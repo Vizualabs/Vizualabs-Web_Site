@@ -159,3 +159,13 @@ This project includes the `ui-ux-pro-max` skill at `.agents/skills/ui-ux-pro-max
 Apply it when designing, building, or reviewing UI: pages, components, color schemes,
 typography, layout, accessibility, animation, or data visualization.
 <!-- ui-ux-pro-max-skill:end -->
+
+<!-- kimi-delegate-skill:start -->
+# Kimi Delegate (project skill)
+
+This project includes the `kimi-delegate` skill at `.agents/skills/kimi-delegate/SKILL.md`.
+
+Delegate a coding task to the Kimi Code CLI (`kimi`) as a background implementer, then review its
+diff and land it yourself. Use this whenever asked to delegate implementation work to Kimi or run
+a queue of coding tasks through Kimi while staying the reviewer.
+<!-- kimi-delegate-skill:end -->

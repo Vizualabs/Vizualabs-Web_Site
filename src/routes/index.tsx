@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ScrollHeroSection } from '../components/hero/ScrollHeroSection'
+import { Footer } from '../components/layout/Footer'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -23,6 +24,10 @@ function Home() {
           </p>
         </div>
       </section>
+
+      {/* Footer Section */}
+      <Footer />
     </div>
   )
 }
+

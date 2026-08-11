@@ -53,8 +53,8 @@ export function ScrollHeroSection() {
 
     const isMobile = width < 768
 
-    // Scale image larger while staying anchored flush at hero bottom
-    const targetRenderHeight = isMobile ? height * 0.85 : height * 0.78
+    // Scale image significantly larger while staying anchored flush at hero bottom
+    const targetRenderHeight = isMobile ? height * 1.05 : height * 0.96
     let scale = targetRenderHeight / croppedSourceHeight
 
     // Ensure minimum scale on very narrow screens so subject doesn't shrink too small

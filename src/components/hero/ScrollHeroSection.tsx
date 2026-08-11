@@ -39,7 +39,16 @@ export function ScrollHeroSection() {
 
   // Track last rendered frame index to avoid unnecessary redrawing
   const currentFrameRef = useRef(1)
-  const rafIdRef = useRef<number | null>(null)
+
+  // Highest frame index that has been successfully decoded (used for fast
+  // fallback during initial scroll before the full sequence is ready).
+  const maxLoadedRef = useRef(0)
+
+  // Cached container geometry so scroll handler never forces layout.
+  const geometryRef = useRef({ top: 0, height: 0 })
+
+  // RAF id for coalescing scroll updates to one calculation + draw per frame.
+  const scrollRafRef = useRef<number | null>(null)
 
   // Helper to resolve frame image URL (ezgif-frame-001.webp through 121.webp)
   const getFrameUrl = (frameIndex: number) => {
@@ -75,6 +84,23 @@ export function ScrollHeroSection() {
       })
     }
     return ctxRef.current
+  }
+
+  // Keep canvas bitmap size in sync with the viewport (call on resize).
+  const syncCanvasSize = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = ensureContext()
+    if (!ctx) return
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+    const targetW = Math.round(window.innerWidth * dpr)
+    const targetH = Math.round(window.innerHeight * dpr)
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW
+      canvas.height = targetH
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+    }
   }
 
   // Draw specific frame. Bitmaps are already cropped & scaled to display
@@ -137,10 +163,16 @@ export function ScrollHeroSection() {
    * While later frames are still streaming, fall back to the nearest decoded
    * frame so scrolling always stays fluid. Once everything is loaded the
    * exact frame is always available and this is a direct hit.
+   *
+   * Optimised path: if the target isn't ready yet and sits beyond the highest
+   * loaded frame, we immediately clamp to that frame instead of scanning.
+   * This turns the common initial-scroll case from O(n) into O(1).
    */
   const findReadyFrame = (target: number) => {
     const bitmaps = bitmapsRef.current
     if (bitmaps[target - 1]) return target
+    const max = maxLoadedRef.current
+    if (target > max && max > 0) return max
     for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
       const prev = target - offset
       if (prev >= 1 && bitmaps[prev - 1]) return prev
@@ -151,46 +183,24 @@ export function ScrollHeroSection() {
   }
 
   /**
-   * SCROLL-TO-FRAME MAPPING LOGIC
-   * 1. Get current scroll rect of sticky wrapper (350vh total height).
-   * 2. Calculate scroll distance relative to viewport.
-   * 3. Normalize scroll progress in range [0, 1].
-   * 4. Map [0, 1] linearly to frame index [1, 121].
-   * 5. Coalesce redraws through requestAnimationFrame, only when the frame changes.
+   * Map current scroll position to a frame index using cached geometry.
+   * This avoids a forced synchronous layout (getBoundingClientRect) on every
+   * scroll event — the biggest single source of jank in the old handler.
    */
-  const updateFrameFromScroll = () => {
-    const container = containerRef.current
-    if (!container) return
+  const readScrollFrame = () => {
+    const geom = geometryRef.current
+    const scrollableDistance = geom.height - window.innerHeight
+    if (scrollableDistance <= 0) return 0
 
-    const rect = container.getBoundingClientRect()
-    const scrollableDistance = rect.height - window.innerHeight
+    const scrollProgress = Math.min(
+      1,
+      Math.max(0, (window.scrollY - geom.top) / scrollableDistance)
+    )
 
-    if (scrollableDistance <= 0) return
-
-    // rect.top is 0 when container top hits viewport top.
-    // Progress goes from 0 (start of sticky container) to 1 (end of scroll).
-    const scrollProgress = Math.min(1, Math.max(0, -rect.top / scrollableDistance))
-
-    // Map progress linearly to 1-based frame index
-    const targetFrame = Math.min(
+    return Math.min(
       TOTAL_FRAMES,
       Math.max(1, Math.floor(scrollProgress * (TOTAL_FRAMES - 1)) + 1)
     )
-
-    // During streaming, draw the closest frame that is already decoded
-    const readyFrame = findReadyFrame(targetFrame)
-    if (readyFrame === 0) return
-
-    // Redraw only if target frame index actually changes
-    if (readyFrame !== currentFrameRef.current) {
-      currentFrameRef.current = readyFrame
-      if (!rafIdRef.current) {
-        rafIdRef.current = requestAnimationFrame(() => {
-          drawFrame(currentFrameRef.current)
-          rafIdRef.current = null
-        })
-      }
-    }
   }
 
   /**
@@ -250,6 +260,9 @@ export function ScrollHeroSection() {
           return
         }
         bitmaps[frameIndex - 1] = bitmap
+        if (frameIndex > maxLoadedRef.current) {
+          maxLoadedRef.current = frameIndex
+        }
       } catch {
         // Missing/broken frame: patched to frame 1 after the load completes.
         bitmaps[frameIndex - 1] = undefined
@@ -263,7 +276,11 @@ export function ScrollHeroSection() {
       const allDone = completed === TOTAL_FRAMES
 
       // Paint frame 1 as soon as it exists so the hero is never blank.
-      if (frameIndex === 1) drawFrame(1)
+      // Defer to the next animation frame so the decode callback doesn't
+      // steal main-thread time from the scroll handler.
+      if (frameIndex === 1) {
+        requestAnimationFrame(() => drawFrame(1))
+      }
 
       // After the reveal, skip all further React state updates — re-rendering
       // during the user's first scrolls would steal main-thread time from
@@ -288,8 +305,17 @@ export function ScrollHeroSection() {
         for (let i = 0; i < TOTAL_FRAMES; i++) {
           if (!bitmaps[i]) bitmaps[i] = bitmaps[0]
         }
+        maxLoadedRef.current = TOTAL_FRAMES
         // Paint the exact frame in case the user scrolled during preload.
-        requestAnimationFrame(() => updateFrameFromScroll())
+        requestAnimationFrame(() => {
+          syncCanvasSize()
+          const target = readScrollFrame()
+          const ready = target > 0 ? findReadyFrame(target) : currentFrameRef.current
+          if (ready !== 0 && ready !== currentFrameRef.current) {
+            currentFrameRef.current = ready
+          }
+          drawFrame(currentFrameRef.current)
+        })
       }
     }
 
@@ -330,6 +356,7 @@ export function ScrollHeroSection() {
       // Release GPU textures on unmount.
       for (const bitmap of bitmaps) bitmap?.close()
       bitmapsRef.current = []
+      maxLoadedRef.current = 0
     }
   }, [])
 
@@ -346,33 +373,78 @@ export function ScrollHeroSection() {
   useEffect(() => {
     if (isLoading) return
     const raf = requestAnimationFrame(() => {
+      syncCanvasSize()
+      const target = readScrollFrame()
+      const ready = target > 0 ? findReadyFrame(target) : currentFrameRef.current
+      if (ready !== 0 && ready !== currentFrameRef.current) {
+        currentFrameRef.current = ready
+      }
       drawFrame(currentFrameRef.current)
-      updateFrameFromScroll()
     })
     return () => cancelAnimationFrame(raf)
   }, [isLoading])
 
   // Attach scroll & resize listeners
   useEffect(() => {
+    const updateGeometry = () => {
+      const container = containerRef.current
+      if (!container) return
+      const rect = container.getBoundingClientRect()
+      geometryRef.current = {
+        top: rect.top + window.scrollY,
+        height: rect.height,
+      }
+    }
+
+    /**
+     * Coalesce all scroll calculations into a single RAF per frame.
+     * The handler itself does ZERO work — it just schedules. This guarantees
+     * that layout reads and canvas draws never run more than once per frame,
+     * and never fight with the browser's own scroll thread.
+     */
     const handleScroll = () => {
-      updateFrameFromScroll()
+      if (scrollRafRef.current) return
+      scrollRafRef.current = requestAnimationFrame(() => {
+        scrollRafRef.current = null
+        const targetFrame = readScrollFrame()
+        if (targetFrame === 0) return
+        const readyFrame = findReadyFrame(targetFrame)
+        if (readyFrame !== 0 && readyFrame !== currentFrameRef.current) {
+          currentFrameRef.current = readyFrame
+          drawFrame(readyFrame)
+        }
+      })
     }
 
     const handleResize = () => {
+      updateGeometry()
+      syncCanvasSize()
       drawFrame(currentFrameRef.current)
     }
+
+    // One-time layout read, then keep geometry in sync on resize only.
+    updateGeometry()
+    syncCanvasSize()
+
+    // Initial check in case user loaded page mid-scroll.
+    const initialTarget = readScrollFrame()
+    if (initialTarget > 0) {
+      const ready = findReadyFrame(initialTarget)
+      if (ready !== 0 && ready !== currentFrameRef.current) {
+        currentFrameRef.current = ready
+      }
+    }
+    drawFrame(currentFrameRef.current)
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleResize)
 
-    // Initial check in case user loaded page mid-scroll
-    updateFrameFromScroll()
-
     return () => {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current)
+      if (scrollRafRef.current) {
+        cancelAnimationFrame(scrollRafRef.current)
+        scrollRafRef.current = null
       }
     }
   }, [])
@@ -384,7 +456,10 @@ export function ScrollHeroSection() {
   return (
     <div ref={containerRef} className="relative w-full bg-black" style={{ height: '350vh' }}>
       {/* Sticky Hero Container pinned during scroll sequence */}
-      <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none">
+      <div
+        className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none"
+        style={{ willChange: 'transform' }}
+      >
 
         {/* Blaze fire — only on the hero, burning from the bottom to the
             middle of the screen (height = 0.5 of the viewport). Mounted only
@@ -412,6 +487,7 @@ export function ScrollHeroSection() {
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full block"
+          style={{ willChange: 'transform', transform: 'translateZ(0)' }}
         />
 
         {/* Subtle Radial Edge Vignette Falloff */}

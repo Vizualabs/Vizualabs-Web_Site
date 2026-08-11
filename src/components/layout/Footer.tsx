@@ -331,11 +331,21 @@ export function Footer() {
         {/* Subtle glowing ring behind mascot */}
         <span className="absolute inset-2 rounded-full bg-[#FF5E4D] animate-ping opacity-25 pointer-events-none" />
 
-        {/* Speech Cloud Bubble on Poke / Click */}
+        {/* Speech Cloud Bubble on Poke / Click - Dynamically positioned to avoid modal overlap */}
         {mascotBubble && (
-          <div className="absolute bottom-full mb-3 right-0 whitespace-nowrap rounded-2xl bg-[#FF5E4D] px-3.5 py-1.5 text-xs font-extrabold text-white shadow-xl shadow-[#FF5E4D]/40 border border-white/20 animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-none">
+          <div
+            className={`absolute whitespace-nowrap rounded-2xl bg-[#FF5E4D] px-3.5 py-1.5 text-xs font-extrabold text-white shadow-xl shadow-[#FF5E4D]/40 border border-white/20 animate-in fade-in duration-200 pointer-events-none z-50 ${
+              chatOpen
+                ? 'right-full mr-3 bottom-3 slide-in-from-right-2'
+                : 'bottom-full mb-3 right-0 slide-in-from-bottom-2'
+            }`}
+          >
             {mascotBubble}
-            <div className="absolute top-full right-7 -mt-1 border-4 border-transparent border-t-[#FF5E4D]" />
+            {chatOpen ? (
+              <div className="absolute top-1/2 -right-2 -translate-y-1/2 border-4 border-transparent border-l-[#FF5E4D]" />
+            ) : (
+              <div className="absolute top-full right-7 -mt-1 border-4 border-transparent border-t-[#FF5E4D]" />
+            )}
           </div>
         )}
 

@@ -39,15 +39,48 @@ export function Footer() {
   const [chatOpen, setChatOpen] = useState(false)
   const [msgSent, setMsgSent] = useState(false)
   const [messageInput, setMessageInput] = useState('')
+  const [clickCount, setClickCount] = useState(0)
+  const [isBouncing, setIsBouncing] = useState(false)
+  const [mascotBubble, setMascotBubble] = useState<string | null>(null)
+
+  const happyPhrases = [
+    'Yay! 😄 Super happy to see you!',
+    'Hehehe! Boing boing! 🌟',
+    'Haha! That tickles! ✨',
+    'Vizualabs is ready to build! 🚀',
+    'Giggle giggle! Let\'s innovate! 💖',
+    'Woohoo! Happy vibes! 🎉'
+  ]
+
+  const handleMascotClick = () => {
+    const nextCount = clickCount + 1
+    setClickCount(nextCount)
+    setChatOpen(prev => !prev)
+    setIsBouncing(true)
+
+    const phrase = happyPhrases[nextCount % happyPhrases.length]
+    setMascotBubble(phrase)
+
+    setTimeout(() => {
+      setIsBouncing(false)
+    }, 2000)
+
+    setTimeout(() => {
+      setMascotBubble(null)
+    }, 3600)
+  }
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (!messageInput.trim()) return
     setMsgSent(true)
+    setIsBouncing(true)
+    setMascotBubble('Yay! Message received! Thank you! 💌')
     setTimeout(() => {
       setMsgSent(false)
       setMessageInput('')
       setChatOpen(false)
+      setIsBouncing(false)
     }, 2500)
   }
 
@@ -102,7 +135,7 @@ export function Footer() {
               </span>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setChatOpen(true)}
+                  onClick={handleMascotClick}
                   aria-label="Open Mascot Chat"
                   className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
                 >
@@ -234,17 +267,17 @@ export function Footer() {
 
       {/* Interactive Corner Message Modal */}
       {chatOpen && (
-        <div className="fixed bottom-24 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-28 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 shrink-0" style={jellyStyle}>
-                <JellyBlobMascot mood="happy" gaze={{ x: 10, y: -4 }} />
+                <JellyBlobMascot mood="happy" happyEyes="smile" mouth="wide" nod={true} gaze={{ x: 10, y: -4 }} />
               </div>
               <div>
                 <h4 className="text-sm font-bold text-white">Vizualabs Mascot Assistant</h4>
                 <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Online
+                  Online & Happy
                 </span>
               </div>
             </div>
@@ -292,23 +325,43 @@ export function Footer() {
       {/* Floating Corner JellyBlobMascot Mascot replacing message icon */}
       <div
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 group flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95"
-        onClick={() => setChatOpen(!chatOpen)}
+        onClick={handleMascotClick}
         style={jellyStyle}
       >
         {/* Subtle glowing ring behind mascot */}
-        <span className="absolute inset-2 rounded-full bg-[#FF5E4D] animate-ping opacity-20 pointer-events-none" />
+        <span className="absolute inset-2 rounded-full bg-[#FF5E4D] animate-ping opacity-25 pointer-events-none" />
+
+        {/* Speech Cloud Bubble on Poke / Click */}
+        {mascotBubble && (
+          <div className="absolute bottom-full mb-3 right-0 whitespace-nowrap rounded-2xl bg-[#FF5E4D] px-3.5 py-1.5 text-xs font-extrabold text-white shadow-xl shadow-[#FF5E4D]/40 border border-white/20 animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-none">
+            {mascotBubble}
+            <div className="absolute top-full right-7 -mt-1 border-4 border-transparent border-t-[#FF5E4D]" />
+          </div>
+        )}
 
         <JellyBlobMascot
-          mood={chatOpen ? 'happy' : 'happy'}
-          gaze={{ x: 18, y: -8 }}
-          onOverpoke={() => setChatOpen(true)}
-          className="w-full h-full drop-shadow-[0_0_15px_rgba(255,94,77,0.45)]"
+          mood="happy"
+          happyEyes={clickCount % 2 === 0 ? 'star' : 'smile'}
+          mouth={isBouncing ? 'wide' : 'open'}
+          nod={isBouncing || clickCount > 0}
+          gaze={
+            isBouncing
+              ? { x: (clickCount % 2 === 0 ? 18 : -18), y: -10 }
+              : { x: 12, y: -6 }
+          }
+          onOverpoke={() => {
+            setIsBouncing(true)
+            setMascotBubble('Hahahahaha! Overpoked! 😄🎉')
+          }}
+          className="w-full h-full drop-shadow-[0_0_18px_rgba(255,94,77,0.55)] transition-all duration-300"
         />
 
         {/* Tooltip on hover */}
-        <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
-          Vizualabs Mascot
-        </span>
+        {!mascotBubble && (
+          <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
+            Click to play with Happy Mascot!
+          </span>
+        )}
       </div>
     </footer>
   )

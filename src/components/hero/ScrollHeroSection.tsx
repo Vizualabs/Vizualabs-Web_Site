@@ -12,9 +12,12 @@ const CROPPED_SOURCE_HEIGHT = 1813
 const MAX_DPR = 2
 const MAX_BITMAP_HEIGHT = 1600
 
-// How many frames are decoded/resized in parallel during preload.
-// 6 keeps peak transient memory reasonable.
+// The first frames (before the preloader lifts) load at full speed.
 const LOAD_CONCURRENCY = 6
+
+// Frames streaming in after the reveal use low concurrency + yielded tasks
+// so background decoding never stutters the initial scroll movement.
+const STREAM_CONCURRENCY = 2
 
 // Lift the preloader as soon as the first frames are ready — the user starts
 // scrolling at frame 1 anyway, and the rest streams in behind the scenes.
@@ -225,13 +228,16 @@ export function ScrollHeroSection() {
         let bitmap: ImageBitmap
         try {
           // Crop (0,0,1280,1813) and resize to display resolution in one step.
+          // 'medium' filtering: this is only a ~0.9x downscale, so it looks
+          // identical to 'high' but costs a fraction of the CPU — that keeps
+          // background streaming from fighting the first scrolls.
           bitmap = await createImageBitmap(
             img,
             0,
             0,
             SOURCE_WIDTH,
             CROPPED_SOURCE_HEIGHT,
-            { resizeWidth: bmpW, resizeHeight: bmpH, resizeQuality: 'high' }
+            { resizeWidth: bmpW, resizeHeight: bmpH, resizeQuality: 'medium' }
           )
         } catch {
           // Older engines without resize options: full-size bitmap still works.
@@ -252,21 +258,27 @@ export function ScrollHeroSection() {
       completed++
       if (cancelled) return
 
-      const consecutive = countConsecutiveReady()
       const allDone = completed === TOTAL_FRAMES
-
-      // Progress is measured against the reveal threshold so the loader always
-      // completes at exactly 100% right before it lifts.
-      const basis = allDone ? REVEAL_THRESHOLD : Math.min(consecutive, REVEAL_THRESHOLD)
-      setReadyPercent(Math.round((basis / REVEAL_THRESHOLD) * 100))
 
       // Paint frame 1 as soon as it exists so the hero is never blank.
       if (frameIndex === 1) drawFrame(1)
 
-      // Lift the preloader early — remaining frames stream in behind it.
-      if (!revealed && (consecutive >= REVEAL_THRESHOLD || allDone)) {
-        revealed = true
-        setIsLoading(false)
+      // After the reveal, skip all further React state updates — re-rendering
+      // during the user's first scrolls would steal main-thread time from
+      // the canvas draws.
+      if (!revealed) {
+        const consecutive = countConsecutiveReady()
+
+        // Progress is measured against the reveal threshold so the loader
+        // always completes at exactly 100% right before it lifts.
+        const basis = allDone ? REVEAL_THRESHOLD : Math.min(consecutive, REVEAL_THRESHOLD)
+        setReadyPercent(Math.round((basis / REVEAL_THRESHOLD) * 100))
+
+        // Lift the preloader early — remaining frames stream in behind it.
+        if (consecutive >= REVEAL_THRESHOLD || allDone) {
+          revealed = true
+          setIsLoading(false)
+        }
       }
 
       if (allDone) {
@@ -279,18 +291,37 @@ export function ScrollHeroSection() {
       }
     }
 
-    // Frame 1 is queued first for an instant first paint; the rest run
-    // through a small concurrency pool to bound peak decode memory.
-    const queue = Array.from({ length: TOTAL_FRAMES }, (_, i) => i + 1)
-    const workers = Array.from({ length: LOAD_CONCURRENCY }, async () => {
-      while (queue.length > 0) {
-        if (cancelled) return
-        const next = queue.shift()
-        if (next === undefined) return
-        await prepareFrame(next)
-      }
-    })
-    void Promise.all(workers)
+    const runPhase = async (
+      from: number,
+      to: number,
+      concurrency: number,
+      yieldBetweenFrames: boolean
+    ) => {
+      const queue: number[] = []
+      for (let i = from; i <= to; i++) queue.push(i)
+      const workers = Array.from({ length: concurrency }, async () => {
+        while (queue.length > 0) {
+          if (cancelled) return
+          const next = queue.shift()
+          if (next === undefined) return
+          await prepareFrame(next)
+          // Yield a macrotask so scroll/rAF work always wins the main thread.
+          if (yieldBetweenFrames) {
+            await new Promise((resolve) => setTimeout(resolve, 0))
+          }
+        }
+      })
+      await Promise.all(workers)
+    }
+
+    // Phase 1: the frames needed for the reveal load at full speed, so the
+    // preloader lifts just as fast as before.
+    // Phase 2: the rest stream in gently — low concurrency, yielded tasks —
+    // so background decoding can't jank the initial scroll movement.
+    void (async () => {
+      await runPhase(1, REVEAL_THRESHOLD, LOAD_CONCURRENCY, false)
+      await runPhase(REVEAL_THRESHOLD + 1, TOTAL_FRAMES, STREAM_CONCURRENCY, true)
+    })()
 
     return () => {
       cancelled = true

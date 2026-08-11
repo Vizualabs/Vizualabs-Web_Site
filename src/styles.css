@@ -76,3 +76,35 @@
 .animate-pulse-slow {
   animation: pulse-slow 8s ease-in-out infinite;
 }
+
+/* Hero preloader animations */
+@keyframes hero-loader-letter {
+  from { opacity: 0; transform: translateY(26px); filter: blur(10px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes hero-loader-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes hero-loader-orbit {
+  to { transform: rotate(360deg); }
+}
+
+.hero-loader-letter {
+  opacity: 0;
+  background-image: linear-gradient(110deg, #ffffff 35%, #FF5E4D 50%, #ffffff 65%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation:
+    hero-loader-letter 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    hero-loader-shimmer 2.8s linear infinite;
+}
+
+.hero-loader-orbit {
+  animation: hero-loader-orbit 10s linear infinite;
+}

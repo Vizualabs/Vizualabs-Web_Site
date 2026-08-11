@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 
 const TOTAL_FRAMES = 121
 
-// Source frame geometry (ezgif frames are 2160x3840; subject ends at Y = 3060,
-// the rest is black border that we crop away once at load time).
-const SOURCE_WIDTH = 2160
-const CROPPED_SOURCE_HEIGHT = 3060
+// Optimized source frames (1280x2276 WebP; subject ends at Y = 1813 which is
+// the same 3060/3840 crop ratio as the original 2160x3840 masters).
+const SOURCE_WIDTH = 1280
+const CROPPED_SOURCE_HEIGHT = 1813
 
 // Performance budget: retina beyond 2x is imperceptible for a photo sequence,
 // and 1600px-tall bitmaps stay crisp up to ~1440p native displays.
@@ -13,8 +13,12 @@ const MAX_DPR = 2
 const MAX_BITMAP_HEIGHT = 1600
 
 // How many frames are decoded/resized in parallel during preload.
-// 6 keeps peak transient memory (~33MB per full-size decode) reasonable.
+// 6 keeps peak transient memory reasonable.
 const LOAD_CONCURRENCY = 6
+
+// Lift the preloader as soon as the first frames are ready — the user starts
+// scrolling at frame 1 anyway, and the rest streams in behind the scenes.
+const REVEAL_THRESHOLD = 15
 
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -25,16 +29,17 @@ export function ScrollHeroSection() {
   const bitmapsRef = useRef<(ImageBitmap | undefined)[]>([])
 
   const [isLoading, setIsLoading] = useState(true)
-  const [loadProgress, setLoadProgress] = useState(0)
+  const [overlayGone, setOverlayGone] = useState(false)
+  const [readyPercent, setReadyPercent] = useState(0)
 
   // Track last rendered frame index to avoid unnecessary redrawing
   const currentFrameRef = useRef(1)
   const rafIdRef = useRef<number | null>(null)
 
-  // Helper to resolve frame image URL (ezgif-frame-001.jpg through 121.jpg)
+  // Helper to resolve frame image URL (ezgif-frame-001.webp through 121.webp)
   const getFrameUrl = (frameIndex: number) => {
     const padded = String(frameIndex).padStart(3, '0')
-    return `/Frist/ezgif-frame-${padded}.jpg`
+    return `/Frist-opt/ezgif-frame-${padded}.webp`
   }
 
   /**
@@ -124,6 +129,23 @@ export function ScrollHeroSection() {
   }
 
   /**
+   * While later frames are still streaming, fall back to the nearest decoded
+   * frame so scrolling always stays fluid. Once everything is loaded the
+   * exact frame is always available and this is a direct hit.
+   */
+  const findReadyFrame = (target: number) => {
+    const bitmaps = bitmapsRef.current
+    if (bitmaps[target - 1]) return target
+    for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
+      const prev = target - offset
+      if (prev >= 1 && bitmaps[prev - 1]) return prev
+      const next = target + offset
+      if (next <= TOTAL_FRAMES && bitmaps[next - 1]) return next
+    }
+    return 0
+  }
+
+  /**
    * SCROLL-TO-FRAME MAPPING LOGIC
    * 1. Get current scroll rect of sticky wrapper (350vh total height).
    * 2. Calculate scroll distance relative to viewport.
@@ -150,9 +172,13 @@ export function ScrollHeroSection() {
       Math.max(1, Math.floor(scrollProgress * (TOTAL_FRAMES - 1)) + 1)
     )
 
+    // During streaming, draw the closest frame that is already decoded
+    const readyFrame = findReadyFrame(targetFrame)
+    if (readyFrame === 0) return
+
     // Redraw only if target frame index actually changes
-    if (targetFrame !== currentFrameRef.current) {
-      currentFrameRef.current = targetFrame
+    if (readyFrame !== currentFrameRef.current) {
+      currentFrameRef.current = readyFrame
       if (!rafIdRef.current) {
         rafIdRef.current = requestAnimationFrame(() => {
           drawFrame(currentFrameRef.current)
@@ -164,15 +190,15 @@ export function ScrollHeroSection() {
 
   /**
    * PRELOAD PIPELINE
-   * Each frame is decoded from its 2160x3840 JPEG exactly ONCE, cropped to the
-   * subject area and downscaled to display resolution via createImageBitmap
-   * (runs off the main thread in modern browsers). The giant source images are
-   * discarded immediately. This is what eliminates scroll-time decode thrash:
-   * 121 raw frames would need ~4GB decoded; pre-scaled bitmaps need ~400MB
-   * and every scroll draw is a same-size GPU blit.
+   * Each frame is decoded exactly ONCE, cropped to the subject area and
+   * downscaled to display resolution via createImageBitmap (runs off the main
+   * thread in modern browsers). Frames load in order 1..121, so the preloader
+   * lifts after the first REVEAL_THRESHOLD frames and the rest streams in
+   * while the user is already watching the hero.
    */
   useEffect(() => {
     let cancelled = false
+    let revealed = false
     const { width: bmpW, height: bmpH } = getBitmapSize()
     const bitmaps: (ImageBitmap | undefined)[] = new Array(TOTAL_FRAMES)
     bitmapsRef.current = bitmaps
@@ -186,12 +212,19 @@ export function ScrollHeroSection() {
         img.src = src
       })
 
+    // Count frames 1..n that are decoded and ready, in scroll order.
+    const countConsecutiveReady = () => {
+      let n = 0
+      while (n < TOTAL_FRAMES && bitmaps[n]) n++
+      return n
+    }
+
     const prepareFrame = async (frameIndex: number) => {
       try {
         const img = await loadImage(getFrameUrl(frameIndex))
         let bitmap: ImageBitmap
         try {
-          // Crop (0,0,2160,3060) and resize to display resolution in one step.
+          // Crop (0,0,1280,1813) and resize to display resolution in one step.
           bitmap = await createImageBitmap(
             img,
             0,
@@ -219,18 +252,29 @@ export function ScrollHeroSection() {
       completed++
       if (cancelled) return
 
-      setLoadProgress(Math.round((completed / TOTAL_FRAMES) * 100))
+      const consecutive = countConsecutiveReady()
+      const allDone = completed === TOTAL_FRAMES
+
+      // Progress is measured against the reveal threshold so the loader always
+      // completes at exactly 100% right before it lifts.
+      const basis = allDone ? REVEAL_THRESHOLD : Math.min(consecutive, REVEAL_THRESHOLD)
+      setReadyPercent(Math.round((basis / REVEAL_THRESHOLD) * 100))
 
       // Paint frame 1 as soon as it exists so the hero is never blank.
       if (frameIndex === 1) drawFrame(1)
 
-      if (completed === TOTAL_FRAMES) {
+      // Lift the preloader early — remaining frames stream in behind it.
+      if (!revealed && (consecutive >= REVEAL_THRESHOLD || allDone)) {
+        revealed = true
+        setIsLoading(false)
+      }
+
+      if (allDone) {
         // Patch any failed frames with frame 1 so playback never stalls.
         for (let i = 0; i < TOTAL_FRAMES; i++) {
           if (!bitmaps[i]) bitmaps[i] = bitmaps[0]
         }
-        setIsLoading(false)
-        // Paint the correct frame in case the user scrolled during preload.
+        // Paint the exact frame in case the user scrolled during preload.
         requestAnimationFrame(() => updateFrameFromScroll())
       }
     }
@@ -255,6 +299,13 @@ export function ScrollHeroSection() {
       bitmapsRef.current = []
     }
   }, [])
+
+  // Unmount the preloader overlay after its exit transition finishes.
+  useEffect(() => {
+    if (isLoading) return
+    const timer = window.setTimeout(() => setOverlayGone(true), 700)
+    return () => window.clearTimeout(timer)
+  }, [isLoading])
 
   // Attach scroll & resize listeners
   useEffect(() => {
@@ -281,21 +332,85 @@ export function ScrollHeroSection() {
     }
   }, [])
 
+  // Preloader ring geometry
+  const RING_RADIUS = 56
+  const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
+
   return (
     <div ref={containerRef} className="relative w-full bg-black" style={{ height: '350vh' }}>
       {/* Sticky Hero Container pinned during scroll sequence */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none">
 
-        {/* Preloader Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-500">
-            <div className="relative flex items-center justify-center mb-6">
-              <div className="w-16 h-16 rounded-full border-2 border-red-500/20 border-t-[#FF5E4D] animate-spin" />
-              <span className="absolute text-[11px] font-mono text-[#FF5E4D] font-bold">{loadProgress}%</span>
+        {/* Preloader Overlay — lifts after the first frames, exits with a fade/scale */}
+        {!overlayGone && (
+          <div
+            className={`absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-all duration-700 ease-out ${
+              isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+            }`}
+          >
+            {/* Breathing ambient glow */}
+            <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#FF5E4D]/15 blur-[100px] animate-pulse-slow" />
+
+            {/* Progress ring with orbiting dashed accent */}
+            <div className="relative w-36 h-36 sm:w-40 sm:h-40">
+              <svg
+              viewBox="0 0 144 144"
+                className="absolute inset-0 w-full h-full -rotate-90"
+              >
+                <circle
+                  cx="72" cy="72" r={RING_RADIUS}
+                  fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3"
+                />
+                <circle
+                  cx="72" cy="72" r={RING_RADIUS}
+                  fill="none" stroke="#FF5E4D" strokeWidth="3" strokeLinecap="round"
+                  strokeDasharray={RING_CIRCUMFERENCE}
+                  strokeDashoffset={RING_CIRCUMFERENCE * (1 - readyPercent / 100)}
+                  className="transition-[stroke-dashoffset] duration-300 ease-out drop-shadow-[0_0_10px_rgba(255,94,77,0.8)]"
+                />
+              </svg>
+              <svg
+                viewBox="0 0 144 144"
+                className="absolute inset-0 w-full h-full hero-loader-orbit"
+              >
+                <circle
+                  cx="72" cy="72" r="66"
+                  fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1"
+                  strokeDasharray="2 8"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-black text-white tabular-nums">
+                  {readyPercent}
+                  <span className="text-base sm:text-lg font-bold text-[#FF5E4D]">%</span>
+                </span>
+              </div>
             </div>
-            <p className="text-xs tracking-[0.3em] uppercase text-gray-400 font-semibold">
-              Loading Pre-rendered Experience
+
+            {/* Brand wordmark — staggered letter reveal with shimmer sweep */}
+            <div className="relative mt-10 flex justify-center" aria-label="Vizualabs">
+              {'VIZUALABS'.split('').map((letter, i) => (
+                <span
+                  key={i}
+                  className="hero-loader-letter text-4xl sm:text-5xl font-black tracking-[0.16em]"
+                  style={{ animationDelay: `${i * 70}ms, 0ms` }}
+                >
+                  {letter}
+                </span>
+              ))}
+            </div>
+
+            <p className="relative mt-4 text-[10px] sm:text-xs tracking-[0.45em] uppercase text-gray-500 font-semibold animate-pulse">
+              Crafting the Experience
             </p>
+
+            {/* Hairline progress bar pinned to the bottom edge */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
+              <div
+                className="h-full origin-left bg-[#FF5E4D] shadow-[0_0_12px_#FF5E4D] transition-transform duration-300 ease-out"
+                style={{ transform: `scaleX(${readyPercent / 100})` }}
+              />
+            </div>
           </div>
         )}
 

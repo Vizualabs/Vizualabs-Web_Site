@@ -169,3 +169,13 @@ Delegate a coding task to the Kimi Code CLI (`kimi`) as a background implementer
 diff and land it yourself. Use this whenever asked to delegate implementation work to Kimi or run
 a queue of coding tasks through Kimi while staying the reviewer.
 <!-- kimi-delegate-skill:end -->
+
+## Git Workflow (Auto-Commit)
+
+- Commit automatically after EVERY file change and after each completed module —
+  do NOT ask permission to commit.
+- Group related changes into logical commits; use the repo's Conventional Commit
+  style: feat:, fix:, refactor:, chore:, style:.
+- After committing, tell the user "committed as <hash>: <message>" and ASK whether
+  to push to the branch — never push without being asked.
+- Never commit secrets (.env, credentials); skip or warn instead.

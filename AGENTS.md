@@ -170,6 +170,33 @@ diff and land it yourself. Use this whenever asked to delegate implementation wo
 a queue of coding tasks through Kimi while staying the reviewer.
 <!-- kimi-delegate-skill:end -->
 
+<!-- tdd-skill:start -->
+# TDD (project skill)
+
+This project includes the `tdd` skill at `.agents/skills/tdd/SKILL.md`.
+
+Apply it when building features or fixing bugs test-first, whenever the user mentions
+"red-green-refactor", or wants integration tests. Key rules: write the failing test
+first (red), then only enough code to pass it (green), one vertical slice per cycle;
+test at pre-agreed public seams, never internals. Reference files: `.agents/skills/tdd/tests.md`
+(what a good test is) and `.agents/skills/tdd/mocking.md` (mock only at system boundaries).
+<!-- tdd-skill:end -->
+
+<!-- playwright-best-practices-skill:start -->
+# Playwright Best Practices (project skill)
+
+This project includes the `playwright-best-practices` skill (currents.dev, v1.2, MIT) at
+`.agents/skills/playwright-best-practices/SKILL.md`.
+
+Apply it when writing, debugging, or maintaining Playwright tests, or setting up test
+infrastructure. It is an activity-based reference: use `SKILL.md`'s activity tables and
+decision tree to pick the right reference file (e.g. `core/locators.md` for selectors,
+`core/assertions-waiting.md` for waits/timeouts, `core/page-object-model.md` for POM,
+`debugging/flaky-tests.md` for flakiness, `infrastructure-ci-cd/*` for CI/config).
+Follow the Test Validation Loop: run `npx playwright test --reporter=list`, fix until
+green, and use `--repeat-each=5` for critical/flaky tests.
+<!-- playwright-best-practices-skill:end -->
+
 ## Git Workflow (Auto-Commit)
 
 - Commit automatically after EVERY file change and after each completed module —

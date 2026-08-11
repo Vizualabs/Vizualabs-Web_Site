@@ -212,11 +212,11 @@ export function Footer() {
 
       {/* Interactive Corner Message Modal */}
       {chatOpen && (
-        <div className="fixed bottom-24 right-6 sm:right-8 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-20 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF5E4D]">
-                <MessageSquare className="h-4 w-4 fill-white text-white" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF5E4D]">
+                <MessageSquare className="h-3.5 w-3.5 fill-white text-white" />
               </div>
               <div>
                 <h4 className="text-sm font-bold text-white">Vizualabs Assistant</h4>
@@ -268,23 +268,23 @@ export function Footer() {
       )}
 
       {/* Floating Corner Message Icon Button */}
-      <div className="fixed bottom-6 right-6 sm:right-8 z-50">
+      <div className="fixed bottom-5 right-5 sm:right-6 z-50">
         <button
           onClick={() => setChatOpen(!chatOpen)}
           aria-label="Toggle Quick Message"
-          className="relative group flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-2xl shadow-[#FF5E4D]/40 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634] focus:outline-none cursor-pointer"
+          className="relative group flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-xl shadow-[#FF5E4D]/35 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634] focus:outline-none cursor-pointer"
         >
           {/* Subtle pulse glow animation */}
-          <span className="absolute -inset-1 rounded-full bg-[#FF5E4D] animate-ping opacity-30 pointer-events-none" />
+          <span className="absolute -inset-0.5 rounded-full bg-[#FF5E4D] animate-ping opacity-25 pointer-events-none" />
 
           {chatOpen ? (
-            <X className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+            <X className="h-5 w-5 text-white" />
           ) : (
-            <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 fill-white text-white group-hover:rotate-12 transition-transform duration-300" />
+            <MessageSquare className="h-5 w-5 fill-white text-white group-hover:rotate-12 transition-transform duration-300" />
           )}
 
           {/* Tooltip on hover */}
-          <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
+          <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
             Message Us
           </span>
         </button>

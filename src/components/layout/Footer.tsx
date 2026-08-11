@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { JellyBlobMascot } from 'feral-blob'
+import 'feral-blob/blob.css'
 import {
   MessageSquare,
   Mail,
@@ -49,6 +51,26 @@ export function Footer() {
     }, 2500)
   }
 
+  const jellyStyle = {
+    '--jelly-body-top': '#FF8A7A',
+    '--jelly-body-mid': '#FF5E4D',
+    '--jelly-body-deep': '#D94434',
+    '--jelly-body-rim': '#FF7868',
+    '--jelly-outline': '#B82E20',
+    '--jelly-outline-light': '#FF5E4D',
+    '--jelly-arm-light': '#FFB0A5',
+    '--jelly-arm-mid': '#FF5E4D',
+    '--jelly-arm-deep': '#D94434',
+    '--jelly-cheek-light': '#FFE2DD',
+    '--jelly-cheek': '#FFA69B',
+    '--jelly-cheek-deep': '#FF7E70',
+    '--jelly-eye-light': '#380E09',
+    '--jelly-eye': '#1C0503',
+    '--jelly-eye-deep': '#0E0201',
+    '--jelly-belly-glow': '#FFC4BC',
+    '--jelly-eye-sparkle': '#FF7868',
+  } as React.CSSProperties
+
   return (
     <footer className="relative w-full bg-[#080808] border-t border-white/10 text-gray-300 font-sans selection:bg-[#FF5E4D] selection:text-white pt-16 pb-12 overflow-hidden">
       {/* Background radial glow effect */}
@@ -73,7 +95,7 @@ export function Footer() {
               </p>
             </div>
 
-            {/* Social & Quick Contact Badges matching Corner Msg Icon style */}
+            {/* Social & Quick Contact Badges */}
             <div className="space-y-3 pt-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Connect With Us
@@ -81,7 +103,7 @@ export function Footer() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setChatOpen(true)}
-                  aria-label="Open Chat"
+                  aria-label="Open Mascot Chat"
                   className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
                 >
                   <MessageSquare className="h-5 w-5 fill-white text-white transition-transform group-hover:rotate-12" />
@@ -212,14 +234,14 @@ export function Footer() {
 
       {/* Interactive Corner Message Modal */}
       {chatOpen && (
-        <div className="fixed bottom-20 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-24 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF5E4D]">
-                <MessageSquare className="h-3.5 w-3.5 fill-white text-white" />
+              <div className="w-7 h-7 shrink-0" style={jellyStyle}>
+                <JellyBlobMascot mood="happy" gaze={{ x: 10, y: -4 }} />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Vizualabs Assistant</h4>
+                <h4 className="text-sm font-bold text-white">Vizualabs Mascot Assistant</h4>
                 <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Online
@@ -244,7 +266,7 @@ export function Footer() {
             ) : (
               <form onSubmit={handleSendMessage} className="space-y-3">
                 <p className="text-xs text-gray-300">
-                  Have a project in mind or need quick assistance? Send us a quick note below!
+                  Have a project in mind or need quick assistance? Send us a message below!
                 </p>
                 <textarea
                   rows={3}
@@ -267,27 +289,26 @@ export function Footer() {
         </div>
       )}
 
-      {/* Floating Corner Message Icon Button */}
-      <div className="fixed bottom-5 right-5 sm:right-6 z-50">
-        <button
-          onClick={() => setChatOpen(!chatOpen)}
-          aria-label="Toggle Quick Message"
-          className="relative group flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-xl shadow-[#FF5E4D]/35 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634] focus:outline-none cursor-pointer"
-        >
-          {/* Subtle pulse glow animation */}
-          <span className="absolute -inset-0.5 rounded-full bg-[#FF5E4D] animate-ping opacity-25 pointer-events-none" />
+      {/* Floating Corner JellyBlobMascot Mascot replacing message icon */}
+      <div
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 group flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95"
+        onClick={() => setChatOpen(!chatOpen)}
+        style={jellyStyle}
+      >
+        {/* Subtle glowing ring behind mascot */}
+        <span className="absolute inset-2 rounded-full bg-[#FF5E4D] animate-ping opacity-20 pointer-events-none" />
 
-          {chatOpen ? (
-            <X className="h-5 w-5 text-white" />
-          ) : (
-            <MessageSquare className="h-5 w-5 fill-white text-white group-hover:rotate-12 transition-transform duration-300" />
-          )}
+        <JellyBlobMascot
+          mood={chatOpen ? 'happy' : 'happy'}
+          gaze={{ x: 18, y: -8 }}
+          onOverpoke={() => setChatOpen(true)}
+          className="w-full h-full drop-shadow-[0_0_15px_rgba(255,94,77,0.45)]"
+        />
 
-          {/* Tooltip on hover */}
-          <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
-            Message Us
-          </span>
-        </button>
+        {/* Tooltip on hover */}
+        <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
+          Vizualabs Mascot
+        </span>
       </div>
     </footer>
   )

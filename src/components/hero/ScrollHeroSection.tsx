@@ -47,37 +47,32 @@ export function ScrollHeroSection() {
     ctx.clearRect(0, 0, width, height)
 
     const imgW = img.naturalWidth || 2160
-    const imgH = img.naturalHeight || 3840
-
-    // Precise subject bounding box & visor location in original 2160x3840 frames:
-    // Subject total height: 2764px (Y = 620 to Y = 3384)
-    // Bright visor center: Y = 1350
-    const subjectOriginalHeight = 2764
-    const visorOriginalY = 1350
+    
+    // Crop bottom black border: subject hoodie ends at Y = 3384 in original 2160x3840 image
+    const croppedSourceHeight = 3384
 
     const isMobile = width < 768
 
-    // Scale subject so its total height takes up ~66% of viewport on desktop (~75% on mobile)
-    const targetSubjectHeight = isMobile ? height * 0.75 : height * 0.66
-    let scale = targetSubjectHeight / subjectOriginalHeight
+    // Scale image so subject sits nicely anchored at hero bottom
+    const targetRenderHeight = isMobile ? height * 0.78 : height * 0.74
+    let scale = targetRenderHeight / croppedSourceHeight
 
     // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
     if (isMobile) {
-      const minWScale = (width * 0.95) / imgW
+      const minWScale = (width * 0.92) / imgW
       scale = Math.max(scale, minWScale)
     }
 
     const renderW = imgW * scale
-    const renderH = imgH * scale
+    const renderH = croppedSourceHeight * scale
 
     // Center horizontally
     const offsetX = (width - renderW) / 2
 
-    // Position visor center at ~53% down screen on desktop (~50% on mobile)
-    const targetVisorScreenY = height * (isMobile ? 0.50 : 0.53)
-    const offsetY = targetVisorScreenY - (visorOriginalY * scale)
+    // Anchor image bottom directly to the bottom of the hero section / viewport
+    const offsetY = height - renderH
 
-    ctx.drawImage(img, offsetX, offsetY, renderW, renderH)
+    ctx.drawImage(img, 0, 0, imgW, croppedSourceHeight, offsetX, offsetY, renderW, renderH)
     ctx.restore()
   }
 

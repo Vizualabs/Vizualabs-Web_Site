@@ -49,19 +49,33 @@ export function ScrollHeroSection() {
     const imgW = img.naturalWidth || 2160
     const imgH = img.naturalHeight || 3840
 
-    // Scaled down subject framing logic:
-    // Scale image relative to viewport height so the entire head, VR visor, neck and shoulders fit comfortably.
-    const isMobile = width < 768
-    const heightTarget = isMobile ? height * 0.82 : height * 0.88
-    const widthTarget = isMobile ? width * 1.1 : width * 0.65
+    // Precise subject bounding box & visor location in original 2160x3840 frames:
+    // Subject total height: 2764px (Y = 620 to Y = 3384)
+    // Bright visor center: Y = 1350
+    const subjectOriginalHeight = 2764
+    const visorOriginalY = 1350
 
-    const scale = Math.max(heightTarget / imgH, widthTarget / imgW)
+    const isMobile = width < 768
+
+    // Scale subject so its total height takes up ~66% of viewport on desktop (~75% on mobile)
+    const targetSubjectHeight = isMobile ? height * 0.75 : height * 0.66
+    let scale = targetSubjectHeight / subjectOriginalHeight
+
+    // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
+    if (isMobile) {
+      const minWScale = (width * 0.95) / imgW
+      scale = Math.max(scale, minWScale)
+    }
+
     const renderW = imgW * scale
     const renderH = imgH * scale
 
-    // Center horizontally, align bottom of subject to viewport bottom
+    // Center horizontally
     const offsetX = (width - renderW) / 2
-    const offsetY = height - renderH
+
+    // Position visor center at ~53% down screen on desktop (~50% on mobile)
+    const targetVisorScreenY = height * (isMobile ? 0.50 : 0.53)
+    const offsetY = targetVisorScreenY - (visorOriginalY * scale)
 
     ctx.drawImage(img, offsetX, offsetY, renderW, renderH)
     ctx.restore()

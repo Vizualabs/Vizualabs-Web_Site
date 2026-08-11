@@ -8,9 +8,7 @@ import {
   Database,
   Sparkles,
   CheckCircle2,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight
+  ArrowRight
 } from 'lucide-react'
 
 interface CapabilityCard {
@@ -97,24 +95,18 @@ const capabilities: CapabilityCard[] = [
 export function CapabilitiesSection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const scrollHorizontal = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -420 : 420
-      scrollContainerRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth',
-      })
-    }
-  }
-
   const handleViewAllClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (scrollContainerRef.current) {
-      // Smoothly scroll horizontally to reveal extended cards
-      scrollContainerRef.current.scrollBy({
-        left: 840,
-        behavior: 'smooth',
-      })
+      const container = scrollContainerRef.current
+      const maxScroll = container.scrollWidth - container.clientWidth
+      if (container.scrollLeft >= maxScroll - 20) {
+        // If at the end, loop smoothly back to start
+        container.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        // Smoothly scroll right to reveal next cards
+        container.scrollBy({ left: 420, behavior: 'smooth' })
+      }
     }
   }
 
@@ -136,34 +128,14 @@ export function CapabilitiesSection() {
             </p>
           </div>
 
-          {/* Action Header Controls */}
-          <div className="flex items-center gap-4 shrink-0 self-start md:self-end">
-            <button
-              onClick={handleViewAllClick}
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold tracking-wider text-[#FF5E4D] uppercase transition-all duration-300 hover:gap-3 hover:text-[#ff4634] group cursor-pointer"
-            >
-              <span>VIEW ALL SERVICES</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
-
-            {/* Left & Right Horizontal Scroll Arrows */}
-            <div className="flex items-center gap-2 pl-2 border-l border-white/10">
-              <button
-                onClick={() => scrollHorizontal('left')}
-                aria-label="Scroll Left"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-gray-300 hover:border-[#FF5E4D] hover:bg-[#FF5E4D] hover:text-white transition-all duration-200 cursor-pointer active:scale-95"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => scrollHorizontal('right')}
-                aria-label="Scroll Right"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-gray-300 hover:border-[#FF5E4D] hover:bg-[#FF5E4D] hover:text-white transition-all duration-200 cursor-pointer active:scale-95"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
+          {/* Action Header Link matching exact reference image */}
+          <button
+            onClick={handleViewAllClick}
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold tracking-wider text-[#FF5E4D] uppercase transition-all duration-300 hover:gap-3 hover:text-[#ff4634] shrink-0 self-start md:self-end group cursor-pointer"
+          >
+            <span>VIEW ALL SERVICES</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </button>
         </div>
 
         {/* Horizontal Scrolling Cards Container */}

@@ -418,71 +418,71 @@ export function ScrollHeroSection() {
         {/* Subtle Radial Edge Vignette Falloff */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_100%)] z-10" />
 
-        {/* Top Center Pill Badge */}
-        <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-lg shadow-[#FF5E4D]/10">
-            <span className="w-2 h-2 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_8px_#FF5E4D]" />
-            <span className="text-[10px] sm:text-xs font-bold tracking-[0.25em] text-[#FF5E4D] uppercase">
+        {/* Top Center Pill Badge — tight fit on small screens */}
+        <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-lg shadow-[#FF5E4D]/10">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_8px_#FF5E4D]" />
+            <span className="text-[9px] sm:text-xs font-bold tracking-[0.14em] sm:tracking-[0.25em] text-[#FF5E4D] uppercase">
               ENGINEERING STRATEGIC MOMENTUM
             </span>
           </div>
         </div>
 
 
-        {/* Bottom Left Navigation Title */}
-        <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 pointer-events-none">
+        {/* Bottom Left Navigation Title — hidden on mobile to free the bottom bar */}
+        <div className="hidden sm:block absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 pointer-events-none">
           <span className="text-sm sm:text-base font-semibold text-gray-200 tracking-wider">
             Our Approach
           </span>
         </div>
 
-        {/* Bottom Right Premium Glassmorphic Stats Card */}
-        <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
-          <div className="liquid-glass relative overflow-hidden rounded-none px-5 py-4 sm:px-9 sm:py-6 flex items-center gap-5 sm:gap-10">
+        {/* Bottom Right Premium Glassmorphic Stats Card — full-width row on mobile */}
+        <div className="absolute inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:inset-x-auto sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
+          <div className="liquid-glass relative overflow-hidden rounded-none px-2 py-3 sm:px-9 sm:py-6 flex items-center justify-between gap-2 sm:justify-start sm:gap-10">
             {/* Soft accent corner glow — kept subtle for depth without a frame */}
             <div className="pointer-events-none absolute -top-14 -right-14 h-36 w-36 rounded-full bg-[#FF5E4D]/15 blur-3xl" />
 
-            <div className="relative flex items-center gap-3 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
+            <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+              <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
                 <FolderCheck className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
               </div>
               <div className="text-left">
-                <div className="text-xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   15 +
                 </div>
-                <div className="text-[9px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
                   Projects Completed
                 </div>
               </div>
             </div>
 
-            <div className="h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+            <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
 
-            <div className="relative flex items-center gap-3 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
+            <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+              <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
                 <Users className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
               </div>
               <div className="text-left">
-                <div className="text-xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   300+
                 </div>
-                <div className="text-[9px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
                   People Reach
                 </div>
               </div>
             </div>
 
-            <div className="h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+            <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
 
-            <div className="relative flex items-center gap-3 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
+            <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+              <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
                 <HeartHandshake className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
               </div>
               <div className="text-left">
-                <div className="text-xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   100%
                 </div>
-                <div className="text-[9px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
                   Clients' Satisfaction
                 </div>
               </div>
@@ -507,7 +507,7 @@ export function ScrollHeroSection() {
             <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#FF5E4D]/15 blur-[100px] animate-pulse-slow" />
 
             {/* Progress ring with orbiting dashed accent */}
-            <div className="relative w-36 h-36 sm:w-40 sm:h-40">
+            <div className="relative w-32 h-32 sm:w-40 sm:h-40">
               <svg
                 viewBox="0 0 144 144"
                 className="absolute inset-0 w-full h-full -rotate-90"
@@ -535,19 +535,19 @@ export function ScrollHeroSection() {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl sm:text-4xl font-black text-white tabular-nums">
+                <span className="text-2xl sm:text-4xl font-black text-white tabular-nums">
                   {readyPercent}
-                  <span className="text-base sm:text-lg font-bold text-[#FF5E4D]">%</span>
+                  <span className="text-sm sm:text-lg font-bold text-[#FF5E4D]">%</span>
                 </span>
               </div>
             </div>
 
             {/* Brand wordmark — staggered letter reveal with shimmer sweep */}
-            <div className="relative mt-10 flex justify-center" aria-label="Vizualabs">
+            <div className="relative mt-8 sm:mt-10 flex justify-center px-4" aria-label="Vizualabs">
               {'VIZUALABS'.split('').map((letter, i) => (
                 <span
                   key={i}
-                  className="hero-loader-letter text-4xl sm:text-5xl font-black tracking-[0.16em]"
+                  className="hero-loader-letter text-3xl sm:text-5xl font-black tracking-[0.14em] sm:tracking-[0.16em]"
                   style={{ animationDelay: `${i * 70}ms, 0ms` }}
                 >
                   {letter}

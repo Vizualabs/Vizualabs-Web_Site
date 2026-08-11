@@ -8,17 +8,17 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-gray-800/60 bg-gray-950/70 backdrop-blur-xl transition-all duration-300">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-20">
         {/* Brand Logo */}
-        <a href="/" className="flex items-center gap-3 group">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-400 p-[1px] shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300">
+        <a href="/" className="flex items-center gap-2 sm:gap-3 group">
+          <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-400 p-[1px] shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300">
             <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-gray-950">
-              <Cpu className="h-5 w-5 text-indigo-400 group-hover:scale-110 transition-transform duration-300" />
+              <Cpu className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-400 group-hover:scale-110 transition-transform duration-300" />
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-xl tracking-tight text-white flex items-center gap-1">
+            <span className="font-bold text-lg sm:text-xl tracking-tight text-white flex items-center gap-1">
               Vizua<span className="text-accent-gradient">labs</span>
             </span>
-            <span className="text-[10px] tracking-wider text-gray-400 uppercase font-semibold">Venture & Tech Studio</span>
+            <span className="hidden sm:block text-[10px] tracking-wider text-gray-400 uppercase font-semibold">Venture & Tech Studio</span>
           </div>
         </a>
 

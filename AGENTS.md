@@ -150,3 +150,12 @@ server-state code. Key conventions for this project:
 - Prefer the `queryOptions` helper for reusable, type-safe query configs.
 - Structure query keys hierarchically (e.g. `['todos', id]`) for prefix invalidation.
 <!-- tanstack-query-skill:end -->
+
+<!-- ui-ux-pro-max-skill:start -->
+# UI/UX Pro Max (project skill)
+
+This project includes the `ui-ux-pro-max` skill at `.agents/skills/ui-ux-pro-max/SKILL.md`.
+
+Apply it when designing, building, or reviewing UI: pages, components, color schemes,
+typography, layout, accessibility, animation, or data visualization.
+<!-- ui-ux-pro-max-skill:end -->

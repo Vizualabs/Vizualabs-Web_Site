@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { FolderCheck, Users, HeartHandshake } from 'lucide-react'
 import { Blaze } from '../canvasui/Blaze'
 
 const TOTAL_FRAMES = 121
@@ -443,9 +442,6 @@ export function ScrollHeroSection() {
             <div className="pointer-events-none absolute -top-14 -right-14 h-36 w-36 rounded-full bg-[#FF5E4D]/15 blur-3xl" />
 
             <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
-                <FolderCheck className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
-              </div>
               <div className="text-left">
                 <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   15 +
@@ -459,9 +455,6 @@ export function ScrollHeroSection() {
             <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
 
             <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
-              </div>
               <div className="text-left">
                 <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   300+
@@ -475,9 +468,6 @@ export function ScrollHeroSection() {
             <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
 
             <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none bg-gradient-to-br from-white/[0.1] to-white/[0.01] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/15 group-hover/stat:scale-105">
-                <HeartHandshake className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
-              </div>
               <div className="text-left">
                 <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   100%

@@ -1,10 +1,16 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
 
-export const Route = createRootRoute({
+interface RouterContext {
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       {
@@ -35,6 +41,10 @@ const devtoolsConfig = {
 } as const
 
 const devtoolsPlugins = [
+  {
+    name: 'TanStack Query',
+    render: <ReactQueryDevtoolsPanel />,
+  },
   {
     name: 'Tanstack Router',
     render: <TanStackRouterDevtoolsPanel />,

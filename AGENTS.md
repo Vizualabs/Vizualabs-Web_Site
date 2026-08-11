@@ -134,3 +134,19 @@ Category priority: 1. Eliminating Waterfalls (`async-`, CRITICAL) >
 6. Rendering (`rendering-`, MEDIUM) > 7. JS Performance (`js-`, LOW-MEDIUM) >
 8. Advanced (`advanced-`, LOW).
 <!-- vercel-react-best-practices:end -->
+
+<!-- tanstack-query-skill:start -->
+# TanStack Query (project skill)
+
+This project includes the `tanstack-query` skill at `.agents/skills/tanstack-query/SKILL.md`.
+
+Apply it when writing or reviewing data fetching, caching, mutations, or
+server-state code. Key conventions for this project:
+
+- `QueryClient` is created in `src/router.tsx` and exposed via router context
+  (`context: { queryClient }`); use `queryClient.ensureQueryData(...)` in route loaders.
+- Components consume data via `useQuery` / `useSuspenseQuery` / `useMutation`
+  from `@tanstack/react-query`.
+- Prefer the `queryOptions` helper for reusable, type-safe query configs.
+- Structure query keys hierarchically (e.g. `['todos', id]`) for prefix invalidation.
+<!-- tanstack-query-skill:end -->

@@ -376,9 +376,8 @@ export function ScrollHeroSection() {
         {/* Preloader Overlay — lifts after the first frames, exits with a fade/scale */}
         {!overlayGone && (
           <div
-            className={`absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-all duration-700 ease-out ${
-              isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
-            }`}
+            className={`absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-all duration-700 ease-out ${isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+              }`}
           >
             {/* Breathing ambient glow */}
             <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#FF5E4D]/15 blur-[100px] animate-pulse-slow" />
@@ -386,7 +385,7 @@ export function ScrollHeroSection() {
             {/* Progress ring with orbiting dashed accent */}
             <div className="relative w-36 h-36 sm:w-40 sm:h-40">
               <svg
-              viewBox="0 0 144 144"
+                viewBox="0 0 144 144"
                 className="absolute inset-0 w-full h-full -rotate-90"
               >
                 <circle
@@ -465,17 +464,6 @@ export function ScrollHeroSection() {
           </div>
         </div>
 
-        {/* Hero Central Overlay Headline */}
-        <div className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-start pt-20 sm:pt-24 md:pt-28 text-center px-4">
-          <h1 className="text-6xl sm:text-8xl md:text-[110px] lg:text-[130px] font-black tracking-tight leading-[0.92] text-white select-none">
-            <span className="block drop-shadow-[0_12px_40px_rgba(0,0,0,0.9)]">Vizualise</span>
-            <span className="block mt-1 sm:mt-2 text-5xl sm:text-7xl md:text-[95px] lg:text-[110px] font-black tracking-tight drop-shadow-[0_12px_40px_rgba(0,0,0,0.9)]">
-              <span className="text-white">Your </span>
-              <span className="font-serif-italic font-normal text-[#FF5E4D] tracking-normal pr-3 sm:pr-4">Digital</span>
-              <span className="text-[#FF5E4D]">Success</span>
-            </span>
-          </h1>
-        </div>
 
         {/* Bottom Left Navigation Title */}
         <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 pointer-events-none">

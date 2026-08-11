@@ -14,8 +14,9 @@ const CROPPED_SOURCE_HEIGHT = 1813
 const MAX_DPR = 2
 const MAX_BITMAP_HEIGHT = 1600
 
-// The first frames (before the preloader lifts) load at full speed.
-const LOAD_CONCURRENCY = 6
+// The first frames (before the preloader lifts) load at full speed. With the
+// WebGL fire not mounting until the reveal, we can afford more workers.
+const LOAD_CONCURRENCY = 8
 
 // Frames streaming in after the reveal use low concurrency + yielded tasks
 // so background decoding never stutters the initial scroll movement.
@@ -23,7 +24,7 @@ const STREAM_CONCURRENCY = 2
 
 // Lift the preloader as soon as the first frames are ready — the user starts
 // scrolling at frame 1 anyway, and the rest streams in behind the scenes.
-const REVEAL_THRESHOLD = 15
+const REVEAL_THRESHOLD = 10
 
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -340,6 +341,18 @@ export function ScrollHeroSection() {
     return () => window.clearTimeout(timer)
   }, [isLoading])
 
+  // The hero canvas only exists after Blaze mounts (post-reveal), so once
+  // loading completes we paint the current frame and re-attach the scroll
+  // mapping so the hero is never blank behind the lifting preloader.
+  useEffect(() => {
+    if (isLoading) return
+    const raf = requestAnimationFrame(() => {
+      drawFrame(currentFrameRef.current)
+      updateFrameFromScroll()
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [isLoading])
+
   // Attach scroll & resize listeners
   useEffect(() => {
     const handleScroll = () => {
@@ -375,7 +388,10 @@ export function ScrollHeroSection() {
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none">
 
         {/* Blaze fire — only on the hero, burning from the bottom to the
-            middle of the screen (height = 0.5 of the viewport). */}
+            middle of the screen (height = 0.5 of the viewport). Mounted only
+            after the preloader lifts so the heavy WebGL effect never competes
+            with the initial frame decoding. */}
+        {!isLoading && (
         <Blaze
           height={0.5}
           distortion={0.6}
@@ -392,78 +408,6 @@ export function ScrollHeroSection() {
           style={{ position: 'absolute', inset: 0 }}
         >
           <div className="relative w-full h-full">
-
-        {/* Preloader Overlay — lifts after the first frames, exits with a fade/scale */}
-        {!overlayGone && (
-          <div
-            className={`absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-all duration-700 ease-out ${isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
-              }`}
-          >
-            {/* Breathing ambient glow */}
-            <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#FF5E4D]/15 blur-[100px] animate-pulse-slow" />
-
-            {/* Progress ring with orbiting dashed accent */}
-            <div className="relative w-36 h-36 sm:w-40 sm:h-40">
-              <svg
-                viewBox="0 0 144 144"
-                className="absolute inset-0 w-full h-full -rotate-90"
-              >
-                <circle
-                  cx="72" cy="72" r={RING_RADIUS}
-                  fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3"
-                />
-                <circle
-                  cx="72" cy="72" r={RING_RADIUS}
-                  fill="none" stroke="#FF5E4D" strokeWidth="3" strokeLinecap="round"
-                  strokeDasharray={RING_CIRCUMFERENCE}
-                  strokeDashoffset={RING_CIRCUMFERENCE * (1 - readyPercent / 100)}
-                  className="transition-[stroke-dashoffset] duration-300 ease-out drop-shadow-[0_0_10px_rgba(255,94,77,0.8)]"
-                />
-              </svg>
-              <svg
-                viewBox="0 0 144 144"
-                className="absolute inset-0 w-full h-full hero-loader-orbit"
-              >
-                <circle
-                  cx="72" cy="72" r="66"
-                  fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1"
-                  strokeDasharray="2 8"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl sm:text-4xl font-black text-white tabular-nums">
-                  {readyPercent}
-                  <span className="text-base sm:text-lg font-bold text-[#FF5E4D]">%</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Brand wordmark — staggered letter reveal with shimmer sweep */}
-            <div className="relative mt-10 flex justify-center" aria-label="Vizualabs">
-              {'VIZUALABS'.split('').map((letter, i) => (
-                <span
-                  key={i}
-                  className="hero-loader-letter text-4xl sm:text-5xl font-black tracking-[0.16em]"
-                  style={{ animationDelay: `${i * 70}ms, 0ms` }}
-                >
-                  {letter}
-                </span>
-              ))}
-            </div>
-
-            <p className="relative mt-4 text-[10px] sm:text-xs tracking-[0.45em] uppercase text-gray-500 font-semibold animate-pulse">
-              Crafting the Experience
-            </p>
-
-            {/* Hairline progress bar pinned to the bottom edge */}
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
-              <div
-                className="h-full origin-left bg-[#FF5E4D] shadow-[0_0_12px_#FF5E4D] transition-transform duration-300 ease-out"
-                style={{ transform: `scaleX(${readyPercent / 100})` }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
         <canvas
@@ -548,6 +492,82 @@ export function ScrollHeroSection() {
 
           </div>
         </Blaze>
+        )}
+
+        {/* Preloader Overlay — sits ABOVE the fire effect (rendered outside
+            Blaze) so the load screen stays a clean, static black canvas with
+            no heat distortion or lag. Lifts after the first frames, exits
+            with a fade/scale. */}
+        {!overlayGone && (
+          <div
+            className={`absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-all duration-700 ease-out ${isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+              }`}
+          >
+            {/* Breathing ambient glow */}
+            <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#FF5E4D]/15 blur-[100px] animate-pulse-slow" />
+
+            {/* Progress ring with orbiting dashed accent */}
+            <div className="relative w-36 h-36 sm:w-40 sm:h-40">
+              <svg
+                viewBox="0 0 144 144"
+                className="absolute inset-0 w-full h-full -rotate-90"
+              >
+                <circle
+                  cx="72" cy="72" r={RING_RADIUS}
+                  fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3"
+                />
+                <circle
+                  cx="72" cy="72" r={RING_RADIUS}
+                  fill="none" stroke="#FF5E4D" strokeWidth="3" strokeLinecap="round"
+                  strokeDasharray={RING_CIRCUMFERENCE}
+                  strokeDashoffset={RING_CIRCUMFERENCE * (1 - readyPercent / 100)}
+                  className="transition-[stroke-dashoffset] duration-300 ease-out drop-shadow-[0_0_10px_rgba(255,94,77,0.8)]"
+                />
+              </svg>
+              <svg
+                viewBox="0 0 144 144"
+                className="absolute inset-0 w-full h-full hero-loader-orbit"
+              >
+                <circle
+                  cx="72" cy="72" r="66"
+                  fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1"
+                  strokeDasharray="2 8"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-black text-white tabular-nums">
+                  {readyPercent}
+                  <span className="text-base sm:text-lg font-bold text-[#FF5E4D]">%</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Brand wordmark — staggered letter reveal with shimmer sweep */}
+            <div className="relative mt-10 flex justify-center" aria-label="Vizualabs">
+              {'VIZUALABS'.split('').map((letter, i) => (
+                <span
+                  key={i}
+                  className="hero-loader-letter text-4xl sm:text-5xl font-black tracking-[0.16em]"
+                  style={{ animationDelay: `${i * 70}ms, 0ms` }}
+                >
+                  {letter}
+                </span>
+              ))}
+            </div>
+
+            <p className="relative mt-4 text-[10px] sm:text-xs tracking-[0.45em] uppercase text-gray-500 font-semibold animate-pulse">
+              Crafting the Experience
+            </p>
+
+            {/* Hairline progress bar pinned to the bottom edge */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
+              <div
+                className="h-full origin-left bg-[#FF5E4D] shadow-[0_0_12px_#FF5E4D] transition-transform duration-300 ease-out"
+                style={{ transform: `scaleX(${readyPercent / 100})` }}
+              />
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

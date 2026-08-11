@@ -494,15 +494,20 @@ export function ScrollHeroSection() {
 
         {/* Bottom Right Premium Glassmorphic Stats Card */}
         <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl px-4 py-4 sm:px-8 sm:py-6 flex items-center gap-5 sm:gap-10 bg-gradient-to-br from-white/[0.14] via-white/[0.07] to-white/[0.03] backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.18] shadow-[0_24px_60px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.25)]">
+          <div className="liquid-glass relative overflow-hidden rounded-none px-5 py-4 sm:px-9 sm:py-6 flex items-center gap-5 sm:gap-10">
             {/* Top edge light sheen */}
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+            {/* Sharp corner accents */}
+            <div className="pointer-events-none absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-white/40" />
+            <div className="pointer-events-none absolute right-0 top-0 h-3 w-3 border-r-2 border-t-2 border-white/40" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-3 w-3 border-b-2 border-l-2 border-white/40" />
+            <div className="pointer-events-none absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-white/40" />
             {/* Soft accent corner glow */}
             <div className="pointer-events-none absolute -top-14 -right-14 h-36 w-36 rounded-full bg-[#FF5E4D]/25 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-white/10 blur-3xl" />
 
             <div className="relative flex items-center gap-3 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/20 group-hover/stat:border-[#FF5E4D]/40 group-hover/stat:scale-105">
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none border border-white/20 bg-gradient-to-br from-white/[0.18] to-white/[0.03] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_10px_rgba(0,0,0,0.4)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/20 group-hover/stat:border-[#FF5E4D]/50 group-hover/stat:scale-105">
                 <FolderCheck className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
               </div>
               <div className="text-left">
@@ -518,7 +523,7 @@ export function ScrollHeroSection() {
             <div className="h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/30 to-transparent" />
 
             <div className="relative flex items-center gap-3 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/20 group-hover/stat:border-[#FF5E4D]/40 group-hover/stat:scale-105">
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none border border-white/20 bg-gradient-to-br from-white/[0.18] to-white/[0.03] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_10px_rgba(0,0,0,0.4)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/20 group-hover/stat:border-[#FF5E4D]/50 group-hover/stat:scale-105">
                 <Users className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
               </div>
               <div className="text-left">
@@ -534,7 +539,7 @@ export function ScrollHeroSection() {
             <div className="h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/30 to-transparent" />
 
             <div className="relative flex items-center gap-3 sm:gap-4 group/stat cursor-default">
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/20 group-hover/stat:border-[#FF5E4D]/40 group-hover/stat:scale-105">
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-none border border-white/20 bg-gradient-to-br from-white/[0.18] to-white/[0.03] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_10px_rgba(0,0,0,0.4)] transition-all duration-300 group-hover/stat:bg-[#FF5E4D]/20 group-hover/stat:border-[#FF5E4D]/50 group-hover/stat:scale-105">
                 <HeartHandshake className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5E4D]" />
               </div>
               <div className="text-left">

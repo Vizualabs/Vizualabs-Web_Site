@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FolderCheck, Users, HeartHandshake } from 'lucide-react'
+import { Blaze } from '../canvasui/Blaze'
 
 const TOTAL_FRAMES = 121
 
@@ -373,6 +374,25 @@ export function ScrollHeroSection() {
       {/* Sticky Hero Container pinned during scroll sequence */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none">
 
+        {/* Blaze fire — only on the hero, burning from the bottom to the
+            middle of the screen (height = 0.5 of the viewport). */}
+        <Blaze
+          height={0.5}
+          distortion={0.6}
+          distortionScale={0.5}
+          speed={1}
+          sparks={1.2}
+          sparkDensity={1.5}
+          sparkSize={1}
+          layers={4}
+          smoke={0.8}
+          glow={2.5}
+          sparkColor={[1, 0.4, 0.051]}
+          smokeColor={[1, 0.4314, 0.102]}
+          style={{ position: 'absolute', inset: 0 }}
+        >
+          <div className="relative w-full h-full">
+
         {/* Preloader Overlay — lifts after the first frames, exits with a fade/scale */}
         {!overlayGone && (
           <div
@@ -528,6 +548,9 @@ export function ScrollHeroSection() {
             </div>
           </div>
         </div>
+
+          </div>
+        </Blaze>
 
       </div>
     </div>

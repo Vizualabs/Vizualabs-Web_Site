@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ScrollHeroSection } from '../components/hero/ScrollHeroSection'
+import { CapabilitiesSection } from '../components/layout/CapabilitiesSection'
 import { StrategicJourney } from '../components/layout/StrategicJourney'
 import { CtaSection } from '../components/layout/CtaSection'
 import { Footer } from '../components/layout/Footer'
@@ -26,6 +27,9 @@ function Home() {
           </p>
         </div>
       </section>
+
+      {/* Core Strategic Capabilities Section */}
+      <CapabilitiesSection />
 
       {/* The Strategic Journey Section */}
       <StrategicJourney />

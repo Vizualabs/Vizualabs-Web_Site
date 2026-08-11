@@ -48,13 +48,13 @@ export function ScrollHeroSection() {
 
     const imgW = img.naturalWidth || 2160
     
-    // Crop bottom black border: subject hoodie ends at Y = 3384 in original 2160x3840 image
-    const croppedSourceHeight = 3384
+    // Crop bottom black border: subject hoodie ends at Y = 3060 in original 2160x3840 image
+    const croppedSourceHeight = 3060
 
     const isMobile = width < 768
 
     // Scale image so subject sits nicely anchored at hero bottom
-    const targetRenderHeight = isMobile ? height * 0.78 : height * 0.74
+    const targetRenderHeight = isMobile ? height * 0.75 : height * 0.70
     let scale = targetRenderHeight / croppedSourceHeight
 
     // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
@@ -204,7 +204,7 @@ export function ScrollHeroSection() {
         {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-cover block"
+          className="absolute inset-0 w-full h-full block"
         />
 
         {/* Subtle Radial Edge Vignette Falloff */}

@@ -49,13 +49,19 @@ export function ScrollHeroSection() {
     const imgW = img.naturalWidth || 2160
     const imgH = img.naturalHeight || 3840
 
-    // Cover math: scale image to cover the canvas container while keeping aspect ratio centered
-    const scale = Math.max(width / imgW, height / imgH)
+    // Scaled down subject framing logic:
+    // Scale image relative to viewport height so the entire head, VR visor, neck and shoulders fit comfortably.
+    const isMobile = width < 768
+    const heightTarget = isMobile ? height * 0.82 : height * 0.88
+    const widthTarget = isMobile ? width * 1.1 : width * 0.65
+
+    const scale = Math.max(heightTarget / imgH, widthTarget / imgW)
     const renderW = imgW * scale
     const renderH = imgH * scale
 
+    // Center horizontally, align bottom of subject to viewport bottom
     const offsetX = (width - renderW) / 2
-    const offsetY = (height - renderH) / 2
+    const offsetY = height - renderH
 
     ctx.drawImage(img, offsetX, offsetY, renderW, renderH)
     ctx.restore()

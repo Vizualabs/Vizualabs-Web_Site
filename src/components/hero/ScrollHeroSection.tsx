@@ -583,12 +583,12 @@ export function ScrollHeroSection() {
             distortion={0.6}
             distortionScale={0.5}
             speed={1}
-            sparks={1.5}
+            sparks={1.7}
             sparkDensity={1.8}
             sparkSize={1}
             layers={4}
-            smoke={1.1}
-            glow={2.8}
+            smoke={1.3}
+            glow={3.2}
             sparkColor={[1, 0, 0]}
             smokeColor={[0.6, 0, 0]}
             style={{ position: 'absolute', inset: 0 }}

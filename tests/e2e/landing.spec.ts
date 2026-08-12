@@ -209,6 +209,157 @@ test.describe('hero scroll effect (regression)', () => {
   })
 })
 
+test.describe('hero heading', () => {
+  test('renders both lines with the accent word intact', async ({ page }) => {
+    await bootLanding(page, { withoutFire: true })
+
+    const title = page.getByTestId('hero-title')
+    await expect(title).toBeVisible()
+    await expect(title).toContainText('Vizualise')
+    await expect(title).toContainText('Your')
+    await expect(title.locator('.hero-title-accent')).toHaveText('Digital Success')
+
+    // Exactly two lines — a third would fall entirely behind the subject.
+    await expect(title.locator('.hero-title-line')).toHaveCount(2)
+  })
+
+  test('keeps the long line unwrapped at every breakpoint', async ({ page }) => {
+    for (const [w, h] of [
+      [390, 844],
+      [768, 1024],
+      [1280, 800],
+      [1440, 900],
+      [1920, 1080],
+    ] as const) {
+      await page.setViewportSize({ width: w, height: h })
+      await bootLanding(page, { withoutFire: true })
+
+      const lineHeights = await page
+        .getByTestId('hero-title')
+        .locator('.hero-title-line')
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))
+
+      // If "Your Digital Success" wrapped, its box would be ~2x line one's.
+      expect(lineHeights).toHaveLength(2)
+      expect(lineHeights[1]).toBeLessThan(lineHeights[0] * 1.6)
+    }
+  })
+
+  test('is layered underneath the image sequence', async ({ page }) => {
+    await bootLanding(page, { withoutFire: true })
+
+    const layering = await page.evaluate(() => {
+      const title = document.querySelector('[data-testid="hero-title"]')!
+      const canvas = document.querySelector('[data-testid="hero-canvas"]')!
+      return {
+        // Node.DOCUMENT_POSITION_FOLLOWING === 4
+        titleBeforeCanvas: !!(
+          title.compareDocumentPosition(canvas) & 4
+        ),
+        sameParent: title.parentElement === canvas.parentElement,
+        titleZ: getComputedStyle(title).zIndex,
+        canvasZ: getComputedStyle(canvas).zIndex,
+      }
+    })
+
+    // Paint order is DOM order here: the canvas follows the heading, and
+    // neither sets a z-index, which is what keeps the Blaze fire on top.
+    expect(layering.sameParent).toBe(true)
+    expect(layering.titleBeforeCanvas).toBe(true)
+    expect(layering.titleZ).toBe('auto')
+    expect(layering.canvasZ).toBe('auto')
+  })
+
+  test('masks the canvas to the subject, aligned to the drawn frame', async ({
+    page,
+  }) => {
+    await bootLanding(page, { withoutFire: true })
+
+    const mask = await page.evaluate(() => {
+      const canvas = document.querySelector(
+        '[data-testid="hero-canvas"]'
+      ) as HTMLCanvasElement
+      const cs = getComputedStyle(canvas)
+
+      // Recompute the expected rect the same way the component does.
+      const SOURCE_WIDTH = 1280
+      const CROPPED_SOURCE_HEIGHT = 1813
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const isMobile = width < 768
+      let scale = (isMobile ? height * 1.05 : height * 0.96) / CROPPED_SOURCE_HEIGHT
+      if (isMobile) scale = Math.max(scale, (width * 0.92) / SOURCE_WIDTH)
+
+      return {
+        image: cs.maskImage || cs.webkitMaskImage,
+        size: cs.maskSize || cs.webkitMaskSize,
+        expectedW: SOURCE_WIDTH * scale,
+        expectedH: CROPPED_SOURCE_HEIGHT * scale,
+      }
+    })
+
+    expect(mask.image).toContain('hero-subject-mask')
+
+    const [maskW, maskH] = mask.size
+      .split(' ')
+      .map((v: string) => parseFloat(v))
+    // Mask must track the exact rect the frame is painted into, or the
+    // silhouette drifts off the subject as the viewport changes.
+    expect(maskW).toBeCloseTo(mask.expectedW, 0)
+    expect(maskH).toBeCloseTo(mask.expectedH, 0)
+  })
+
+  test('plays its entrance animation and settles', async ({ page }) => {
+    await bootLanding(page, { withoutFire: true })
+
+    const inner = page.getByTestId('hero-title').locator('.hero-title-inner')
+    await expect(inner.first()).toHaveClass(/is-in/)
+
+    // Lines rise from behind an overflow mask, so the wrapper must clip.
+    const overflow = await page
+      .getByTestId('hero-title')
+      .locator('.hero-title-line')
+      .first()
+      .evaluate((el) => getComputedStyle(el).overflow)
+    expect(overflow).toBe('hidden')
+
+    // Settled state: fully in place and opaque.
+    const settled = await inner.evaluateAll((els) =>
+      els.map((el) => {
+        const cs = getComputedStyle(el)
+        return { opacity: cs.opacity, transform: cs.transform }
+      })
+    )
+    for (const s of settled) {
+      expect(Number(s.opacity)).toBeGreaterThan(0.99)
+      expect(['none', 'matrix(1, 0, 0, 1, 0, 0)']).toContain(s.transform)
+    }
+  })
+
+  test('fades out as the sequence takes over', async ({ page }) => {
+    await bootLanding(page, { withoutFire: true })
+    const title = page.getByTestId('hero-title')
+
+    expect(
+      Number(await title.evaluate((el) => getComputedStyle(el).opacity))
+    ).toBeGreaterThan(0.95)
+
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.3))
+    await page.waitForTimeout(300)
+    const mid = Number(
+      await title.evaluate((el) => getComputedStyle(el).opacity)
+    )
+    expect(mid).toBeGreaterThan(0)
+    expect(mid).toBeLessThan(0.75)
+
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.8))
+    await page.waitForTimeout(300)
+    expect(
+      await title.evaluate((el) => getComputedStyle(el).visibility)
+    ).toBe('hidden')
+  })
+})
+
 test.describe('load performance', () => {
   test('reaches Largest Contentful Paint within budget', async ({ page }) => {
     await page.goto('/', { waitUntil: 'load' })

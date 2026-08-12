@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Blaze } from '../canvasui/Blaze'
 import { BrandIntro, type IntroPhase } from './BrandIntro'
+import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
 
 // Optimized source frames (1280x2276 WebP; subject ends at Y = 1813 which is
@@ -43,6 +44,7 @@ const REVEAL_MS = 900
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const titleRef = useRef<HTMLDivElement>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
 
   // Pre-cropped, pre-scaled GPU bitmaps — the ONLY thing kept in memory.
@@ -97,15 +99,67 @@ export function ScrollHeroSection() {
     return { width, height }
   }
 
-  // Opaque + desynchronized context: no alpha compositing, lowest draw latency.
+  /**
+   * The canvas now needs an alpha channel: it is masked to the subject's
+   * silhouette so the heading can sit underneath it. Without alpha the frame's
+   * own black backdrop would paint an opaque rectangle over the text.
+   */
   const ensureContext = () => {
     if (!ctxRef.current && canvasRef.current) {
       ctxRef.current = canvasRef.current.getContext('2d', {
-        alpha: false,
+        alpha: true,
         desynchronized: true,
       })
     }
     return ctxRef.current
+  }
+
+  /**
+   * Where the frame lands inside the viewport, in CSS pixels.
+   *
+   * Single source of truth: drawFrame calls it with the real bitmap size, and
+   * the silhouette mask calls it with the source aspect so the mask always
+   * lines up with the pixels being drawn.
+   */
+  const computeImageRect = (bmpW: number, bmpH: number) => {
+    const width = window.innerWidth
+    const height = window.innerHeight
+    const isMobile = width < 768
+
+    // Scale image significantly larger while staying anchored flush at hero bottom
+    const targetRenderHeight = isMobile ? height * 1.05 : height * 0.96
+    let scale = targetRenderHeight / bmpH
+
+    // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
+    if (isMobile) {
+      const minWScale = (width * 0.92) / bmpW
+      scale = Math.max(scale, minWScale)
+    }
+
+    const renderW = bmpW * scale
+    const renderH = bmpH * scale
+
+    // Center horizontally, anchor bottom flush to the hero bottom
+    return {
+      renderW,
+      renderH,
+      offsetX: (width - renderW) / 2,
+      offsetY: height - renderH,
+      width,
+      height,
+    }
+  }
+
+  // Point the CSS silhouette mask at exactly the rect the frame is drawn into.
+  const syncMaskGeometry = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const { renderW, renderH, offsetX, offsetY } = computeImageRect(
+      SOURCE_WIDTH,
+      CROPPED_SOURCE_HEIGHT
+    )
+    canvas.style.setProperty('--hero-mask-size', `${renderW}px ${renderH}px`)
+    canvas.style.setProperty('--hero-mask-pos', `${offsetX}px ${offsetY}px`)
   }
 
   // Keep canvas bitmap size in sync with the viewport (call on resize).
@@ -123,6 +177,7 @@ export function ScrollHeroSection() {
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
     }
+    syncMaskGeometry()
   }
 
   // Draw specific frame. Bitmaps are already cropped & scaled to display
@@ -152,31 +207,14 @@ export function ScrollHeroSection() {
     }
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    // Opaque fill covers previous frame in letterboxed areas.
-    ctx.fillStyle = '#000'
-    ctx.fillRect(0, 0, width, height)
+    // Clear rather than fill: the backdrop must stay transparent so the
+    // heading underneath shows through everywhere the mask cuts away.
+    ctx.clearRect(0, 0, width, height)
 
-    const bmpW = bitmap.width
-    const bmpH = bitmap.height
-
-    const isMobile = width < 768
-
-    // Scale image significantly larger while staying anchored flush at hero bottom
-    const targetRenderHeight = isMobile ? height * 1.05 : height * 0.96
-    let scale = targetRenderHeight / bmpH
-
-    // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
-    if (isMobile) {
-      const minWScale = (width * 0.92) / bmpW
-      scale = Math.max(scale, minWScale)
-    }
-
-    const renderW = bmpW * scale
-    const renderH = bmpH * scale
-
-    // Center horizontally, anchor bottom flush to the hero bottom
-    const offsetX = (width - renderW) / 2
-    const offsetY = height - renderH
+    const { renderW, renderH, offsetX, offsetY } = computeImageRect(
+      bitmap.width,
+      bitmap.height
+    )
 
     ctx.drawImage(bitmap, offsetX, offsetY, renderW, renderH)
   }
@@ -470,10 +508,27 @@ export function ScrollHeroSection() {
      * that layout reads and canvas draws never run more than once per frame,
      * and never fight with the browser's own scroll thread.
      */
+    /**
+     * Fade the heading out over the first part of the scroll, so it reads as
+     * the hero's opening state and then hands the stage to the sequence.
+     * Written straight to the node — routing this through React state would
+     * re-render the whole hero on every scroll frame.
+     */
+    const syncTitleFade = () => {
+      const title = titleRef.current
+      if (!title) return
+      const travelled = window.scrollY - geometryRef.current.top
+      const fadeOver = window.innerHeight * 0.55
+      const opacity = Math.min(1, Math.max(0, 1 - travelled / fadeOver))
+      title.style.opacity = String(opacity)
+      title.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible'
+    }
+
     const handleScroll = () => {
       if (scrollRafRef.current) return
       scrollRafRef.current = requestAnimationFrame(() => {
         scrollRafRef.current = null
+        syncTitleFade()
         const targetFrame = readScrollFrame()
         if (targetFrame === 0) return
         const readyFrame = findReadyFrame(targetFrame)
@@ -487,12 +542,14 @@ export function ScrollHeroSection() {
     const handleResize = () => {
       updateGeometry()
       syncCanvasSize()
+      syncTitleFade()
       drawFrame(currentFrameRef.current)
     }
 
     // One-time layout read, then keep geometry in sync on resize only.
     updateGeometry()
     syncCanvasSize()
+    syncTitleFade()
 
     // Initial check in case user loaded page mid-scroll.
     const initialTarget = readScrollFrame()
@@ -554,16 +611,28 @@ export function ScrollHeroSection() {
         >
           <div className="relative w-full h-full">
 
+        {/* Heading, layered UNDER the canvas so the silhouette-masked subject
+            overlaps it the way the reference composition does. */}
+        <HeroTitle ref={titleRef} start={phase === 'revealing' || phase === 'done'} />
+
         {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
         <canvas
           ref={canvasRef}
           data-testid="hero-canvas"
-          className="absolute inset-0 w-full h-full block"
+          /* No z-index on purpose: painting order here comes from DOM order,
+             so the canvas sits above the heading that precedes it while the
+             Blaze fire — a later sibling of this wrapper — still paints over
+             the canvas exactly as it did before. */
+          className="hero-sequence-canvas absolute inset-0 w-full h-full block"
           style={{ willChange: 'transform', transform: 'translateZ(0)' }}
         />
 
         {/* Subtle Radial Edge Vignette Falloff */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_100%)] z-10" />
+        {/* Widened the clear centre so the heading's outer words keep their
+            contrast — at 30% the vignette was greying out "Your". Kept as an
+            ellipse so the corner falloff survives without reaching into the
+            headline band. */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_92%_at_50%_52%,transparent_52%,rgba(0,0,0,0.72)_100%)] z-10" />
 
         {/* Top Center Pill Badge — tight fit on small screens */}
         <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">

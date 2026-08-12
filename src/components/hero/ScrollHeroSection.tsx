@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Blaze } from '../canvasui/Blaze'
-
-const TOTAL_FRAMES = 121
+import { BrandIntro, type IntroPhase } from './BrandIntro'
+import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
 
 // Optimized source frames (1280x2276 WebP; subject ends at Y = 1813 which is
 // the same 3060/3840 crop ratio as the original 2160x3840 masters).
@@ -13,17 +13,32 @@ const CROPPED_SOURCE_HEIGHT = 1813
 const MAX_DPR = 2
 const MAX_BITMAP_HEIGHT = 1600
 
-// The first frames (before the preloader lifts) load at full speed. With the
-// WebGL fire not mounting until the reveal, we can afford more workers.
+// The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8
 
-// Frames streaming in after the reveal use low concurrency + yielded tasks
-// so background decoding never stutters the initial scroll movement.
-const STREAM_CONCURRENCY = 2
+// Frames streaming in after the reveal. Decoding is off the main thread now
+// (fetch -> Blob -> createImageBitmap), so this no longer competes with the
+// user's first scroll and can run wider than the old serialized pipeline.
+const STREAM_CONCURRENCY = 4
 
-// Lift the preloader as soon as the first frames are ready — the user starts
-// scrolling at frame 1 anyway, and the rest streams in behind the scenes.
-const REVEAL_THRESHOLD = 10
+// How many frames must be decoded before the intro is allowed to lift. This
+// buys roughly the first fifth of the scroll distance as pre-buffered frames,
+// so the sequence tracks the very first scroll instead of freezing on the last
+// decoded frame — the main cause of the "lag" on initial load.
+const REVEAL_THRESHOLD = 24
+
+// The branded intro runs for at least this long so it reads as an intentional
+// animation rather than a flash. Frame decoding happens underneath it, so on
+// a warm cache this is the only thing gating the reveal.
+const MIN_INTRO_MS = 1150
+
+// Beat between mounting the WebGL fire and starting the reveal. Shader compile
+// and texture allocation are synchronous main-thread work; paying that cost
+// here — while the plane is still fully opaque — keeps it off the first scroll.
+const WARMUP_MS = 240
+
+// Must match the iris animation duration in styles.css.
+const REVEAL_MS = 900
 
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -33,9 +48,17 @@ export function ScrollHeroSection() {
   // Pre-cropped, pre-scaled GPU bitmaps — the ONLY thing kept in memory.
   const bitmapsRef = useRef<(ImageBitmap | undefined)[]>([])
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [overlayGone, setOverlayGone] = useState(false)
-  const [readyPercent, setReadyPercent] = useState(0)
+  // 'intro'     — opaque plane, mark drawing, fire not yet mounted, scroll locked
+  // 'warmup'    — still opaque, fire mounting behind it, scroll locked
+  // 'revealing' — iris opening, scroll unlocked
+  // 'done'      — overlay unmounted
+  const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
+  const [framesReady, setFramesReady] = useState(false)
+
+  // Scroll stays locked while the plane is still opaque.
+  const isLoading = phase === 'intro' || phase === 'warmup'
+  // The canvas lives inside Blaze, so it only exists from 'warmup' onward.
+  const fireMounted = phase !== 'intro'
 
   // Track last rendered frame index to avoid unnecessary redrawing
   const currentFrameRef = useRef(1)
@@ -47,14 +70,13 @@ export function ScrollHeroSection() {
   // Cached container geometry so scroll handler never forces layout.
   const geometryRef = useRef({ top: 0, height: 0 })
 
+  // Wall-clock mount time, used to give the intro animation its minimum beat.
+  const mountedAtRef = useRef(
+    typeof performance !== 'undefined' ? performance.now() : 0
+  )
+
   // RAF id for coalescing scroll updates to one calculation + draw per frame.
   const scrollRafRef = useRef<number | null>(null)
-
-  // Helper to resolve frame image URL (ezgif-frame-001.webp through 121.webp)
-  const getFrameUrl = (frameIndex: number) => {
-    const padded = String(frameIndex).padStart(3, '0')
-    return `/Frist-opt/ezgif-frame-${padded}.webp`
-  }
 
   /**
    * Target bitmap resolution: match the physical pixels the sequence can ever
@@ -219,13 +241,37 @@ export function ScrollHeroSection() {
     bitmapsRef.current = bitmaps
     let completed = 0
 
-    const loadImage = (src: string) =>
-      new Promise<HTMLImageElement>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve(img)
-        img.onerror = () => reject(new Error(`Failed to load ${src}`))
-        img.src = src
-      })
+    /**
+     * Decode a frame entirely OFF the main thread.
+     *
+     * The old pipeline went through an HTMLImageElement, whose decode is
+     * charged to the main thread and lands in the middle of the user's first
+     * scroll. Handing a Blob straight to createImageBitmap lets the browser
+     * decode, crop and downscale on a worker thread, so streaming the tail of
+     * the sequence can no longer stall scroll-driven canvas draws.
+     */
+    const decodeFrame = async (frameIndex: number): Promise<ImageBitmap> => {
+      const response = await fetch(heroFrameUrl(frameIndex))
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const blob = await response.blob()
+
+      try {
+        // Crop (0,0,1280,1813) and resize to display resolution in one step.
+        // 'medium' filtering: this is only a ~0.9x downscale, so it looks
+        // identical to 'high' but costs a fraction of the CPU.
+        return await createImageBitmap(
+          blob,
+          0,
+          0,
+          SOURCE_WIDTH,
+          CROPPED_SOURCE_HEIGHT,
+          { resizeWidth: bmpW, resizeHeight: bmpH, resizeQuality: 'medium' }
+        )
+      } catch {
+        // Engines without crop/resize options still give us a usable bitmap.
+        return await createImageBitmap(blob)
+      }
+    }
 
     // Count frames 1..n that are decoded and ready, in scroll order.
     const countConsecutiveReady = () => {
@@ -236,25 +282,7 @@ export function ScrollHeroSection() {
 
     const prepareFrame = async (frameIndex: number) => {
       try {
-        const img = await loadImage(getFrameUrl(frameIndex))
-        let bitmap: ImageBitmap
-        try {
-          // Crop (0,0,1280,1813) and resize to display resolution in one step.
-          // 'medium' filtering: this is only a ~0.9x downscale, so it looks
-          // identical to 'high' but costs a fraction of the CPU — that keeps
-          // background streaming from fighting the first scrolls.
-          bitmap = await createImageBitmap(
-            img,
-            0,
-            0,
-            SOURCE_WIDTH,
-            CROPPED_SOURCE_HEIGHT,
-            { resizeWidth: bmpW, resizeHeight: bmpH, resizeQuality: 'medium' }
-          )
-        } catch {
-          // Older engines without resize options: full-size bitmap still works.
-          bitmap = await createImageBitmap(img)
-        }
+        const bitmap = await decodeFrame(frameIndex)
         if (cancelled) {
           bitmap.close()
           return
@@ -268,8 +296,6 @@ export function ScrollHeroSection() {
         bitmaps[frameIndex - 1] = undefined
       }
 
-      // Source image element goes out of scope here and is garbage collected —
-      // only the small scaled bitmap stays alive.
       completed++
       if (cancelled) return
 
@@ -282,21 +308,13 @@ export function ScrollHeroSection() {
         requestAnimationFrame(() => drawFrame(1))
       }
 
-      // After the reveal, skip all further React state updates — re-rendering
-      // during the user's first scrolls would steal main-thread time from
-      // the canvas draws.
+      // Exactly one state update during the whole load — re-rendering while
+      // frames stream in would steal main-thread time from the canvas draws.
       if (!revealed) {
         const consecutive = countConsecutiveReady()
-
-        // Progress is measured against the reveal threshold so the loader
-        // always completes at exactly 100% right before it lifts.
-        const basis = allDone ? REVEAL_THRESHOLD : Math.min(consecutive, REVEAL_THRESHOLD)
-        setReadyPercent(Math.round((basis / REVEAL_THRESHOLD) * 100))
-
-        // Lift the preloader early — remaining frames stream in behind it.
         if (consecutive >= REVEAL_THRESHOLD || allDone) {
           revealed = true
-          setIsLoading(false)
+          setFramesReady(true)
         }
       }
 
@@ -342,10 +360,12 @@ export function ScrollHeroSection() {
       await Promise.all(workers)
     }
 
-    // Phase 1: the frames needed for the reveal load at full speed, so the
-    // preloader lifts just as fast as before.
-    // Phase 2: the rest stream in gently — low concurrency, yielded tasks —
-    // so background decoding can't jank the initial scroll movement.
+    // Phase 1: the frames gating the reveal load at full speed behind the
+    // opaque intro plane.
+    // Phase 2: the rest stream in while the user watches the hero. Decoding
+    // is off-thread now, so the remaining main-thread cost is negligible; the
+    // macrotask yield stays as a cheap guarantee that scroll/rAF work always
+    // gets a turn between frames.
     void (async () => {
       await runPhase(1, REVEAL_THRESHOLD, LOAD_CONCURRENCY, false)
       await runPhase(REVEAL_THRESHOLD + 1, TOTAL_FRAMES, STREAM_CONCURRENCY, true)
@@ -360,18 +380,66 @@ export function ScrollHeroSection() {
     }
   }, [])
 
-  // Unmount the preloader overlay after its exit transition finishes.
+  /**
+   * Intro choreography.
+   *
+   * 'intro' holds until BOTH the minimum animation beat has played and enough
+   * frames are decoded. Then the fire mounts behind the still-opaque plane
+   * ('warmup') so its shader compile cannot land on the user's first scroll,
+   * and only then does the iris open ('revealing').
+   */
+  /*
+   * One effect per hop, each owning exactly one timer.
+   *
+   * Chaining the hops inside a single effect deadlocks: setting the next phase
+   * re-runs the effect, and its cleanup cancels the timer the previous tick had
+   * just scheduled in the same closure.
+   */
+
+  // intro -> warmup, once frames are decoded AND the animation beat has played.
   useEffect(() => {
-    if (isLoading) return
-    const timer = window.setTimeout(() => setOverlayGone(true), 700)
+    if (phase !== 'intro' || !framesReady) return
+    const elapsed = performance.now() - mountedAtRef.current
+    const remaining = Math.max(0, MIN_INTRO_MS - elapsed)
+    const timer = window.setTimeout(() => setPhase('warmup'), remaining)
     return () => window.clearTimeout(timer)
+  }, [phase, framesReady])
+
+  // warmup -> revealing, giving the fire a beat to compile behind the plane.
+  useEffect(() => {
+    if (phase !== 'warmup') return
+    const timer = window.setTimeout(() => setPhase('revealing'), WARMUP_MS)
+    return () => window.clearTimeout(timer)
+  }, [phase])
+
+  // revealing -> done, unmounting the overlay after the iris finishes.
+  useEffect(() => {
+    if (phase !== 'revealing') return
+    const timer = window.setTimeout(() => setPhase('done'), REVEAL_MS)
+    return () => window.clearTimeout(timer)
+  }, [phase])
+
+  /**
+   * Hold scroll while the intro is on screen. Without this the user can scroll
+   * behind an opaque overlay into frames that have not been decoded yet, and
+   * arrive at a hero that is frozen on the last available frame — which reads
+   * as scroll lag. `scrollbar-gutter: stable` on <html> keeps the lock from
+   * shifting layout.
+   */
+  useEffect(() => {
+    if (!isLoading) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
   }, [isLoading])
 
-  // The hero canvas only exists after Blaze mounts (post-reveal), so once
-  // loading completes we paint the current frame and re-attach the scroll
-  // mapping so the hero is never blank behind the lifting preloader.
+  // The hero canvas only exists once Blaze mounts, so paint the current frame
+  // as soon as it does — during 'warmup', while the plane is still opaque —
+  // guaranteeing a fully drawn hero the instant the iris opens.
   useEffect(() => {
-    if (isLoading) return
+    if (!fireMounted) return
     const raf = requestAnimationFrame(() => {
       syncCanvasSize()
       const target = readScrollFrame()
@@ -382,7 +450,7 @@ export function ScrollHeroSection() {
       drawFrame(currentFrameRef.current)
     })
     return () => cancelAnimationFrame(raf)
-  }, [isLoading])
+  }, [fireMounted])
 
   // Attach scroll & resize listeners
   useEffect(() => {
@@ -449,12 +517,13 @@ export function ScrollHeroSection() {
     }
   }, [])
 
-  // Preloader ring geometry
-  const RING_RADIUS = 56
-  const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
-
   return (
-    <div ref={containerRef} className="relative w-full bg-black" style={{ height: '350vh' }}>
+    <div
+      ref={containerRef}
+      data-testid="hero-scroll-container"
+      className="relative w-full bg-black"
+      style={{ height: '350vh' }}
+    >
       {/* Sticky Hero Container pinned during scroll sequence */}
       <div
         className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none"
@@ -462,10 +531,12 @@ export function ScrollHeroSection() {
       >
 
         {/* Blaze fire — only on the hero, burning from the bottom to the
-            middle of the screen (height = 0.5 of the viewport). Mounted only
-            after the preloader lifts so the heavy WebGL effect never competes
-            with the initial frame decoding. */}
-        {!isLoading && (
+            middle of the screen (height = 0.5 of the viewport). Mounts at the
+            'warmup' beat: late enough that its WebGL setup never competes with
+            decoding the first frames, early enough that the shader compile is
+            paid behind the still-opaque intro plane rather than on the user's
+            first scroll. */}
+        {fireMounted && (
         <Blaze
           height={0.5}
           distortion={0.6}
@@ -486,6 +557,7 @@ export function ScrollHeroSection() {
         {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
         <canvas
           ref={canvasRef}
+          data-testid="hero-canvas"
           className="absolute inset-0 w-full h-full block"
           style={{ willChange: 'transform', transform: 'translateZ(0)' }}
         />
@@ -560,80 +632,10 @@ export function ScrollHeroSection() {
         </Blaze>
         )}
 
-        {/* Preloader Overlay — sits ABOVE the fire effect (rendered outside
-            Blaze) so the load screen stays a clean, static black canvas with
-            no heat distortion or lag. Lifts after the first frames, exits
-            with a fade/scale. */}
-        {!overlayGone && (
-          <div
-            className={`absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-all duration-700 ease-out ${isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
-              }`}
-          >
-            {/* Breathing ambient glow */}
-            <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#FF5E4D]/15 blur-[100px] animate-pulse-slow" />
-
-            {/* Progress ring with orbiting dashed accent */}
-            <div className="relative w-32 h-32 sm:w-40 sm:h-40">
-              <svg
-                viewBox="0 0 144 144"
-                className="absolute inset-0 w-full h-full -rotate-90"
-              >
-                <circle
-                  cx="72" cy="72" r={RING_RADIUS}
-                  fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3"
-                />
-                <circle
-                  cx="72" cy="72" r={RING_RADIUS}
-                  fill="none" stroke="#FF5E4D" strokeWidth="3" strokeLinecap="round"
-                  strokeDasharray={RING_CIRCUMFERENCE}
-                  strokeDashoffset={RING_CIRCUMFERENCE * (1 - readyPercent / 100)}
-                  className="transition-[stroke-dashoffset] duration-300 ease-out drop-shadow-[0_0_10px_rgba(255,94,77,0.8)]"
-                />
-              </svg>
-              <svg
-                viewBox="0 0 144 144"
-                className="absolute inset-0 w-full h-full hero-loader-orbit"
-              >
-                <circle
-                  cx="72" cy="72" r="66"
-                  fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1"
-                  strokeDasharray="2 8"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl sm:text-4xl font-black text-white tabular-nums">
-                  {readyPercent}
-                  <span className="text-sm sm:text-lg font-bold text-[#FF5E4D]">%</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Brand wordmark — staggered letter reveal with shimmer sweep */}
-            <div className="relative mt-8 sm:mt-10 flex justify-center px-4" aria-label="Vizualabs">
-              {'VIZUALABS'.split('').map((letter, i) => (
-                <span
-                  key={i}
-                  className="hero-loader-letter text-3xl sm:text-5xl font-black tracking-[0.14em] sm:tracking-[0.16em]"
-                  style={{ animationDelay: `${i * 70}ms, 0ms` }}
-                >
-                  {letter}
-                </span>
-              ))}
-            </div>
-
-            <p className="relative mt-4 text-[10px] sm:text-xs tracking-[0.45em] uppercase text-gray-500 font-semibold animate-pulse">
-              Crafting the Experience
-            </p>
-
-            {/* Hairline progress bar pinned to the bottom edge */}
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
-              <div
-                className="h-full origin-left bg-[#FF5E4D] shadow-[0_0_12px_#FF5E4D] transition-transform duration-300 ease-out"
-                style={{ transform: `scaleX(${readyPercent / 100})` }}
-              />
-            </div>
-          </div>
-        )}
+        {/* Branded intro — rendered outside Blaze so the plane stays a clean
+            flat black with no heat distortion, and sits above it so the fire
+            can warm up hidden underneath. */}
+        {phase !== 'done' && <BrandIntro phase={phase} />}
 
       </div>
     </div>

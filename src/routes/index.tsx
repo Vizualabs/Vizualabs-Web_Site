@@ -14,7 +14,7 @@ function Home() {
       <ScrollHeroSection />
 
       {/* Continuation section after scroll sequence completes */}
-      <section className="relative z-30 bg-black py-24 sm:py-32 px-5 sm:px-6 border-t border-white/10 text-center">
+      <section className="defer-paint relative z-30 bg-black py-24 sm:py-32 px-5 sm:px-6 border-t border-white/10 text-center">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/5 text-[10px] sm:text-xs text-gray-300 font-mono">
             <span>SEQUENCE COMPLETE</span>
@@ -28,14 +28,19 @@ function Home() {
         </div>
       </section>
 
-      {/* Core Strategic Capabilities Section */}
-      <CapabilitiesSection />
+      {/* Below-the-fold sections opt into content-visibility so their layout
+          and paint stay off the initial-load critical path. */}
+      <div className="defer-paint">
+        <CapabilitiesSection />
+      </div>
 
-      {/* The Strategic Journey Section */}
-      <StrategicJourney />
+      <div className="defer-paint">
+        <StrategicJourney />
+      </div>
 
-      {/* Call to Action Section */}
-      <CtaSection />
+      <div className="defer-paint">
+        <CtaSection />
+      </div>
 
       {/* Footer Section */}
       <Footer />

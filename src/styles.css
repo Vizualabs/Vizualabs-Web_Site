@@ -2,9 +2,17 @@
 
 @layer base {
   :root {
-    --font-sans: 'Poppins', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    /* Only families the page actually paints are fetched in __root.tsx.
+       'Plus Jakarta Sans' and 'Space Grotesk' were downloaded but never
+       rendered, so they are no longer requested or referenced here. */
+    --font-sans: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     --font-serif: 'Instrument Serif', Georgia, serif;
+  }
+
+  html {
+    /* Reserve the scrollbar track permanently so locking scroll during the
+       intro overlay cannot shift the layout sideways when it engages. */
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -15,6 +23,14 @@
     margin: 0;
     padding: 0;
   }
+}
+
+/* Below-the-fold sections: let the browser skip layout/paint until they are
+   near the viewport. contain-intrinsic-size keeps the scrollbar honest so the
+   hero's scroll-to-frame mapping is unaffected. */
+.defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
 }
 
 .font-serif-italic {
@@ -128,22 +144,46 @@
   animation: pulse-slow 8s ease-in-out infinite;
 }
 
-/* Hero preloader animations */
-@keyframes hero-loader-letter {
-  from { opacity: 0; transform: translateY(26px); filter: blur(10px); }
+/* ==========================================================================
+   Branded intro overlay (X-style "logo opens into the app" reveal)
+   No percentage, no progress bar — the mark draws, then an iris keyed to its
+   centre opens the landing page behind it.
+   ========================================================================== */
+
+/* Animatable length powers the iris hole. Registered so it interpolates
+   instead of snapping; browsers without @property fall back to the opacity
+   fade baked into the same keyframes. */
+@property --iris {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* --- Mark draw-in --------------------------------------------------------- */
+@keyframes brand-v-draw {
+  from { stroke-dashoffset: 112; }
+  to { stroke-dashoffset: 0; }
+}
+
+.brand-intro-v {
+  stroke-dasharray: 112;
+  stroke-dashoffset: 112;
+  filter: drop-shadow(0 0 14px rgba(255, 94, 77, 0.55));
+  animation: brand-v-draw 900ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+/* --- Wordmark ------------------------------------------------------------- */
+@keyframes brand-intro-letter {
+  from { opacity: 0; transform: translateY(22px); filter: blur(8px); }
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-@keyframes hero-loader-shimmer {
+@keyframes brand-intro-shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
 }
 
-@keyframes hero-loader-orbit {
-  to { transform: rotate(360deg); }
-}
-
-.hero-loader-letter {
+.brand-intro-letter {
   opacity: 0;
   background-image: linear-gradient(110deg, #ffffff 35%, #FF5E4D 50%, #ffffff 65%);
   background-size: 250% 100%;
@@ -152,10 +192,97 @@
   -webkit-text-fill-color: transparent;
   color: transparent;
   animation:
-    hero-loader-letter 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    hero-loader-shimmer 2.8s linear infinite;
+    brand-intro-letter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    brand-intro-shimmer 2.8s linear infinite;
 }
 
-.hero-loader-orbit {
-  animation: hero-loader-orbit 10s linear infinite;
+@keyframes brand-intro-dot {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.brand-intro-dot {
+  opacity: 0;
+  box-shadow: 0 0 12px #FF5E4D;
+  animation: brand-intro-dot 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1080ms forwards;
+}
+
+@keyframes brand-intro-tagline {
+  from { opacity: 0; letter-spacing: 0.6em; }
+  to { opacity: 1; letter-spacing: 0.42em; }
+}
+
+.brand-intro-tagline {
+  opacity: 0;
+  animation: brand-intro-tagline 0.8s ease-out 1180ms forwards;
+}
+
+/* --- Reveal --------------------------------------------------------------- */
+/* The iris: a full-bleed black plane whose radial mask hole opens from the
+   centre of the mark. Layer stays viewport-sized (unlike a scaled box-shadow),
+   so this composites cheaply. */
+@keyframes brand-iris-open {
+  0% { --iris: 46px; opacity: 1; }
+  72% { opacity: 1; }
+  100% { --iris: 170vmax; opacity: 0; }
+}
+
+.brand-intro-iris {
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris), #000 calc(var(--iris) + 2px));
+  mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris), #000 calc(var(--iris) + 2px));
+  animation: brand-iris-open 900ms cubic-bezier(0.66, 0, 0.24, 1) forwards;
+}
+
+/* The mark rushes toward the viewer as the iris opens out of it. */
+@keyframes brand-intro-mark-exit {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(8); }
+}
+
+.brand-intro-mark-exit {
+  animation: brand-intro-mark-exit 760ms cubic-bezier(0.66, 0, 0.24, 1) forwards;
+}
+
+@keyframes brand-intro-text-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(14px); }
+}
+
+.brand-intro-text-exit {
+  animation: brand-intro-text-exit 260ms ease-in forwards;
+}
+
+@keyframes brand-intro-glow-exit {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(2.4); }
+}
+
+.brand-intro-glow-exit {
+  animation: brand-intro-glow-exit 700ms ease-out forwards;
+}
+
+/* Honour reduced-motion: keep the brand beat, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .brand-intro-v,
+  .brand-intro-letter,
+  .brand-intro-dot,
+  .brand-intro-tagline {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .brand-intro-iris {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: brand-intro-text-exit 300ms ease-out forwards;
+  }
+
+  .brand-intro-mark-exit,
+  .brand-intro-glow-exit {
+    animation: brand-intro-text-exit 300ms ease-out forwards;
+  }
 }

@@ -40,10 +40,11 @@ print(f"union coverage: {100*acc.mean():.1f}%")
 
 mask = Image.fromarray((acc * 255).astype(np.uint8), mode="L")
 
-# Close interior holes (dark hair/shirt), then a minimal grow for safety.
+# Close interior holes (dark hair/shirt), then trim the fringe so the
+# silhouette hugs the subject with no black rim.
 mask = mask.filter(ImageFilter.MaxFilter(5))   # dilate (radius 2)
 mask = mask.filter(ImageFilter.MinFilter(5))   # erode back (closing)
-mask = mask.filter(ImageFilter.MaxFilter(3))   # minimal final grow (radius 1)
+mask = mask.filter(ImageFilter.MinFilter(3))   # trim fringe (erode radius 1)
 
 a8 = np.asarray(mask).astype(np.uint8)
 a8 = np.where(a8 > 127, 255, 0).astype(np.uint8)  # keep binary

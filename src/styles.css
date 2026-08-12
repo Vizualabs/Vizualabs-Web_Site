@@ -282,6 +282,7 @@
 */
 .hero-title-marquee {
   width: 100%;
+  font-size: 0.75em;
 }
 
 .hero-marquee-track {

@@ -39,9 +39,10 @@ export default defineConfig({
   ],
 
   webServer: {
-    // `vite preview` runs the SSR handler via the TanStack Start plugin —
-    // dist/server/server.js only exports a fetch handler and cannot self-host.
-    command: `npx vite preview --port ${PORT} --strictPort`,
+    // Build first, then serve: `vite preview` runs the SSR handler via the
+    // TanStack Start plugin, but it does NOT rebuild — without the build step
+    // the suite silently tests whatever dist/ happens to be lying around.
+    command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

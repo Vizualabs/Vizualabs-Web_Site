@@ -646,8 +646,8 @@ export function ScrollHeroSection() {
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
                     <div className="text-left">
-                      <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                        15 +
+                      <div className="font-sans text-2xl sm:text-4xl font-bold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                        15+
                       </div>
                       <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
                         Projects Completed
@@ -659,7 +659,7 @@ export function ScrollHeroSection() {
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
                     <div className="text-left">
-                      <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                      <div className="font-sans text-2xl sm:text-4xl font-bold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                         300+
                       </div>
                       <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
@@ -672,7 +672,7 @@ export function ScrollHeroSection() {
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
                     <div className="text-left">
-                      <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                      <div className="font-sans text-2xl sm:text-4xl font-bold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                         100%
                       </div>
                       <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">

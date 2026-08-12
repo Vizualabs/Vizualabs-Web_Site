@@ -44,7 +44,6 @@ const REVEAL_MS = 900
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const titleRef = useRef<HTMLDivElement>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
 
   // Pre-cropped, pre-scaled GPU bitmaps — the ONLY thing kept in memory.
@@ -507,28 +506,15 @@ export function ScrollHeroSection() {
      * The handler itself does ZERO work — it just schedules. This guarantees
      * that layout reads and canvas draws never run more than once per frame,
      * and never fight with the browser's own scroll thread.
+     *
+     * The heading is deliberately NOT touched here: it stays pinned (its
+     * line-two marquee is a pure-CSS animation) so scroll work per frame is
+     * exactly one canvas draw.
      */
-    /**
-     * Fade the heading out over the first part of the scroll, so it reads as
-     * the hero's opening state and then hands the stage to the sequence.
-     * Written straight to the node — routing this through React state would
-     * re-render the whole hero on every scroll frame.
-     */
-    const syncTitleFade = () => {
-      const title = titleRef.current
-      if (!title) return
-      const travelled = window.scrollY - geometryRef.current.top
-      const fadeOver = window.innerHeight * 0.55
-      const opacity = Math.min(1, Math.max(0, 1 - travelled / fadeOver))
-      title.style.opacity = String(opacity)
-      title.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible'
-    }
-
     const handleScroll = () => {
       if (scrollRafRef.current) return
       scrollRafRef.current = requestAnimationFrame(() => {
         scrollRafRef.current = null
-        syncTitleFade()
         const targetFrame = readScrollFrame()
         if (targetFrame === 0) return
         const readyFrame = findReadyFrame(targetFrame)
@@ -542,14 +528,12 @@ export function ScrollHeroSection() {
     const handleResize = () => {
       updateGeometry()
       syncCanvasSize()
-      syncTitleFade()
       drawFrame(currentFrameRef.current)
     }
 
     // One-time layout read, then keep geometry in sync on resize only.
     updateGeometry()
     syncCanvasSize()
-    syncTitleFade()
 
     // Initial check in case user loaded page mid-scroll.
     const initialTarget = readScrollFrame()
@@ -612,8 +596,10 @@ export function ScrollHeroSection() {
             <div className="relative w-full h-full">
 
               {/* Heading, layered UNDER the canvas so the silhouette-masked subject
-            overlaps it the way the reference composition does. */}
-              <HeroTitle ref={titleRef} start={phase === 'revealing' || phase === 'done'} />
+            overlaps it the way the reference composition does. It stays pinned
+            for the whole sequence — no scroll fade — while its line-two
+            marquee loops purely in CSS, decoupled from the frame draws. */}
+              <HeroTitle start={phase === 'revealing' || phase === 'done'} />
 
               {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
               <canvas

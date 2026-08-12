@@ -217,7 +217,10 @@ test.describe('hero heading', () => {
     await expect(title).toBeVisible()
     await expect(title).toContainText('Vizualise')
     await expect(title).toContainText('Your')
-    await expect(title.locator('.hero-title-accent')).toHaveText('Digital Success')
+    // The marquee repeats the phrase (2 groups x 2 phrases) for a seamless
+    // loop; every copy carries the accent word.
+    await expect(title.locator('.hero-title-accent').first()).toHaveText('Digital Success')
+    await expect(title.locator('.hero-title-accent')).toHaveCount(4)
 
     // Exactly two lines — a third would fall entirely behind the subject.
     await expect(title.locator('.hero-title-line')).toHaveCount(2)
@@ -336,27 +339,71 @@ test.describe('hero heading', () => {
     }
   })
 
-  test('fades out as the sequence takes over', async ({ page }) => {
+  test('stays pinned and visible while the sequence plays', async ({ page }) => {
     await bootLanding(page, { withoutFire: true })
     const title = page.getByTestId('hero-title')
 
+    // The line-two loop is a pure-CSS marquee running on its own track.
+    const track = title.locator('.hero-marquee-track')
+    await expect(track).toHaveCount(1)
+    expect(
+      await track.evaluate((el) => getComputedStyle(el).animationName)
+    ).toBe('hero-marquee-scroll')
+
+    // Fully visible at rest...
     expect(
       Number(await title.evaluate((el) => getComputedStyle(el).opacity))
     ).toBeGreaterThan(0.95)
 
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.3))
-    await page.waitForTimeout(300)
-    const mid = Number(
-      await title.evaluate((el) => getComputedStyle(el).opacity)
-    )
-    expect(mid).toBeGreaterThan(0)
-    expect(mid).toBeLessThan(0.75)
+    // ...and it never fades: still fully visible mid-scroll and at the very
+    // end of the scroll container, while the frame sequence plays over it.
+    const scrollStops = await page.evaluate(() => {
+      const container = document.querySelector(
+        '[data-testid="hero-scroll-container"]'
+      )!
+      const rect = container.getBoundingClientRect()
+      const top = rect.top + window.scrollY
+      const bottom = top + rect.height - window.innerHeight
+      return [window.innerHeight * 0.3, window.innerHeight * 0.8, bottom]
+    })
 
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.8))
-    await page.waitForTimeout(300)
-    expect(
-      await title.evaluate((el) => getComputedStyle(el).visibility)
-    ).toBe('hidden')
+    for (const y of scrollStops) {
+      await page.evaluate((scrollY) => window.scrollTo(0, scrollY), y)
+      await page.waitForTimeout(300)
+      const { opacity, visibility } = await title.evaluate((el) => {
+        const cs = getComputedStyle(el)
+        return { opacity: cs.opacity, visibility: cs.visibility }
+      })
+      expect(Number(opacity)).toBe(1)
+      expect(visibility).toBe('visible')
+    }
+  })
+
+  test('keeps every marquee group at least viewport wide for a seamless loop', async ({
+    page,
+  }) => {
+    for (const [w, h] of [
+      [390, 844],
+      [768, 1024],
+      [1280, 800],
+      [1440, 900],
+      [1920, 1080],
+    ] as const) {
+      await page.setViewportSize({ width: w, height: h })
+      await bootLanding(page, { withoutFire: true })
+
+      const groupWidths = await page
+        .getByTestId('hero-title')
+        .locator('.hero-marquee-group')
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width))
+
+      // translateX(-50%) loops seamlessly only while one group covers the
+      // viewport — a narrower group would open a gap at the wrap point.
+      expect(groupWidths.length).toBeGreaterThan(0)
+      for (const width of groupWidths) {
+        expect(width).toBeGreaterThanOrEqual(w)
+      }
+    }
   })
 })
 

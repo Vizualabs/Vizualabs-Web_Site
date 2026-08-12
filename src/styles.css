@@ -273,6 +273,42 @@
   }
 }
 
+/*
+  Line two is a full-width marquee strip: "Your Digital Success" loops right
+  to left behind the subject, so no word stays trapped behind the silhouette.
+  Pure CSS on a dedicated track — compositor-only transform, zero JS, zero
+  coupling with the scroll-driven frame sequence. .hero-title-line already
+  clips it (overflow: hidden).
+*/
+.hero-title-marquee {
+  width: 100%;
+}
+
+.hero-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: hero-marquee-scroll var(--hero-marquee-duration, 22s) linear infinite;
+}
+
+.hero-marquee-group {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.hero-marquee-phrase {
+  white-space: nowrap;
+  /* Gap between iterations — inside the group, so it is part of the loop period. */
+  padding-right: 0.75em;
+}
+
+/* Right-to-left travel: negative X. Do not reverse. */
+@keyframes hero-marquee-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .hero-title-inner,
@@ -285,6 +321,22 @@
   .hero-title-accent.is-in {
     animation: none;
     text-shadow: 0 0 18px rgba(255, 94, 77, 0.28);
+  }
+
+  /* Marquee collapses to one static, centered phrase. */
+  .hero-marquee-track {
+    animation: none;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-marquee-group + .hero-marquee-group,
+  .hero-marquee-phrase + .hero-marquee-phrase {
+    display: none;
+  }
+
+  .hero-marquee-phrase {
+    padding-right: 0;
   }
 }
 

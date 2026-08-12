@@ -5,7 +5,7 @@ import appCss from '../styles.css?url'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
 
 const FONT_CSS_URL =
-  'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Poppins:wght@300;400;500;600;700;800;900&display=swap'
+  'https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Instrument+Serif:ital@1&family=Poppins:wght@300;400;500;600;700;800;900&display=swap'
 
 interface RouterContext {
   queryClient: QueryClient

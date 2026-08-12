@@ -21,7 +21,7 @@ export const HeroTitle = forwardRef<HTMLDivElement, { start: boolean }>(
         className="pointer-events-none absolute inset-x-0 top-[10vh] flex flex-col items-center px-4 text-center sm:top-[15vh]"
         style={{ willChange: 'opacity' }}
       >
-        <h1 className="hero-title-type m-0 font-black leading-[0.92] tracking-[-0.02em]">
+        <h1 className="hero-title-type font-hanken m-0 font-black leading-[0.92] tracking-[-0.02em]">
           <span className="hero-title-line">
             <span
               className={`hero-title-inner text-white ${start ? 'is-in' : ''}`}

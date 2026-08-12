@@ -69,8 +69,8 @@
   background:
     radial-gradient(120% 150% at 18% -12%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 62%),
     linear-gradient(125deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 35%, rgba(255, 255, 255, 0.005) 62%, rgba(255, 255, 255, 0.04) 100%);
-  backdrop-filter: blur(24px) saturate(180%) brightness(1.06);
-  -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.06);
+  backdrop-filter: blur(30px) saturate(230%) brightness(1.1);
+  -webkit-backdrop-filter: blur(30px) saturate(230%) brightness(1.1);
   box-shadow:
     0 24px 56px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
@@ -98,7 +98,7 @@
   z-index: 2;
   width: 45%;
   pointer-events: none;
-  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.14) 45%, rgba(255, 255, 255, 0.26) 50%, rgba(255, 255, 255, 0.14) 55%, transparent 100%);
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.42) 50%, rgba(255, 255, 255, 0.2) 55%, transparent 100%);
   animation: liquid-sheen 5.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
@@ -107,13 +107,13 @@
 
   0%,
   100% {
-    opacity: 0.45;
+    opacity: 0.6;
     transform: translate(0, 0) scale(1);
   }
 
   50% {
-    opacity: 0.85;
-    transform: translate(-10px, 8px) scale(1.08);
+    opacity: 1;
+    transform: translate(-12px, 10px) scale(1.1);
   }
 }
 
@@ -123,7 +123,7 @@
   inset: -40%;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(ellipse 60% 42% at 50% 62%, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse 60% 42% at 50% 62%, rgba(255, 255, 255, 0.14) 0%, transparent 70%);
   mix-blend-mode: screen;
   animation: liquid-caustic 7s ease-in-out infinite;
 }

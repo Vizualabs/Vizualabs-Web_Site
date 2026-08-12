@@ -594,111 +594,111 @@ export function ScrollHeroSection() {
             paid behind the still-opaque intro plane rather than on the user's
             first scroll. */}
         {fireMounted && (
-        <Blaze
-          height={0.5}
-          distortion={0.6}
-          distortionScale={0.5}
-          speed={1}
-          sparks={1.5}
-          sparkDensity={1.8}
-          sparkSize={1}
-          layers={4}
-          smoke={1.1}
-          glow={2.8}
-          sparkColor={[1, 0.4, 0.051]}
-          smokeColor={[1, 0.4314, 0.102]}
-          style={{ position: 'absolute', inset: 0 }}
-        >
-          <div className="relative w-full h-full">
+          <Blaze
+            height={0.5}
+            distortion={0.6}
+            distortionScale={0.5}
+            speed={1}
+            sparks={1.5}
+            sparkDensity={1.8}
+            sparkSize={1}
+            layers={4}
+            smoke={1.1}
+            glow={2.8}
+            sparkColor={[1, 0.4, 0.051]}
+            smokeColor={[1, 0.4314, 0.102]}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <div className="relative w-full h-full">
 
-        {/* Heading, layered UNDER the canvas so the silhouette-masked subject
+              {/* Heading, layered UNDER the canvas so the silhouette-masked subject
             overlaps it the way the reference composition does. */}
-        <HeroTitle ref={titleRef} start={phase === 'revealing' || phase === 'done'} />
+              <HeroTitle ref={titleRef} start={phase === 'revealing' || phase === 'done'} />
 
-        {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
-        <canvas
-          ref={canvasRef}
-          data-testid="hero-canvas"
-          /* No z-index on purpose: painting order here comes from DOM order,
-             so the canvas sits above the heading that precedes it while the
-             Blaze fire — a later sibling of this wrapper — still paints over
-             the canvas exactly as it did before. */
-          className="hero-sequence-canvas absolute inset-0 w-full h-full block"
-          style={{ willChange: 'transform', transform: 'translateZ(0)' }}
-        />
+              {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
+              <canvas
+                ref={canvasRef}
+                data-testid="hero-canvas"
+                /* No z-index on purpose: painting order here comes from DOM order,
+                   so the canvas sits above the heading that precedes it while the
+                   Blaze fire — a later sibling of this wrapper — still paints over
+                   the canvas exactly as it did before. */
+                className="hero-sequence-canvas absolute inset-0 w-full h-full block"
+                style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+              />
 
-        {/* Subtle Radial Edge Vignette Falloff */}
-        {/* Widened the clear centre so the heading's outer words keep their
+              {/* Subtle Radial Edge Vignette Falloff */}
+              {/* Widened the clear centre so the heading's outer words keep their
             contrast — at 30% the vignette was greying out "Your". Kept as an
             ellipse so the corner falloff survives without reaching into the
             headline band. */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_92%_at_50%_52%,transparent_52%,rgba(0,0,0,0.72)_100%)] z-10" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_92%_at_50%_52%,transparent_52%,rgba(0,0,0,0.72)_100%)] z-10" />
 
-        {/* Top Center Pill Badge — tight fit on small screens */}
-        <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-lg shadow-[#FF5E4D]/10">
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_8px_#FF5E4D]" />
-            <span className="text-[9px] sm:text-xs font-bold tracking-[0.14em] sm:tracking-[0.25em] text-[#FF5E4D] uppercase">
-              ENGINEERING STRATEGIC MOMENTUM
-            </span>
-          </div>
-        </div>
-
-
-        {/* Bottom Left Navigation Title — hidden on mobile to free the bottom bar */}
-        <div className="hidden sm:block absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 pointer-events-none">
-          <span className="text-sm sm:text-base font-semibold text-gray-200 tracking-wider">
-            Our Approach
-          </span>
-        </div>
-
-        {/* Bottom Right Premium Glassmorphic Stats Card — full-width row on mobile */}
-        <div className="absolute inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:inset-x-auto sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
-          <div className="liquid-glass relative overflow-hidden rounded-none px-2 py-3 sm:px-9 sm:py-6 flex items-center justify-between gap-2 sm:justify-start sm:gap-10">
-            {/* Soft accent corner glow — kept subtle for depth without a frame */}
-            <div className="pointer-events-none absolute -top-14 -right-14 h-36 w-36 rounded-full bg-[#FF5E4D]/15 blur-3xl" />
-
-            <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
-              <div className="text-left">
-                <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                  15 +
-                </div>
-                <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
-                  Projects Completed
+              {/* Top Center Pill Badge — tight fit on small screens */}
+              <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-lg shadow-[#FF5E4D]/10">
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_8px_#FF5E4D]" />
+                  <span className="text-[9px] sm:text-xs font-bold tracking-[0.14em] sm:tracking-[0.25em] text-[#FF5E4D] uppercase">
+                    ENGINEERING STRATEGIC MOMENTUM
+                  </span>
                 </div>
               </div>
-            </div>
 
-            <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
 
-            <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
-              <div className="text-left">
-                <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                  300+
-                </div>
-                <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
-                  People Reach
+              {/* Bottom Left Navigation Title — hidden on mobile to free the bottom bar */}
+              <div className="hidden sm:block absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 pointer-events-none">
+                <span className="text-sm sm:text-base font-semibold text-gray-200 tracking-wider">
+                  Our Approach
+                </span>
+              </div>
+
+              {/* Bottom Right Premium Glassmorphic Stats Card — full-width row on mobile */}
+              <div className="absolute inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:inset-x-auto sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
+                <div className="liquid-glass relative overflow-hidden rounded-none px-2 py-3 sm:px-9 sm:py-6 flex items-center justify-between gap-2 sm:justify-start sm:gap-10">
+                  {/* Soft accent corner glow — kept subtle for depth without a frame */}
+                  <div className="pointer-events-none absolute -top-14 -right-14 h-36 w-36 rounded-full bg-[#FF5E4D]/15 blur-3xl" />
+
+                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+                    <div className="text-left">
+                      <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                        15 +
+                      </div>
+                      <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                        Projects Completed
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+
+                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+                    <div className="text-left">
+                      <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                        300+
+                      </div>
+                      <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                        People Reach
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+
+                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+                    <div className="text-left">
+                      <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                        100%
+                      </div>
+                      <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                        Clients' Satisfaction
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+
             </div>
-
-            <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
-
-            <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
-              <div className="text-left">
-                <div className="text-lg sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                  100%
-                </div>
-                <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
-                  Clients' Satisfaction
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-          </div>
-        </Blaze>
+          </Blaze>
         )}
 
         {/* Branded intro — rendered outside Blaze so the plane stays a clean

@@ -40,7 +40,7 @@
 /* Background patterns & Glow utilities */
 .bg-grid-pattern {
   background-size: 40px 40px;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
@@ -81,8 +81,14 @@
 
 /* Liquid sheen — slow diagonal glint sliding across the glass */
 @keyframes liquid-sheen {
-  0% { transform: translateX(-160%) skewX(-24deg); }
-  55%, 100% { transform: translateX(300%) skewX(-24deg); }
+  0% {
+    transform: translateX(-160%) skewX(-24deg);
+  }
+
+  55%,
+  100% {
+    transform: translateX(300%) skewX(-24deg);
+  }
 }
 
 .liquid-glass::before {
@@ -98,8 +104,17 @@
 
 /* Refraction wobble — subtle caustic shimmer that reads as "liquid" */
 @keyframes liquid-caustic {
-  0%, 100% { opacity: 0.45; transform: translate(0, 0) scale(1); }
-  50% { opacity: 0.85; transform: translate(-10px, 8px) scale(1.08); }
+
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: translate(-10px, 8px) scale(1.08);
+  }
 }
 
 .liquid-glass::after {
@@ -126,8 +141,15 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
@@ -135,8 +157,17 @@
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
 .animate-pulse-slow {
@@ -208,8 +239,15 @@
 }
 
 @keyframes hero-title-rise {
-  from { transform: translateY(105%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .hero-title-accent {
@@ -222,16 +260,21 @@
 }
 
 @keyframes hero-title-accent-glow {
-  0% { text-shadow: none; }
+  0% {
+    text-shadow: none;
+  }
+
   35% {
     text-shadow: 0 0 26px rgba(255, 94, 77, 0.75), 0 0 60px rgba(255, 94, 77, 0.35);
   }
+
   100% {
     text-shadow: 0 0 18px rgba(255, 94, 77, 0.28);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .hero-title-inner,
   .hero-title-inner.is-in {
     animation: none;
@@ -262,8 +305,13 @@
 
 /* --- Mark draw-in --------------------------------------------------------- */
 @keyframes brand-v-draw {
-  from { stroke-dashoffset: 112; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 112;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .brand-intro-v {
@@ -275,13 +323,27 @@
 
 /* --- Wordmark ------------------------------------------------------------- */
 @keyframes brand-intro-letter {
-  from { opacity: 0; transform: translateY(22px); filter: blur(8px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 @keyframes brand-intro-shimmer {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .brand-intro-letter {
@@ -298,8 +360,15 @@
 }
 
 @keyframes brand-intro-dot {
-  from { opacity: 0; transform: scale(0); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .brand-intro-dot {
@@ -309,8 +378,15 @@
 }
 
 @keyframes brand-intro-tagline {
-  from { opacity: 0; letter-spacing: 0.6em; }
-  to { opacity: 1; letter-spacing: 0.42em; }
+  from {
+    opacity: 0;
+    letter-spacing: 0.6em;
+  }
+
+  to {
+    opacity: 1;
+    letter-spacing: 0.42em;
+  }
 }
 
 .brand-intro-tagline {
@@ -323,9 +399,19 @@
    centre of the mark. Layer stays viewport-sized (unlike a scaled box-shadow),
    so this composites cheaply. */
 @keyframes brand-iris-open {
-  0% { --iris: 46px; opacity: 1; }
-  72% { opacity: 1; }
-  100% { --iris: 170vmax; opacity: 0; }
+  0% {
+    --iris: 46px;
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 1;
+  }
+
+  100% {
+    --iris: 170vmax;
+    opacity: 0;
+  }
 }
 
 .brand-intro-iris {
@@ -339,8 +425,15 @@
 
 /* The mark rushes toward the viewer as the iris opens out of it. */
 @keyframes brand-intro-mark-exit {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(8); }
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(8);
+  }
 }
 
 .brand-intro-mark-exit {
@@ -348,8 +441,15 @@
 }
 
 @keyframes brand-intro-text-exit {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(14px); }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(14px);
+  }
 }
 
 .brand-intro-text-exit {
@@ -357,8 +457,15 @@
 }
 
 @keyframes brand-intro-glow-exit {
-  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  to { opacity: 0; transform: translate(-50%, -50%) scale(2.4); }
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4);
+  }
 }
 
 .brand-intro-glow-exit {
@@ -367,6 +474,7 @@
 
 /* Honour reduced-motion: keep the brand beat, drop the movement. */
 @media (prefers-reduced-motion: reduce) {
+
   .brand-intro-v,
   .brand-intro-letter,
   .brand-intro-dot,

@@ -549,7 +549,11 @@ export function ScrollHeroSection() {
     const handleScroll = () => scheduleDraw()
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseXRef.current = (e.clientX / window.innerWidth) * 2 - 1
+      const normalized = (e.clientX / window.innerWidth) * 2 - 1
+      // Saturate the steering: the outer half of each side already drives a
+      // full turn, so the pointer reaches the complete rotation well before the
+      // screen edge instead of only at the last pixel.
+      mouseXRef.current = Math.max(-1, Math.min(1, normalized * 2))
       scheduleDraw()
     }
 

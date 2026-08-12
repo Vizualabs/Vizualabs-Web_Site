@@ -589,8 +589,8 @@ export function ScrollHeroSection() {
             layers={4}
             smoke={1.1}
             glow={2.8}
-            sparkColor={[1, 0.4, 0.051]}
-            smokeColor={[1, 0.4314, 0.102]}
+            sparkColor={[1, 0, 0]}
+            smokeColor={[0.6, 0, 0]}
             style={{ position: 'absolute', inset: 0 }}
           >
             <div className="relative w-full h-full">

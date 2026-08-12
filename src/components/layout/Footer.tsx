@@ -1,15 +1,10 @@
 import { useState } from 'react'
-import { JellyBlobMascot } from 'feral-blob'
-import 'feral-blob/blob.css'
 import {
   MessageSquare,
   Mail,
-  Globe,
   ArrowUpRight,
-  Send,
-  X,
-  CheckCircle2
 } from 'lucide-react'
+import { AssistantWidget } from '#/components/chat/AssistantWidget'
 
 function GithubIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -37,72 +32,6 @@ function TwitterIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 export function Footer() {
   const [chatOpen, setChatOpen] = useState(false)
-  const [msgSent, setMsgSent] = useState(false)
-  const [messageInput, setMessageInput] = useState('')
-  const [clickCount, setClickCount] = useState(0)
-  const [isBouncing, setIsBouncing] = useState(false)
-  const [mascotBubble, setMascotBubble] = useState<string | null>(null)
-
-  const happyPhrases = [
-    'Yay! 😄 Super happy to see you!',
-    'Hehehe! Boing boing! 🌟',
-    'Haha! That tickles! ✨',
-    'Vizualabs is ready to build! 🚀',
-    'Giggle giggle! Let\'s innovate! 💖',
-    'Woohoo! Happy vibes! 🎉'
-  ]
-
-  const handleMascotClick = () => {
-    const nextCount = clickCount + 1
-    setClickCount(nextCount)
-    setChatOpen(prev => !prev)
-    setIsBouncing(true)
-
-    const phrase = happyPhrases[nextCount % happyPhrases.length]
-    setMascotBubble(phrase)
-
-    setTimeout(() => {
-      setIsBouncing(false)
-    }, 2000)
-
-    setTimeout(() => {
-      setMascotBubble(null)
-    }, 3600)
-  }
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!messageInput.trim()) return
-    setMsgSent(true)
-    setIsBouncing(true)
-    setMascotBubble('Yay! Message received! Thank you! 💌')
-    setTimeout(() => {
-      setMsgSent(false)
-      setMessageInput('')
-      setChatOpen(false)
-      setIsBouncing(false)
-    }, 2500)
-  }
-
-  const jellyStyle = {
-    '--jelly-body-top': '#FF8A7A',
-    '--jelly-body-mid': '#FF5E4D',
-    '--jelly-body-deep': '#D94434',
-    '--jelly-body-rim': '#FF7868',
-    '--jelly-outline': '#B82E20',
-    '--jelly-outline-light': '#FF5E4D',
-    '--jelly-arm-light': '#FFB0A5',
-    '--jelly-arm-mid': '#FF5E4D',
-    '--jelly-arm-deep': '#D94434',
-    '--jelly-cheek-light': '#FFE2DD',
-    '--jelly-cheek': '#FFA69B',
-    '--jelly-cheek-deep': '#FF7E70',
-    '--jelly-eye-light': '#380E09',
-    '--jelly-eye': '#1C0503',
-    '--jelly-eye-deep': '#0E0201',
-    '--jelly-belly-glow': '#FFC4BC',
-    '--jelly-eye-sparkle': '#FF7868',
-  } as React.CSSProperties
 
   return (
     <footer className="relative w-full bg-[#080808] border-t border-white/10 text-gray-300 font-sans selection:bg-[#FF5E4D] selection:text-white pt-16 pb-12 overflow-hidden">
@@ -128,15 +57,15 @@ export function Footer() {
               </p>
             </div>
 
-            {/* Social & Quick Contact Badges */}
+            {/* Social & Quick Contact Badges matching Corner Msg Icon style */}
             <div className="space-y-3 pt-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Connect With Us
               </span>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={handleMascotClick}
-                  aria-label="Open Mascot Chat"
+                  onClick={() => setChatOpen(true)}
+                  aria-label="Open Chat"
                   className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
                 >
                   <MessageSquare className="h-5 w-5 fill-white text-white transition-transform group-hover:rotate-12" />
@@ -265,114 +194,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Interactive Corner Message Modal */}
-      {chatOpen && (
-        <div className="fixed bottom-28 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 shrink-0" style={jellyStyle}>
-                <JellyBlobMascot mood="happy" happyEyes="smile" mouth="wide" nod={true} gaze={{ x: 10, y: -4 }} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">Vizualabs Mascot Assistant</h4>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Online & Happy
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={() => setChatOpen(false)}
-              className="rounded-lg p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="py-4">
-            {msgSent ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
-                <CheckCircle2 className="h-10 w-10 text-[#FF5E4D] animate-bounce" />
-                <p className="text-sm font-semibold text-white">Message Delivered!</p>
-                <p className="text-xs text-gray-400">Our team will get back to you shortly.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSendMessage} className="space-y-3">
-                <p className="text-xs text-gray-300">
-                  Have a project in mind or need quick assistance? Send us a message below!
-                </p>
-                <textarea
-                  rows={3}
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  placeholder="Type your message..."
-                  className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-[#FF5E4D] focus:outline-none focus:ring-1 focus:ring-[#FF5E4D] transition-all resize-none"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#FF5E4D] py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-[#FF5E4D]/25 hover:bg-[#ff4634] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <span>Send Message</span>
-                  <Send className="h-3.5 w-3.5" />
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Floating Corner JellyBlobMascot Mascot replacing message icon */}
-      <div
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 group flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95"
-        onClick={handleMascotClick}
-        style={jellyStyle}
-      >
-        {/* Subtle glowing ring behind mascot */}
-        <span className="absolute inset-2 rounded-full bg-[#FF5E4D] animate-ping opacity-25 pointer-events-none" />
-
-        {/* Speech Cloud Bubble on Poke / Click - Dynamically positioned to avoid modal overlap */}
-        {mascotBubble && (
-          <div
-            className={`absolute whitespace-nowrap rounded-2xl bg-[#FF5E4D] px-3.5 py-1.5 text-xs font-extrabold text-white shadow-xl shadow-[#FF5E4D]/40 border border-white/20 animate-in fade-in duration-200 pointer-events-none z-50 ${
-              chatOpen
-                ? 'right-full mr-3 bottom-3 slide-in-from-right-2'
-                : 'bottom-full mb-3 right-0 slide-in-from-bottom-2'
-            }`}
-          >
-            {mascotBubble}
-            {chatOpen ? (
-              <div className="absolute top-1/2 -right-2 -translate-y-1/2 border-4 border-transparent border-l-[#FF5E4D]" />
-            ) : (
-              <div className="absolute top-full right-7 -mt-1 border-4 border-transparent border-t-[#FF5E4D]" />
-            )}
-          </div>
-        )}
-
-        <JellyBlobMascot
-          mood="happy"
-          happyEyes={clickCount % 2 === 0 ? 'star' : 'smile'}
-          mouth={isBouncing ? 'wide' : 'open'}
-          nod={isBouncing || clickCount > 0}
-          gaze={
-            isBouncing
-              ? { x: (clickCount % 2 === 0 ? 18 : -18), y: -10 }
-              : { x: 12, y: -6 }
-          }
-          onOverpoke={() => {
-            setIsBouncing(true)
-            setMascotBubble('Hahahahaha! Overpoked! 😄🎉')
-          }}
-          className="w-full h-full drop-shadow-[0_0_18px_rgba(255,94,77,0.55)] transition-all duration-300"
-        />
-
-        {/* Tooltip on hover */}
-        {!mascotBubble && (
-          <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
-            Click to play with Happy Mascot!
-          </span>
-        )}
-      </div>
+      <AssistantWidget open={chatOpen} onOpenChange={setChatOpen} />
     </footer>
   )
 }

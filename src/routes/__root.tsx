@@ -2,6 +2,10 @@ import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/reac
 import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
+import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
+
+const FONT_CSS_URL =
+  'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Poppins:wght@300;400;500;600;700;800;900&display=swap'
 
 interface RouterContext {
   queryClient: QueryClient
@@ -29,15 +33,31 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       {
         rel: 'preconnect',
         href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
       },
+      // Only the families actually rendered are requested. 'Plus Jakarta Sans'
+      // and 'Space Grotesk' were being downloaded but never painted — Jakarta
+      // sits behind Poppins in the --font-sans stack (so it can never win) and
+      // --font-display had no consumers at all. Instrument Serif is only ever
+      // used italic, so the roman axis is dropped too.
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap',
+        href: FONT_CSS_URL,
       },
       {
         rel: 'stylesheet',
         href: appCss,
       },
+      // The hero cannot paint until these decode, and they are only discovered
+      // once the route JS runs. Preloading lets the fetch overlap script
+      // evaluation instead of queueing behind it.
+      ...HERO_PRELOAD_FRAMES.map((frame) => ({
+        rel: 'preload',
+        as: 'image',
+        type: 'image/webp',
+        href: heroFrameUrl(frame),
+        fetchPriority: 'high',
+      })),
     ],
   }),
   shellComponent: RootDocument,

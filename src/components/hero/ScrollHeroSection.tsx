@@ -14,6 +14,12 @@ const CROPPED_SOURCE_HEIGHT = 1813
 const MAX_DPR = 2
 const MAX_BITMAP_HEIGHT = 1600
 
+// How many frames the horizontal mouse position can steer the subject by.
+// Left edge = -MOUSE_TURN_RANGE, right edge = +MOUSE_TURN_RANGE, on top of the
+// scroll-driven base frame. Kept well under the full 121 so scroll stays the
+// primary turn while the mouse adds a subtle, synced nudge.
+const MOUSE_TURN_RANGE = 20
+
 // The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8
 
@@ -63,6 +69,9 @@ export function ScrollHeroSection() {
 
   // Track last rendered frame index to avoid unnecessary redrawing
   const currentFrameRef = useRef(1)
+
+  // Normalized horizontal mouse position, -1 (left) .. +1 (right).
+  const mouseXRef = useRef(0)
 
   // Highest frame index that has been successfully decoded (used for fast
   // fallback during initial scroll before the full sequence is ready).
@@ -260,6 +269,18 @@ export function ScrollHeroSection() {
       TOTAL_FRAMES,
       Math.max(1, Math.floor(scrollProgress * (TOTAL_FRAMES - 1)) + 1)
     )
+  }
+
+  /**
+   * Combine the scroll-driven base frame with the horizontal mouse position so
+   * moving the pointer left-to-right nudges the subject forward and right-to-
+   * left nudges it back, synced on top of the existing scroll turn.
+   */
+  const readCombinedFrame = () => {
+    const scrollFrame = readScrollFrame()
+    const base = scrollFrame > 0 ? scrollFrame : 1
+    const combined = base + Math.round(mouseXRef.current * MOUSE_TURN_RANGE)
+    return Math.min(TOTAL_FRAMES, Math.max(1, combined))
   }
 
   /**
@@ -511,11 +532,11 @@ export function ScrollHeroSection() {
      * line-two marquee is a pure-CSS animation) so scroll work per frame is
      * exactly one canvas draw.
      */
-    const handleScroll = () => {
+    const scheduleDraw = () => {
       if (scrollRafRef.current) return
       scrollRafRef.current = requestAnimationFrame(() => {
         scrollRafRef.current = null
-        const targetFrame = readScrollFrame()
+        const targetFrame = readCombinedFrame()
         if (targetFrame === 0) return
         const readyFrame = findReadyFrame(targetFrame)
         if (readyFrame !== 0 && readyFrame !== currentFrameRef.current) {
@@ -523,6 +544,13 @@ export function ScrollHeroSection() {
           drawFrame(readyFrame)
         }
       })
+    }
+
+    const handleScroll = () => scheduleDraw()
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseXRef.current = (e.clientX / window.innerWidth) * 2 - 1
+      scheduleDraw()
     }
 
     const handleResize = () => {
@@ -547,10 +575,12 @@ export function ScrollHeroSection() {
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleResize)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
+      window.removeEventListener('mousemove', handleMouseMove)
       if (scrollRafRef.current) {
         cancelAnimationFrame(scrollRafRef.current)
         scrollRafRef.current = null

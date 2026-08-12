@@ -23,7 +23,7 @@ const MOUSE_TURN_RANGE = TOTAL_FRAMES - 1
 // Per-frame easing toward the target frame (0..1). Higher = snappier,
 // lower = glide-ier. Keeps scroll and mouse steering buttery instead of
 // jumping straight to the nearest decoded frame.
-const FRAME_EASE = 0.02
+const FRAME_EASE = 0.1
 
 // The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8

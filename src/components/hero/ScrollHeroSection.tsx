@@ -20,6 +20,11 @@ const MAX_BITMAP_HEIGHT = 1600
 // can drive a complete turn (edge to edge), matching a full scroll.
 const MOUSE_TURN_RANGE = TOTAL_FRAMES - 1
 
+// Per-frame easing toward the target frame (0..1). Higher = snappier,
+// lower = glide-ier. Keeps scroll and mouse steering buttery instead of
+// jumping straight to the nearest decoded frame.
+const FRAME_EASE = 0.16
+
 // The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8
 
@@ -69,6 +74,10 @@ export function ScrollHeroSection() {
 
   // Track last rendered frame index to avoid unnecessary redrawing
   const currentFrameRef = useRef(1)
+
+  // Fractional frame the canvas is currently easing through, so scroll and
+  // mouse steering glide between frames instead of snapping.
+  const displayFrameRef = useRef(1)
 
   // Normalized horizontal mouse position, -1 (left) .. +1 (right).
   const mouseXRef = useRef(0)
@@ -390,6 +399,7 @@ export function ScrollHeroSection() {
           if (ready !== 0 && ready !== currentFrameRef.current) {
             currentFrameRef.current = ready
           }
+          displayFrameRef.current = currentFrameRef.current
           drawFrame(currentFrameRef.current)
         })
       }
@@ -505,6 +515,7 @@ export function ScrollHeroSection() {
       if (ready !== 0 && ready !== currentFrameRef.current) {
         currentFrameRef.current = ready
       }
+      displayFrameRef.current = currentFrameRef.current
       drawFrame(currentFrameRef.current)
     })
     return () => cancelAnimationFrame(raf)
@@ -532,18 +543,32 @@ export function ScrollHeroSection() {
      * line-two marquee is a pure-CSS animation) so scroll work per frame is
      * exactly one canvas draw.
      */
+    const runFrameLoop = () => {
+      scrollRafRef.current = null
+      const targetFrame = readCombinedFrame()
+      if (targetFrame === 0) return
+      const readyFrame = findReadyFrame(targetFrame)
+      if (readyFrame === 0) return
+
+      // Ease the displayed frame toward the target so movement glides rather
+      // than snapping between decoded frames.
+      const next = displayFrameRef.current + (readyFrame - displayFrameRef.current) * FRAME_EASE
+      displayFrameRef.current = next
+      const rounded = Math.round(next)
+      if (rounded !== currentFrameRef.current) {
+        currentFrameRef.current = rounded
+        drawFrame(rounded)
+      }
+
+      // Keep animating until the ease settles close enough to the target.
+      if (Math.abs(readyFrame - next) > 0.01) {
+        scrollRafRef.current = requestAnimationFrame(runFrameLoop)
+      }
+    }
+
     const scheduleDraw = () => {
       if (scrollRafRef.current) return
-      scrollRafRef.current = requestAnimationFrame(() => {
-        scrollRafRef.current = null
-        const targetFrame = readCombinedFrame()
-        if (targetFrame === 0) return
-        const readyFrame = findReadyFrame(targetFrame)
-        if (readyFrame !== 0 && readyFrame !== currentFrameRef.current) {
-          currentFrameRef.current = readyFrame
-          drawFrame(readyFrame)
-        }
-      })
+      scrollRafRef.current = requestAnimationFrame(runFrameLoop)
     }
 
     const handleScroll = () => scheduleDraw()
@@ -560,6 +585,7 @@ export function ScrollHeroSection() {
     const handleResize = () => {
       updateGeometry()
       syncCanvasSize()
+      displayFrameRef.current = currentFrameRef.current
       drawFrame(currentFrameRef.current)
     }
 
@@ -575,6 +601,7 @@ export function ScrollHeroSection() {
         currentFrameRef.current = ready
       }
     }
+    displayFrameRef.current = currentFrameRef.current
     drawFrame(currentFrameRef.current)
 
     window.addEventListener('scroll', handleScroll, { passive: true })

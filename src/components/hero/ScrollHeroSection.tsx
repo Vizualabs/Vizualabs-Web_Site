@@ -15,10 +15,10 @@ const MAX_DPR = 2
 const MAX_BITMAP_HEIGHT = 1600
 
 // How many frames the horizontal mouse position can steer the subject by.
-// Left edge = -MOUSE_TURN_RANGE, right edge = +MOUSE_TURN_RANGE, on top of the
-// scroll-driven base frame. Kept well under the full 121 so scroll stays the
-// primary turn while the mouse adds a subtle, synced nudge.
-const MOUSE_TURN_RANGE = 20
+// Left edge = -MOUSE_TURN_RANGE, right edge = +MOUSE_TURN_RANGE, added on top
+// of the scroll-driven base frame. Set to the full sequence span so the mouse
+// can drive a complete turn (edge to edge), matching a full scroll.
+const MOUSE_TURN_RANGE = TOTAL_FRAMES - 1
 
 // The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8

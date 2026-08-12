@@ -2,12 +2,9 @@ import { useState } from 'react'
 import {
   MessageSquare,
   Mail,
-  Globe,
   ArrowUpRight,
-  Send,
-  X,
-  CheckCircle2
 } from 'lucide-react'
+import { AssistantWidget } from '#/components/chat/AssistantWidget'
 
 function GithubIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -35,19 +32,6 @@ function TwitterIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 export function Footer() {
   const [chatOpen, setChatOpen] = useState(false)
-  const [msgSent, setMsgSent] = useState(false)
-  const [messageInput, setMessageInput] = useState('')
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!messageInput.trim()) return
-    setMsgSent(true)
-    setTimeout(() => {
-      setMsgSent(false)
-      setMessageInput('')
-      setChatOpen(false)
-    }, 2500)
-  }
 
   return (
     <footer className="relative w-full bg-[#080808] border-t border-white/10 text-gray-300 font-sans selection:bg-[#FF5E4D] selection:text-white pt-16 pb-12 overflow-hidden">
@@ -210,85 +194,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Interactive Corner Message Modal */}
-      {chatOpen && (
-        <div className="fixed bottom-20 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF5E4D]">
-                <MessageSquare className="h-3.5 w-3.5 fill-white text-white" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">Vizualabs Assistant</h4>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Online
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={() => setChatOpen(false)}
-              className="rounded-lg p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="py-4">
-            {msgSent ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
-                <CheckCircle2 className="h-10 w-10 text-[#FF5E4D] animate-bounce" />
-                <p className="text-sm font-semibold text-white">Message Delivered!</p>
-                <p className="text-xs text-gray-400">Our team will get back to you shortly.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSendMessage} className="space-y-3">
-                <p className="text-xs text-gray-300">
-                  Have a project in mind or need quick assistance? Send us a quick note below!
-                </p>
-                <textarea
-                  rows={3}
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  placeholder="Type your message..."
-                  className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-[#FF5E4D] focus:outline-none focus:ring-1 focus:ring-[#FF5E4D] transition-all resize-none"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#FF5E4D] py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-[#FF5E4D]/25 hover:bg-[#ff4634] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <span>Send Message</span>
-                  <Send className="h-3.5 w-3.5" />
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Floating Corner Message Icon Button */}
-      <div className="fixed bottom-5 right-5 sm:right-6 z-50">
-        <button
-          onClick={() => setChatOpen(!chatOpen)}
-          aria-label="Toggle Quick Message"
-          className="relative group flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-xl shadow-[#FF5E4D]/35 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634] focus:outline-none cursor-pointer"
-        >
-          {/* Subtle pulse glow animation */}
-          <span className="absolute -inset-0.5 rounded-full bg-[#FF5E4D] animate-ping opacity-25 pointer-events-none" />
-
-          {chatOpen ? (
-            <X className="h-5 w-5 text-white" />
-          ) : (
-            <MessageSquare className="h-5 w-5 fill-white text-white group-hover:rotate-12 transition-transform duration-300" />
-          )}
-
-          {/* Tooltip on hover */}
-          <span className="absolute right-full mr-3 hidden group-hover:block whitespace-nowrap rounded-lg bg-black/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg border border-white/10 backdrop-blur-md">
-            Message Us
-          </span>
-        </button>
-      </div>
+      <AssistantWidget open={chatOpen} onOpenChange={setChatOpen} />
     </footer>
   )
 }

@@ -62,21 +62,17 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Liquid glass — premium frosted panel with sharp box edges */
+/* Liquid glass — ultra-transparent frosted glass panel */
 .liquid-glass {
   position: relative;
   isolation: isolate;
-  background:
-    radial-gradient(120% 150% at 18% -12%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 62%),
-    linear-gradient(125deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 35%, rgba(255, 255, 255, 0.005) 62%, rgba(255, 255, 255, 0.04) 100%);
-  backdrop-filter: blur(30px) saturate(230%) brightness(1.1);
-  -webkit-backdrop-filter: blur(30px) saturate(230%) brightness(1.1);
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 24px 56px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
-    inset 1px 0 0 rgba(255, 255, 255, 0.06),
-    inset -1px 0 0 rgba(255, 255, 255, 0.06);
+    0 12px 32px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* Liquid sheen — slow diagonal glint sliding across the glass */
@@ -98,34 +94,8 @@
   z-index: 2;
   width: 45%;
   pointer-events: none;
-  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.42) 50%, rgba(255, 255, 255, 0.2) 55%, transparent 100%);
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.08) 55%, transparent 100%);
   animation: liquid-sheen 5.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-/* Refraction wobble — subtle caustic shimmer that reads as "liquid" */
-@keyframes liquid-caustic {
-
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: translate(0, 0) scale(1);
-  }
-
-  50% {
-    opacity: 1;
-    transform: translate(-12px, 10px) scale(1.1);
-  }
-}
-
-.liquid-glass::after {
-  content: '';
-  position: absolute;
-  inset: -40%;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(ellipse 60% 42% at 50% 62%, rgba(255, 255, 255, 0.14) 0%, transparent 70%);
-  mix-blend-mode: screen;
-  animation: liquid-caustic 7s ease-in-out infinite;
 }
 
 .text-gradient {
@@ -210,21 +180,21 @@
 
 .hero-title-type {
   font-family: var(--font-hanken);
-  font-size: clamp(1.5rem, 7.4vw, 8.8rem);
+  font-size: clamp(1.4rem, 6.5vw, 7.6rem);
 }
 
 @media (min-width: 768px) {
   .hero-title-type {
-    font-size: min(8.4vw, 9rem);
+    font-size: min(7.5vw, 7.8rem);
   }
 }
 
 .hero-title-line {
   display: block;
   overflow: hidden;
-  /* Descenders/accents would otherwise be clipped by the reveal mask. */
-  padding-bottom: 0.06em;
-  margin-bottom: -0.06em;
+  /* Extra bottom padding ensures descenders (like 'g', 'y', 'p') are never clipped. */
+  padding-bottom: 0.35em;
+  margin-bottom: -0.35em;
 }
 
 .hero-title-inner {
@@ -546,5 +516,92 @@
   .brand-intro-mark-exit,
   .brand-intro-glow-exit {
     animation: brand-intro-text-exit 300ms ease-out forwards;
+  }
+}
+
+/* ==========================================================================
+   Navbar — gray resting state, orange on hover, animated underline
+   ========================================================================== */
+
+.nav-link {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #E5E2E1;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+/* Underline grows from the left on hover/focus/active. */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 1px;
+  background: #FF5540;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-link.active {
+  color: #FF5540;
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after,
+.nav-link.active::after {
+  transform: scaleX(1);
+}
+
+/* Mobile variant: underline sits inline instead of hanging off the link. */
+.nav-link-mobile {
+  padding: 0.75rem 0.5rem;
+  font-size: 1.05rem;
+}
+
+.nav-link-mobile::after {
+  bottom: 0.35rem;
+}
+
+/* Contact button — solid red-orange (#FF4D30) with crisp white text matching Figma. */
+.nav-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.6rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #FF4D30;
+  box-shadow: 0 4px 20px rgba(255, 77, 48, 0.35);
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.nav-contact-btn:hover {
+  transform: translateY(-1px);
+  background-color: #FF5E4D;
+  box-shadow: 0 8px 28px rgba(255, 77, 48, 0.5);
+}
+
+.nav-contact-btn:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .nav-link::after,
+  .nav-contact-btn {
+    transition: none;
   }
 }

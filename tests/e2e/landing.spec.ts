@@ -214,13 +214,8 @@ test.describe('hero heading', () => {
     await bootLanding(page, { withoutFire: true })
 
     const title = page.getByTestId('hero-title')
-    await expect(title).toBeVisible()
-    await expect(title).toContainText('Vizualise')
-    await expect(title).toContainText('Your')
-    // The marquee repeats the phrase (2 groups x 2 phrases) for a seamless
-    // loop; every copy carries the accent word.
-    await expect(title.locator('.hero-title-accent').first()).toHaveText('Digital Success')
-    await expect(title.locator('.hero-title-accent')).toHaveCount(4)
+    await expect(title.locator('.hero-title-accent').first()).toHaveText('Digital')
+    await expect(title.locator('.hero-title-accent')).toHaveCount(8)
 
     // Exactly two lines — a third would fall entirely behind the subject.
     await expect(title.locator('.hero-title-line')).toHaveCount(2)

@@ -143,13 +143,13 @@ export function ScrollHeroSection() {
     const height = window.innerHeight
     const isMobile = width < 768
 
-    // Scale image significantly larger while staying anchored flush at hero bottom
-    const targetRenderHeight = isMobile ? height * 1.05 : height * 0.96
+    // Scale image (86% desktop height / 92% mobile height)
+    const targetRenderHeight = isMobile ? height * 0.92 : height * 0.86
     let scale = targetRenderHeight / bmpH
 
     // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
     if (isMobile) {
-      const minWScale = (width * 0.92) / bmpW
+      const minWScale = (width * 0.84) / bmpW
       scale = Math.max(scale, minWScale)
     }
 
@@ -681,8 +681,9 @@ export function ScrollHeroSection() {
             headline band. */}
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_92%_at_50%_52%,transparent_52%,rgba(0,0,0,0.72)_100%)] z-10" />
 
-              {/* Top Center Pill Badge — tight fit on small screens */}
-              <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
+              {/* Top Center Pill Badge — sits below the fixed navbar (h-20) so it
+                  no longer collides with the nav links / logo */}
+              <div className="absolute top-24 sm:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-lg shadow-[#FF5E4D]/10">
                   <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_8px_#FF5E4D]" />
                   <span className="text-[9px] sm:text-xs font-bold tracking-[0.14em] sm:tracking-[0.25em] text-[#FF5E4D] uppercase">
@@ -701,42 +702,39 @@ export function ScrollHeroSection() {
 
               {/* Bottom Right Premium Glassmorphic Stats Card — full-width row on mobile */}
               <div className="absolute inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:inset-x-auto sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
-                <div className="liquid-glass relative overflow-hidden rounded-none px-2 py-3 sm:px-9 sm:py-6 flex items-center justify-between gap-2 sm:justify-start sm:gap-10">
-                  {/* Soft accent corner glow — kept subtle for depth without a frame */}
-                  <div className="pointer-events-none absolute -top-14 -right-14 h-36 w-36 rounded-full bg-[#FF5E4D]/15 blur-3xl" />
-
-                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+                <div className="liquid-glass relative overflow-hidden px-4 py-3 sm:px-8 sm:py-5 flex items-center justify-between gap-4 sm:justify-start sm:gap-8 shadow-2xl">
+                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
                     <div className="text-left">
-                      <div className="font-sans text-3xl sm:text-5xl text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                        15+
+                      <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
+                        15 +
                       </div>
-                      <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                      <div className="text-[10px] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         Projects Completed
                       </div>
                     </div>
                   </div>
 
-                  <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+                  <div className="hidden sm:block h-8 sm:h-10 w-px bg-white/15" />
 
-                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
                     <div className="text-left">
-                      <div className="font-sans text-3xl sm:text-5xl text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                      <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
                         300+
                       </div>
-                      <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
-                        People Reach
+                      <div className="text-[10px] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
+                        People reach
                       </div>
                     </div>
                   </div>
 
-                  <div className="hidden sm:block h-8 sm:h-12 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+                  <div className="hidden sm:block h-8 sm:h-10 w-px bg-white/15" />
 
-                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 sm:gap-4 group/stat cursor-default">
+                  <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
                     <div className="text-left">
-                      <div className="font-sans text-3xl sm:text-5xl text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                      <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
                         100%
                       </div>
-                      <div className="text-[8px] sm:text-xs text-gray-300/80 font-semibold mt-0.5 tracking-wider whitespace-nowrap uppercase">
+                      <div className="text-[10px] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         Clients' Satisfaction
                       </div>
                     </div>

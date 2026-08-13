@@ -307,6 +307,98 @@ test.describe('hero heading', () => {
     expect(maskH).toBeCloseTo(mask.expectedH, 0)
   })
 
+  test('does not paint a black smudge over the hair', async ({ page }) => {
+    await bootLanding(page, { withoutFire: true })
+
+    const sample = async () =>
+      page.evaluate(() => {
+        const canvas = document.querySelector(
+          '[data-testid="hero-canvas"]'
+        ) as HTMLCanvasElement
+        const ctx = canvas.getContext('2d')
+        if (!ctx || canvas.width < 8 || canvas.height < 8) {
+          return { ready: false, opaqueBlack: 0, opaqueLit: 0, hoodieBlack: 0 }
+        }
+
+        const dpr = canvas.width / window.innerWidth
+        const SOURCE_WIDTH = 1280
+        const CROPPED_SOURCE_HEIGHT = 1813
+        const width = window.innerWidth
+        const height = window.innerHeight
+        const isMobile = width < 768
+        let scale =
+          (isMobile ? height * 1.05 : height * 0.96) / CROPPED_SOURCE_HEIGHT
+        if (isMobile) scale = Math.max(scale, (width * 0.92) / SOURCE_WIDTH)
+        const renderW = SOURCE_WIDTH * scale
+        const renderH = CROPPED_SOURCE_HEIGHT * scale
+        const offsetX = (width - renderW) / 2
+        const offsetY = height - renderH
+
+        const count = (
+          x0css: number,
+          y0css: number,
+          x1css: number,
+          y1css: number
+        ) => {
+          const x0 = Math.max(0, Math.round(x0css * dpr))
+          const y0 = Math.max(0, Math.round(y0css * dpr))
+          const x1 = Math.min(canvas.width, Math.round(x1css * dpr))
+          const y1 = Math.min(canvas.height, Math.round(y1css * dpr))
+          const w = Math.max(1, x1 - x0)
+          const h = Math.max(1, y1 - y0)
+          const data = ctx.getImageData(x0, y0, w, h).data
+          let opaqueBlack = 0
+          let opaqueLit = 0
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 24) continue
+            const r = data[i]
+            const g = data[i + 1]
+            const b = data[i + 2]
+            const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            const chroma = Math.max(r, g, b) - Math.min(r, g, b)
+            if (lum <= 14 && chroma <= 8) opaqueBlack++
+            else opaqueLit++
+          }
+          return { opaqueBlack, opaqueLit }
+        }
+
+        const aboveHair = count(
+          offsetX + renderW * 0.38,
+          offsetY + renderH * 0.2,
+          offsetX + renderW * 0.62,
+          offsetY + renderH * 0.255
+        )
+        const hair = count(
+          offsetX + renderW * 0.32,
+          offsetY + renderH * 0.28,
+          offsetX + renderW * 0.68,
+          offsetY + renderH * 0.38
+        )
+        const hoodie = count(
+          offsetX + renderW * 0.35,
+          offsetY + renderH * 0.72,
+          offsetX + renderW * 0.65,
+          offsetY + renderH * 0.88
+        )
+
+        return {
+          ready: hair.opaqueLit + hair.opaqueBlack + hoodie.opaqueLit > 0,
+          aboveHairOpaque: aboveHair.opaqueBlack + aboveHair.opaqueLit,
+          hairOpaque: hair.opaqueLit + hair.opaqueBlack,
+          hoodieBlack: hoodie.opaqueBlack,
+        }
+      })
+
+    await expect.poll(sample, { timeout: 15_000 }).toMatchObject({ ready: true })
+
+    const pixels = await sample()
+    // Sky just above the crown used to be opaque black from the union mask.
+    expect(pixels.aboveHairOpaque).toBe(0)
+    expect(pixels.hairOpaque).toBeGreaterThan(200)
+    // Hoodie is also near-black and must remain painted.
+    expect(pixels.hoodieBlack).toBeGreaterThan(200)
+  })
+
   test('plays its entrance animation and settles', async ({ page }) => {
     await bootLanding(page, { withoutFire: true })
 

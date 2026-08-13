@@ -3,6 +3,7 @@ import { Blaze } from '../canvasui/Blaze'
 import { BrandIntro, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
+import { keyHairBackdrop } from './keyHairBackdrop'
 
 // Optimized source frames (1280x2276 WebP; subject ends at Y = 1813 which is
 // the same 3060/3840 crop ratio as the original 2160x3840 masters).
@@ -326,7 +327,7 @@ export function ScrollHeroSection() {
         // Crop (0,0,1280,1813) and resize to display resolution in one step.
         // 'medium' filtering: this is only a ~0.9x downscale, so it looks
         // identical to 'high' but costs a fraction of the CPU.
-        return await createImageBitmap(
+        const bitmap = await createImageBitmap(
           blob,
           0,
           0,
@@ -334,9 +335,19 @@ export function ScrollHeroSection() {
           CROPPED_SOURCE_HEIGHT,
           { resizeWidth: bmpW, resizeHeight: bmpH, resizeQuality: 'medium' }
         )
+        try {
+          return await keyHairBackdrop(bitmap)
+        } catch {
+          return bitmap
+        }
       } catch {
         // Engines without crop/resize options still give us a usable bitmap.
-        return await createImageBitmap(blob)
+        const bitmap = await createImageBitmap(blob)
+        try {
+          return await keyHairBackdrop(bitmap)
+        } catch {
+          return bitmap
+        }
       }
     }
 

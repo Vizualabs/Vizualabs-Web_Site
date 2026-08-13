@@ -312,6 +312,76 @@
 }
 
 /* ==========================================================================
+   Strategic journey — curved, self-advancing timeline
+   ========================================================================== */
+.strategic-timeline-curve {
+  overflow: visible;
+}
+
+.strategic-timeline-path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-linecap: round;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-timeline-progress {
+  stroke: #ff5e4d;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 5px rgba(255, 94, 77, 0.5));
+  transition: stroke-dasharray 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.strategic-timeline-traveler {
+  fill: #ffffff;
+  filter: drop-shadow(0 0 5px rgba(255, 94, 77, 0.95));
+}
+
+.strategic-timeline-node::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border: 1px solid rgba(255, 94, 77, 0.18);
+  border-radius: 999px;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.strategic-timeline-node.bg-\[\#FF5E4D\]::after {
+  animation: strategic-timeline-pulse 2.4s ease-out infinite;
+}
+
+@keyframes strategic-timeline-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.82);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@media (max-width: 639px) {
+  .strategic-timeline-curve {
+    width: 3.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strategic-timeline-progress {
+    transition: none;
+  }
+
+  .strategic-timeline-traveler,
+  .strategic-timeline-node.bg-\[\#FF5E4D\]::after {
+    display: none;
+  }
+}
+
+/* ==========================================================================
    Branded intro overlay (X-style "logo opens into the app" reveal)
    No percentage, no progress bar — the mark draws, then an iris keyed to its
    centre opens the landing page behind it.
@@ -571,7 +641,7 @@
   bottom: 0.35rem;
 }
 
-/* Contact button — solid red-orange (#FF4D30) with crisp white text matching Figma. */
+/* Contact button — solid red-orange (#FF5540) with crisp white text. */
 .nav-contact-btn {
   display: inline-flex;
   align-items: center;
@@ -582,16 +652,16 @@
   font-size: 0.9rem;
   font-weight: 700;
   color: #ffffff;
-  background-color: #FF4D30;
-  box-shadow: 0 4px 20px rgba(255, 77, 48, 0.35);
+  background-color: #FF5540;
+  box-shadow: 0 4px 20px rgba(255, 85, 64, 0.35);
   text-decoration: none;
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .nav-contact-btn:hover {
   transform: translateY(-1px);
-  background-color: #FF5E4D;
-  box-shadow: 0 8px 28px rgba(255, 77, 48, 0.5);
+  background-color: #ff432d;
+  box-shadow: 0 8px 28px rgba(255, 85, 64, 0.5);
 }
 
 .nav-contact-btn:active {

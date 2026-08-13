@@ -137,7 +137,7 @@ export function Footer() {
 
         {/* Bottom Sub-footer */}
         <div className="pt-8 text-center text-xs sm:text-sm text-[#EBBBB4]/60 font-medium font-nimbus tracking-wide">
-          <p>© 2024 Vizualabs. All rights reserved. Precision in Engineering, Strategic in Vision.</p>
+          <p>© {new Date().getFullYear()} Vizualabs. All rights reserved. Precision in Engineering, Strategic in Vision.</p>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Menu, X } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -10,9 +10,40 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
+  const [visible, setVisible] = useState(true)
+  const [scrolled, setScrolled] = useState(false)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      setScrolled(currentScrollY > 20)
+
+      // Only trigger state change when scroll delta > 6px to avoid micro jitter
+      if (Math.abs(currentScrollY - lastScrollY.current) > 6) {
+        if (currentScrollY > lastScrollY.current && currentScrollY > 80 && !open) {
+          // Scrolling DOWN -> stash navbar
+          setVisible(false)
+        } else {
+          // Scrolling UP -> reveal navbar nicely
+          setVisible(true)
+        }
+        lastScrollY.current = currentScrollY
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [open])
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40">
+    <header
+      className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
+        visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+      } ${
+        scrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/50' : 'bg-transparent'
+      }`}
+    >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
         {/* Brand logo — Hanken Grotesk wordmark */}
         <a href="/" className="flex items-center gap-2" aria-label="Vizualabs home">

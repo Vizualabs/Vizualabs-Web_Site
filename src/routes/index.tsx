@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ScrollHeroSection } from '../components/hero/ScrollHeroSection'
 import { CapabilitiesSection } from '../components/layout/CapabilitiesSection'
-import { StrategicJourney } from '../components/layout/StrategicJourney'
 import { CtaSection } from '../components/layout/CtaSection'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
@@ -22,10 +21,6 @@ function Home() {
           and paint stay off the initial-load critical path. */}
       <div className="defer-paint">
         <CapabilitiesSection />
-      </div>
-
-      <div className="defer-paint">
-        <StrategicJourney />
       </div>
 
       <div className="defer-paint">

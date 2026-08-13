@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ArrowRight, Sparkles, Calendar, X, CheckCircle2 } from 'lucide-react'
+import { ShimmerButton } from '../ui/shimmer-button'
 
 export function CtaSection() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -29,14 +30,17 @@ export function CtaSection() {
           Join the enterprise leaders who choose precision over guesswork. Let's engineer your next digital success together.
         </p>
 
-        {/* Call to Action Button */}
-        <div className="pt-6">
-          <button
+        {/* Call to Action Button with Magic UI Shimmer Effect */}
+        <div className="pt-6 flex justify-center">
+          <ShimmerButton
             onClick={() => setModalOpen(true)}
-            className="group relative inline-flex items-center justify-center rounded-full bg-[#FF5540] px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-[#FFFFFF] shadow-lg shadow-[#FF5540]/30 transition-all duration-300 hover:bg-[#ff422a] hover:shadow-xl hover:shadow-[#FF5540]/40 hover:scale-[1.02] active:scale-95 cursor-pointer"
+            background="#FF5540"
+            shimmerColor="#FFD700"
+            shimmerSize="0.15em"
+            shimmerDuration="2.5s"
           >
             <span>Book a Strategy Session</span>
-          </button>
+          </ShimmerButton>
         </div>
       </div>
 

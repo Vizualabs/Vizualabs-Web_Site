@@ -34,7 +34,7 @@ export function Footer() {
   const [chatOpen, setChatOpen] = useState(false)
 
   return (
-    <footer className="relative w-full bg-[#080808] border-t border-white/10 text-gray-300 font-sans selection:bg-[#FF5E4D] selection:text-white pt-16 pb-12 overflow-hidden">
+    <footer className="relative w-full bg-[#080808] border-t border-white/10 text-[#EBBBB4] font-sans selection:bg-[#FF5E4D] selection:text-white pt-16 pb-12 overflow-hidden">
       {/* Background radial glow effect */}
       <div className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[#FF5E4D]/5 blur-[120px]" />
       <div className="pointer-events-none absolute top-0 left-1/4 h-64 w-64 rounded-full bg-[#FF5E4D]/5 blur-[100px]" />
@@ -47,90 +47,39 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-6">
             <div>
               <a href="/" className="inline-block">
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                <h2 className="text-3xl sm:text-4xl font-bold font-hanken tracking-tight text-[#E5E2E1]">
                   Vizualabs
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#FF5E4D] shadow-[0_0_10px_#FF5E4D]" />
                 </h2>
               </a>
-              <p className="mt-4 text-base sm:text-lg text-gray-400 font-normal max-w-md leading-relaxed">
-                Precision in Engineering, Strategic in Vision.
+              <p className="mt-4 text-base sm:text-lg text-[#EBBBB4] font-normal font-nimbus max-w-md leading-relaxed">
+                Precision in Engineering, Strategic in<br />
+                Vision.
               </p>
-            </div>
-
-            {/* Social & Quick Contact Badges matching Corner Msg Icon style */}
-            <div className="space-y-3 pt-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Connect With Us
-              </span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setChatOpen(true)}
-                  aria-label="Open Chat"
-                  className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
-                >
-                  <MessageSquare className="h-5 w-5 fill-white text-white transition-transform group-hover:rotate-12" />
-                </button>
-                <a
-                  href="mailto:contact@vizualabs.com"
-                  aria-label="Email Us"
-                  className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
-                >
-                  <Mail className="h-5 w-5 fill-white text-[#FF5E4D] group-hover:text-white transition-colors" />
-                </a>
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="GitHub"
-                  className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
-                >
-                  <GithubIcon className="h-5 w-5 text-white transition-colors" />
-                </a>
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="LinkedIn"
-                  className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
-                >
-                  <LinkedinIcon className="h-5 w-5 text-white transition-colors" />
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Twitter"
-                  className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF5E4D] text-white shadow-md shadow-[#FF5E4D]/25 transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#ff4634]"
-                >
-                  <TwitterIcon className="h-5 w-5 text-white transition-colors" />
-                </a>
-              </div>
             </div>
           </div>
 
           {/* Column 2: SOLUTIONS */}
           <div className="space-y-4">
-            <h3 className="text-xs sm:text-sm font-bold tracking-wider text-[#FF5E4D] uppercase flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5E4D]" />
+            <h3 className="text-xs sm:text-sm font-normal font-geist tracking-wider text-[#FF5540] uppercase">
               SOLUTIONS
             </h3>
-            <ul className="space-y-3 text-sm sm:text-base font-normal">
+            <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
-                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>Custom Software</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
               <li>
-                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>Product Development</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
               <li>
-                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>AI Solutions</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
             </ul>
@@ -138,27 +87,26 @@ export function Footer() {
 
           {/* Column 3: COMPANY */}
           <div className="space-y-4">
-            <h3 className="text-xs sm:text-sm font-bold tracking-wider text-[#FF5E4D] uppercase flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5E4D]" />
+            <h3 className="text-xs sm:text-sm font-normal font-geist tracking-wider text-[#FF5540] uppercase">
               COMPANY
             </h3>
-            <ul className="space-y-3 text-sm sm:text-base font-normal">
+            <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
-                <a href="#about" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#about" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>About Us</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
               <li>
-                <a href="#services" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>Case Studies</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
               <li>
-                <a href="#contact" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>Contact</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
             </ul>
@@ -166,21 +114,20 @@ export function Footer() {
 
           {/* Column 4: LEGAL */}
           <div className="space-y-4">
-            <h3 className="text-xs sm:text-sm font-bold tracking-wider text-[#FF5E4D] uppercase flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5E4D]" />
+            <h3 className="text-xs sm:text-sm font-normal font-geist tracking-wider text-[#FF5540] uppercase">
               LEGAL
             </h3>
-            <ul className="space-y-3 text-sm sm:text-base font-normal">
+            <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
-                <a href="#privacy" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#privacy" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>Privacy Policy</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
               <li>
-                <a href="#terms" className="hover:text-white transition-colors duration-200 text-gray-300 flex items-center gap-1 group">
+                <a href="#terms" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
                   <span>Terms of Service</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5E4D]" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
                 </a>
               </li>
             </ul>
@@ -189,7 +136,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Sub-footer */}
-        <div className="pt-8 text-center text-xs sm:text-sm text-gray-400 font-medium tracking-wide">
+        <div className="pt-8 text-center text-xs sm:text-sm text-[#EBBBB4]/60 font-medium font-nimbus tracking-wide">
           <p>© 2024 Vizualabs. All rights reserved. Precision in Engineering, Strategic in Vision.</p>
         </div>
       </div>

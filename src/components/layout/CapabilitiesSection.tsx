@@ -93,68 +93,89 @@ const capabilities: CapabilityCard[] = [
 ]
 
 export function CapabilitiesSection() {
-  const [showAll, setShowAll] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const displayedCapabilities = showAll ? capabilities : capabilities.slice(0, 3)
+  const handleNextCardClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current
+      const firstCard = container.querySelector<HTMLElement>('[data-capability-card]')
+      const step = firstCard ? firstCard.offsetWidth + 24 : 400
+
+      const maxScroll = container.scrollWidth - container.clientWidth
+      if (container.scrollLeft >= maxScroll - 20) {
+        // Loop back to start smoothly
+        container.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        // Scroll right by ONE card at a time
+        container.scrollBy({ left: step, behavior: 'smooth' })
+      }
+    }
+  }
 
   return (
-    <section id="solutions" className="relative z-30 w-full bg-[#080808] py-16 sm:py-20 px-6 sm:px-12 text-white border-t border-white/10 selection:bg-[#FF5E4D] selection:text-white overflow-hidden">
+    <section id="solutions" className="relative z-30 w-full bg-[#080808] py-20 sm:py-24 px-6 sm:px-12 text-white border-t border-white/10 selection:bg-[#FF5E4D] selection:text-white overflow-hidden">
       {/* Background subtle glow effect */}
       <div className="pointer-events-none absolute top-1/2 right-0 h-96 w-96 rounded-full bg-[#FF5E4D]/5 blur-[140px]" />
 
-      <div className="relative mx-auto max-w-7xl space-y-10 sm:space-y-12">
+      <div className="relative mx-auto max-w-7xl space-y-12 sm:space-y-14">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
-          <div className="space-y-3 max-w-2xl">
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+          <div className="space-y-3.5 max-w-5xl">
+            <h2 className="text-4xl sm:text-5xl lg:text-[3.6rem] font-normal tracking-tight text-[#E5E2E1] leading-tight whitespace-normal md:whitespace-nowrap">
               Core Strategic Capabilities
             </h2>
-            <p className="text-base sm:text-lg text-gray-400 font-normal leading-relaxed">
+            <p className="text-lg sm:text-xl text-[#E5E2E1]/60 font-normal leading-relaxed max-w-3xl">
               We engineer precise solutions for the enterprise void, transforming complex challenges into competitive advantages.
             </p>
           </div>
 
-          {/* Action Header Link */}
+          {/* Action Header Link — font-normal (non-bold) */}
           <button
-            onClick={() => setShowAll(!showAll)}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold tracking-wider text-[#FF5E4D] uppercase transition-all duration-300 hover:gap-3 hover:text-[#ff4634] shrink-0 self-start md:self-end group cursor-pointer"
+            onClick={handleNextCardClick}
+            className="inline-flex items-center gap-2 text-sm sm:text-base font-normal tracking-wider text-[#FF5E4D] uppercase transition-all duration-300 hover:gap-3 hover:text-[#ff4634] shrink-0 self-start md:self-end group cursor-pointer"
           >
-            <span>{showAll ? 'SHOW LESS' : 'VIEW ALL SERVICES'}</span>
+            <span>VIEW ALL SERVICES</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
 
-        {/* 3-Column Grid Cards Container (matching reference image) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {displayedCapabilities.map((item) => {
+        {/* Horizontal Scrolling Cards Container — advances one-by-one */}
+        <div
+          ref={scrollContainerRef}
+          className="flex space-x-6 sm:space-x-8 overflow-x-auto scroll-smooth pb-8 pt-2 scrollbar-none snap-x snap-mandatory focus:outline-none"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {capabilities.map((item) => {
             const IconComp = item.icon
             return (
               <div
                 key={item.id}
-                className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-[#121212] p-7 sm:p-9 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#FF5E4D]/40 hover:bg-[#161616] hover:shadow-2xl hover:shadow-[#FF5E4D]/10"
+                data-capability-card
+                className="group relative flex flex-col justify-between w-[320px] sm:w-[380px] lg:w-[400px] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#121212] p-8 sm:p-10 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#FF5E4D]/40 hover:bg-[#161616] hover:shadow-2xl hover:shadow-[#FF5E4D]/10"
               >
                 <div>
                   {/* Top Icon Badge */}
-                  <div className="mb-8 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#1c1c1c] text-[#FF5E4D] shadow-inner transition-colors duration-300 group-hover:border-[#FF5E4D]/40 group-hover:bg-[#FF5E4D]/10">
-                    <IconComp className="h-6 w-6 text-[#FF5E4D]" />
+                  <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-[#1c1c1c] text-[#FF5E4D] shadow-inner transition-colors duration-300 group-hover:border-[#FF5E4D]/40 group-hover:bg-[#FF5E4D]/10">
+                    <IconComp className="h-7 w-7 text-[#FF5E4D]" />
                   </div>
 
                   {/* Title */}
-                  <h3 className="mb-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                  <h3 className="mb-4 text-2xl sm:text-3xl lg:text-[2rem] font-normal tracking-tight text-[#E5E2E1] leading-tight">
                     {item.title}
                     {item.titleLine2 && <span className="block">{item.titleLine2}</span>}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-sm sm:text-base text-gray-400 font-normal leading-relaxed mb-8">
+                  <p className="text-base sm:text-[1.05rem] text-[#E5E2E1]/60 font-normal leading-relaxed mb-8">
                     {item.description}
                   </p>
                 </div>
 
                 {/* Footer Tagline / Number */}
                 <div className="pt-6 border-t border-white/10 flex items-center gap-2">
-                  <span className="text-sm font-bold tracking-wide text-[#FF5E4D]">
+                  <span className="text-sm sm:text-base font-normal tracking-wide text-[#FF5E4D]">
                     {item.number} — {item.category}
                   </span>
                 </div>

@@ -31,7 +31,7 @@ export function HeroTitle({ start }: { start: boolean }) {
     <div
       data-testid="hero-title"
       aria-hidden={!start}
-      className="pointer-events-none absolute inset-x-0 top-[18vh] flex flex-col items-center px-4 text-center sm:top-[23vh] z-0 overflow-hidden"
+      className="pointer-events-none absolute inset-x-0 top-[18vh] flex flex-col items-center px-4 text-center sm:top-[23vh] overflow-hidden"
     >
       <h1 className="hero-title-type font-hanken m-0 w-full font-black leading-[0.92] tracking-[-0.02em]">
         <span className="hero-title-line block overflow-hidden mt-0">
@@ -52,8 +52,10 @@ export function HeroTitle({ start }: { start: boolean }) {
               <span className="hero-marquee-group">
                 <MarqueePhrase start={start} />
                 <MarqueePhrase start={start} hidden />
+                <MarqueePhrase start={start} hidden />
               </span>
               <span className="hero-marquee-group" aria-hidden="true">
+                <MarqueePhrase start={start} hidden />
                 <MarqueePhrase start={start} hidden />
                 <MarqueePhrase start={start} hidden />
               </span>

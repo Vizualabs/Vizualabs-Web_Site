@@ -215,7 +215,7 @@ test.describe('hero heading', () => {
 
     const title = page.getByTestId('hero-title')
     await expect(title.locator('.hero-title-accent').first()).toHaveText('Digital')
-    await expect(title.locator('.hero-title-accent')).toHaveCount(8)
+    await expect(title.locator('.hero-title-accent')).toHaveCount(12)
 
     // Exactly two lines — a third would fall entirely behind the subject.
     await expect(title.locator('.hero-title-line')).toHaveCount(2)

@@ -285,8 +285,8 @@ test.describe('hero heading', () => {
       const width = window.innerWidth
       const height = window.innerHeight
       const isMobile = width < 768
-      let scale = (isMobile ? height * 1.05 : height * 0.96) / CROPPED_SOURCE_HEIGHT
-      if (isMobile) scale = Math.max(scale, (width * 0.92) / SOURCE_WIDTH)
+      let scale = (isMobile ? height * 0.7 : height * 0.86) / CROPPED_SOURCE_HEIGHT
+      if (isMobile) scale = Math.max(scale, (width * 0.84) / SOURCE_WIDTH)
 
       return {
         image: cs.maskImage || cs.webkitMaskImage,
@@ -327,8 +327,8 @@ test.describe('hero heading', () => {
         const height = window.innerHeight
         const isMobile = width < 768
         let scale =
-          (isMobile ? height * 1.05 : height * 0.96) / CROPPED_SOURCE_HEIGHT
-        if (isMobile) scale = Math.max(scale, (width * 0.92) / SOURCE_WIDTH)
+          (isMobile ? height * 0.7 : height * 0.86) / CROPPED_SOURCE_HEIGHT
+        if (isMobile) scale = Math.max(scale, (width * 0.84) / SOURCE_WIDTH)
         const renderW = SOURCE_WIDTH * scale
         const renderH = CROPPED_SOURCE_HEIGHT * scale
         const offsetX = (width - renderW) / 2

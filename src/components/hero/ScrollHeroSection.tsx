@@ -144,8 +144,10 @@ export function ScrollHeroSection() {
     const height = window.innerHeight
     const isMobile = width < 768
 
-    // Scale image (86% desktop height / 92% mobile height)
-    const targetRenderHeight = isMobile ? height * 0.92 : height * 0.86
+    // Desktop anchors the subject near full viewport height so the heading sits
+    // behind it. Mobile keeps the subject noticeably smaller so the heading and
+    // stats stay legible instead of overflowing the screen.
+    const targetRenderHeight = isMobile ? height * 0.7 : height * 0.86
     let scale = targetRenderHeight / bmpH
 
     // Ensure minimum scale on very narrow screens so subject doesn't shrink too small

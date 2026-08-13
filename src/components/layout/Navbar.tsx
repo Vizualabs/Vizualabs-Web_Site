@@ -41,7 +41,7 @@ export function Navbar() {
       className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
         visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
       } ${
-        scrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/50' : 'bg-transparent'
+        scrolled ? 'bg-black/80 backdrop-blur-xl shadow-lg shadow-black/50' : 'bg-transparent'
       }`}
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
@@ -82,7 +82,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-black/90 px-5 pb-8 pt-2 backdrop-blur-xl border-b border-white/10">
+        <div className="md:hidden bg-black/90 px-5 pb-8 pt-2 backdrop-blur-xl">
           <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => (
               <a

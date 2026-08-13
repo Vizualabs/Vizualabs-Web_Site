@@ -23,7 +23,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Vizualabs — Visualise Your Digital Success',
+        title: 'Vizualabs — Visualize Your Digital Success',
       },
     ],
     links: [

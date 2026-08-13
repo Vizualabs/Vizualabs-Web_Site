@@ -39,7 +39,7 @@ export function HeroTitle({ start }: { start: boolean }) {
             className={`hero-title-inner inline-block text-white text-[1.15em] ${start ? 'is-in' : ''}`}
             style={{ animationDelay: '0ms' }}
           >
-            Vizualise
+            Visualize
           </span>
         </span>
 

@@ -348,7 +348,7 @@
   transform: scale(0.8);
 }
 
-.strategic-timeline-node.bg-\[\#FF5E4D\]::after {
+.strategic-timeline-node-active::after {
   animation: strategic-timeline-pulse 2.4s ease-out infinite;
 }
 
@@ -376,7 +376,7 @@
   }
 
   .strategic-timeline-traveler,
-  .strategic-timeline-node.bg-\[\#FF5E4D\]::after {
+  .strategic-timeline-node-active::after {
     display: none;
   }
 }

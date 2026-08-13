@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Search,
   Wrench,
   Rocket,
   TrendingUp,
 } from 'lucide-react'
+import { AnimatedList } from '../ui/animated-list'
 
 interface JourneyStep {
   id: number
@@ -25,7 +26,14 @@ const steps: JourneyStep[] = [
       { label: 'System Health', value: '99.8%' },
       { label: 'Debt Reduced', value: '45%' },
     ],
-    highlights: ['Deep Codebase Analysis', 'Infrastructure Bottleneck Detection', 'Security & Compliance Scan'],
+    highlights: [
+      'Deep Codebase Analysis',
+      'Infrastructure Bottleneck Detection',
+      'Security & Compliance Scan',
+      'Performance Benchmarking',
+      'Technical Debt Assessment',
+      'Roadmap Prioritization',
+    ],
   },
   {
     id: 2,
@@ -36,7 +44,14 @@ const steps: JourneyStep[] = [
       { label: 'Code Coverage', value: '98.5%' },
       { label: 'Sprint Speed', value: '2.4x' },
     ],
-    highlights: ['Modular System Architecture', 'Strict Type-Safe Workflows', 'CI/CD Automated Pipelines'],
+    highlights: [
+      'Modular System Architecture',
+      'Strict Type-Safe Workflows',
+      'CI/CD Automated Pipelines',
+      'Test-Driven Development',
+      'Code Review Gates',
+      'Performance Profiling',
+    ],
   },
   {
     id: 3,
@@ -47,7 +62,14 @@ const steps: JourneyStep[] = [
       { label: 'Uptime', value: '99.99%' },
       { label: 'Deploy Latency', value: '< 45ms' },
     ],
-    highlights: ['Blue-Green Releases', 'Real-Time Telemetry', 'Automated Fallback Guards'],
+    highlights: [
+      'Blue-Green Releases',
+      'Real-Time Telemetry',
+      'Automated Fallback Guards',
+      'Canary Rollouts',
+      'Synthetic Monitoring',
+      'Instant Rollback',
+    ],
   },
   {
     id: 4,
@@ -58,7 +80,14 @@ const steps: JourneyStep[] = [
       { label: 'Scale Factor', value: '10x' },
       { label: 'ROI Growth', value: '+320%' },
     ],
-    highlights: ['AI-Driven Analytics', 'Elastic Microservices', 'Proactive Threat Shielding'],
+    highlights: [
+      'AI-Driven Analytics',
+      'Elastic Microservices',
+      'Proactive Threat Shielding',
+      'Predictive Scaling',
+      'Global Edge Caching',
+      'Continuous A/B Testing',
+    ],
   },
 ]
 
@@ -66,18 +95,6 @@ const timelinePath = 'M 32 28 C 54 68 10 108 32 148 C 54 188 10 228 32 268 C 54 
 
 export function StrategicJourney() {
   const [activeStep, setActiveStep] = useState(1)
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return
-    }
-
-    const cycle = window.setInterval(() => {
-      setActiveStep((currentStep) => (currentStep === steps.length ? 1 : currentStep + 1))
-    }, 3800)
-
-    return () => window.clearInterval(cycle)
-  }, [])
 
   return (
     <section className="relative z-30 w-full bg-[#050505] py-20 sm:py-28 px-6 sm:px-12 border-t border-white/10 text-white selection:bg-[#FF5E4D] selection:text-white overflow-hidden">
@@ -135,7 +152,7 @@ export function StrategicJourney() {
                   {/* Step Icon Circle Badge */}
                   <div
                     className={`strategic-timeline-node relative z-10 mt-1 flex h-14 w-14 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${isActive
-                      ? 'bg-[#FF5E4D] text-white shadow-[0_0_0_8px_rgba(255,94,77,0.08),0_0_28px_rgba(255,94,77,0.35)]'
+                      ? 'strategic-timeline-node-active bg-[#FF5E4D] text-white shadow-[0_0_0_8px_rgba(255,94,77,0.08),0_0_28px_rgba(255,94,77,0.35)]'
                       : 'border border-white/15 bg-[#171717] text-gray-500 group-hover:border-[#FF5E4D]/50 group-hover:text-gray-300'
                       }`}
                   >
@@ -165,6 +182,25 @@ export function StrategicJourney() {
                         </span>
                       ))}
                     </div>
+
+                    {/* Animated highlights: each item springs in sequence when the
+                        step becomes active. Remounts per step so the stagger
+                        replays on every activation. */}
+                    {isActive && (
+                      <AnimatedList delay={400} className="pt-2">
+                        {step.highlights.map((highlight) => (
+                          <div
+                            key={highlight}
+                            className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5"
+                          >
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF5E4D]" />
+                            <span className="text-sm font-medium text-gray-300">
+                              {highlight}
+                            </span>
+                          </div>
+                        ))}
+                      </AnimatedList>
+                    )}
                   </div>
                 </button>
               )

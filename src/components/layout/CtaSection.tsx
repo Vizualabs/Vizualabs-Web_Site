@@ -17,30 +17,25 @@ export function CtaSection() {
   }
 
   return (
-    <section className="relative z-30 overflow-hidden bg-[#0d0d0d] py-28 sm:py-36 px-6 sm:px-12 text-center border-t border-white/10 selection:bg-[#FF5E4D] selection:text-white">
-      {/* Ambient background glow & grid elements */}
-      <div className="pointer-events-none absolute inset-0 bg-radial-glow opacity-60" />
-      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[380px] w-[500px] sm:w-[700px] rounded-full bg-[#FF5E4D]/10 blur-[130px]" />
-      
-      <div className="relative mx-auto max-w-4xl space-y-8">
+    <section className="relative z-30 overflow-hidden bg-[#2A2A2A] py-24 sm:py-32 px-6 sm:px-12 text-center border-t border-white/10 selection:bg-[#FF5E4D] selection:text-white">
+      <div className="relative mx-auto max-w-4xl space-y-6">
         {/* Main Title */}
-        <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+        <h2 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-normal tracking-tight text-[#E5E2E1] leading-tight">
           Ready to Accelerate Your Journey?
         </h2>
 
         {/* Sub-text */}
-        <p className="mx-auto max-w-2xl text-base sm:text-xl text-gray-400 font-normal leading-relaxed">
+        <p className="mx-auto max-w-2xl text-base sm:text-lg text-[#E5E2E1]/60 font-normal leading-relaxed">
           Join the enterprise leaders who choose precision over guesswork. Let's engineer your next digital success together.
         </p>
 
         {/* Call to Action Button */}
-        <div className="pt-4">
+        <div className="pt-6">
           <button
             onClick={() => setModalOpen(true)}
-            className="group relative inline-flex items-center gap-3 rounded-full bg-[#FF5E4D] px-8 sm:px-10 py-4 sm:py-4.5 text-base sm:text-lg font-semibold text-white shadow-[0_0_30px_rgba(255,94,77,0.35)] transition-all duration-300 hover:bg-[#ff4836] hover:shadow-[0_0_45px_rgba(255,94,77,0.55)] hover:scale-105 active:scale-95 cursor-pointer"
+            className="group relative inline-flex items-center justify-center rounded-full bg-[#FF5540] px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-[#FFFFFF] shadow-lg shadow-[#FF5540]/30 transition-all duration-300 hover:bg-[#ff422a] hover:shadow-xl hover:shadow-[#FF5540]/40 hover:scale-[1.02] active:scale-95 cursor-pointer"
           >
             <span>Book a Strategy Session</span>
-            <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
           </button>
         </div>
       </div>

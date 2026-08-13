@@ -79,7 +79,7 @@ export function StrategicJourney() {
       <div className="relative mx-auto max-w-3xl">
         {/* Header section matching exact reference image */}
         <div className="space-y-3 mb-12 sm:mb-16">
-          <span className="text-xs sm:text-sm font-bold tracking-[0.2em] text-[#FF5E4D] uppercase block">
+          <span className="text-xs sm:text-sm font-normal tracking-[0.2em] text-[#FF5E4D] uppercase block">
             THE STRATEGIC JOURNEY
           </span>
           <h2 className="text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-white leading-tight">
@@ -106,19 +106,17 @@ export function StrategicJourney() {
                 {/* Vertical connecting line */}
                 {!isLast && (
                   <div
-                    className={`absolute left-5 top-12 bottom-0 w-[2px] -mb-10 transition-colors duration-300 ${
-                      isActive ? 'bg-[#FF5E4D]' : 'bg-white/10'
-                    }`}
+                    className={`absolute left-5 top-12 bottom-0 w-[2px] -mb-10 transition-colors duration-300 ${isActive ? 'bg-[#FF5E4D]' : 'bg-white/10'
+                      }`}
                   />
                 )}
 
                 {/* Step Icon Circle Badge */}
                 <div
-                  className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-                    isActive
+                  className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isActive
                       ? 'bg-[#FF5E4D] text-white shadow-lg shadow-[#FF5E4D]/40 scale-105'
                       : 'bg-[#1c1c1c] border border-white/10 text-gray-500 group-hover:border-[#FF5E4D]/40 group-hover:text-gray-300'
-                  }`}
+                    }`}
                 >
                   <IconComponent className="h-5 w-5" />
                 </div>
@@ -126,16 +124,14 @@ export function StrategicJourney() {
                 {/* Step Content */}
                 <div className="space-y-1.5 pt-1">
                   <h3
-                    className={`text-xl sm:text-2xl font-bold transition-colors ${
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-200'
-                    }`}
+                    className={`text-xl sm:text-2xl font-bold transition-colors ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-200'
+                      }`}
                   >
                     {step.title}
                   </h3>
                   <p
-                    className={`text-sm sm:text-base font-normal leading-relaxed max-w-xl transition-colors ${
-                      isActive ? 'text-gray-300' : 'text-gray-500 group-hover:text-gray-400'
-                    }`}
+                    className={`text-sm sm:text-base font-normal leading-relaxed max-w-xl transition-colors ${isActive ? 'text-gray-300' : 'text-gray-500 group-hover:text-gray-400'
+                      }`}
                   >
                     {step.description}
                   </p>

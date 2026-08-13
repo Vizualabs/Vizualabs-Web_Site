@@ -301,8 +301,8 @@
     justify-content: center;
   }
 
-  .hero-marquee-group + .hero-marquee-group,
-  .hero-marquee-phrase + .hero-marquee-phrase {
+  .hero-marquee-group+.hero-marquee-group,
+  .hero-marquee-phrase+.hero-marquee-phrase {
     display: none;
   }
 

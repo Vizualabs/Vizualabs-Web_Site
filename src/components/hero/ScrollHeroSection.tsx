@@ -683,10 +683,10 @@ export function ScrollHeroSection() {
 
               {/* Top Center Pill Badge — sits below the fixed navbar (h-20) so it
                   no longer collides with the nav links / logo */}
-              <div className="absolute top-24 sm:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-lg shadow-[#FF5E4D]/10">
-                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_8px_#FF5E4D]" />
-                  <span className="text-[9px] sm:text-xs font-bold tracking-[0.14em] sm:tracking-[0.25em] text-[#FF5E4D] uppercase">
+              <div className="absolute top-26 sm:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-md shadow-[#FF5E4D]/10">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_6px_#FF5E4D]" />
+                  <span className="text-[8.5px] sm:text-[11px] font-semibold tracking-[0.14em] sm:tracking-[0.2em] text-[#FF5E4D] uppercase">
                     ENGINEERING STRATEGIC MOMENTUM
                   </span>
                 </div>

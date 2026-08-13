@@ -637,7 +637,7 @@ export function ScrollHeroSection() {
       ref={containerRef}
       data-testid="hero-scroll-container"
       className="relative w-full bg-black"
-      style={{ height: '350vh' }}
+      style={{ height: '105vh' }}
     >
       {/* Sticky Hero Container pinned during scroll sequence */}
       <div

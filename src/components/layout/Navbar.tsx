@@ -17,19 +17,16 @@ export function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      setScrolled(currentScrollY > 20)
+      setScrolled(currentScrollY > 10)
 
-      // Only trigger state change when scroll delta > 6px to avoid micro jitter
-      if (Math.abs(currentScrollY - lastScrollY.current) > 6) {
-        if (currentScrollY > lastScrollY.current && currentScrollY > 80 && !open) {
-          // Scrolling DOWN -> stash navbar
-          setVisible(false)
-        } else {
-          // Scrolling UP -> reveal navbar nicely
-          setVisible(true)
-        }
-        lastScrollY.current = currentScrollY
+      if (currentScrollY > lastScrollY.current && currentScrollY > 0 && !open) {
+        // Scrolling DOWN -> stash navbar immediately
+        setVisible(false)
+      } else if (currentScrollY < lastScrollY.current || currentScrollY <= 0) {
+        // Scrolling UP or at top -> reveal navbar
+        setVisible(true)
       }
+      lastScrollY.current = currentScrollY
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })

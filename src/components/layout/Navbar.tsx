@@ -9,8 +9,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'About Us', href: '/#about' },
   { label: 'Services', href: '/services', isRoute: true },
+  { label: 'About Us', href: '/#about' },
   { label: 'Process', href: '/#process' },
   { label: 'Case Studies', href: '/#cases' },
 ]
@@ -19,10 +19,46 @@ export function Navbar() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(true)
   const [scrolled, setScrolled] = useState(false)
+  const [introLoading, setIntroLoading] = useState(true)
   const lastScrollY = useRef(0)
 
   const routerState = useRouterState()
   const currentPath = routerState?.location?.pathname ?? ''
+
+  // Listen to branded intro loading state
+  useEffect(() => {
+    // If not on home page, no intro loading exists
+    if (currentPath !== '/' && currentPath !== '') {
+      setIntroLoading(false)
+      return
+    }
+
+    const handleIntroState = (e: any) => {
+      setIntroLoading(Boolean(e.detail?.loading))
+    }
+
+    window.addEventListener('intro-loading-state', handleIntroState)
+
+    // Check if initial document attribute is set
+    if (typeof document !== 'undefined') {
+      if (!document.documentElement.hasAttribute('data-intro-loading')) {
+        // If attribute not set, assume loading is done
+        const timer = setTimeout(() => {
+          if (!document.documentElement.hasAttribute('data-intro-loading')) {
+            setIntroLoading(false)
+          }
+        }, 150)
+        return () => {
+          clearTimeout(timer)
+          window.removeEventListener('intro-loading-state', handleIntroState)
+        }
+      }
+    }
+
+    return () => {
+      window.removeEventListener('intro-loading-state', handleIntroState)
+    }
+  }, [currentPath])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,14 +87,17 @@ export function Navbar() {
       }
     }
 
+    // Run on initial mount
+    handleScroll()
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [open])
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
-        visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+      className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
+        visible && !introLoading ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
       } ${
         scrolled ? 'bg-black/80 backdrop-blur-xl shadow-lg shadow-black/50' : 'bg-transparent'
       }`}

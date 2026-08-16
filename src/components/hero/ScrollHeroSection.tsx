@@ -70,6 +70,17 @@ export function ScrollHeroSection() {
 
   // Scroll stays locked while the plane is still opaque.
   const isLoading = phase === 'intro' || phase === 'warmup'
+
+  // Communicate loading state so the navbar is completely hidden during intro loading
+  useEffect(() => {
+    if (isLoading) {
+      document.documentElement.setAttribute('data-intro-loading', 'true')
+      window.dispatchEvent(new CustomEvent('intro-loading-state', { detail: { loading: true } }))
+    } else {
+      document.documentElement.removeAttribute('data-intro-loading')
+      window.dispatchEvent(new CustomEvent('intro-loading-state', { detail: { loading: false } }))
+    }
+  }, [isLoading])
   // The canvas lives inside Blaze, so it only exists from 'warmup' onward.
   const fireMounted = phase !== 'intro'
 

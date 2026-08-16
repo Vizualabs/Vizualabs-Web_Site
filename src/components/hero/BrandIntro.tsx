@@ -17,7 +17,7 @@ export function BrandIntro({ phase }: { phase: IntroPhase }) {
 
   return (
     <div
-      className="absolute inset-0 z-50 overflow-hidden"
+      className="fixed inset-0 z-[100] overflow-hidden"
       data-testid="brand-intro"
       data-phase={phase}
       role="status"

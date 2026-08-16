@@ -10,7 +10,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
-  { label: 'About Us', href: '/#about' },
+  { label: 'About Us', href: '/about', isRoute: true },
   { label: 'Process', href: '/#process' },
   { label: 'Case Studies', href: '/#cases' },
 ]
@@ -96,11 +96,9 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
-        visible && !introLoading ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
-      } ${
-        scrolled ? 'bg-black/80 backdrop-blur-xl shadow-lg shadow-black/50' : 'bg-transparent'
-      }`}
+      className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${visible && !introLoading ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        } ${scrolled ? 'bg-black/80 backdrop-blur-xl shadow-lg shadow-black/50' : 'bg-transparent'
+        }`}
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
         {/* Brand logo — Hanken Grotesk wordmark */}
@@ -114,7 +112,9 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-8">
           {NAV_ITEMS.map((item) => {
             const isActive = item.isRoute
-              ? currentPath === item.href || (item.href === '/services' && currentPath.startsWith('/service'))
+              ? currentPath === item.href ||
+              (item.href === '/services' && currentPath.startsWith('/service')) ||
+              (item.href === '/about' && currentPath.startsWith('/about'))
               : false
 
             if (item.isRoute) {
@@ -166,7 +166,9 @@ export function Navbar() {
           <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => {
               const isActive = item.isRoute
-                ? currentPath === item.href || (item.href === '/services' && currentPath.startsWith('/service'))
+                ? currentPath === item.href ||
+                (item.href === '/services' && currentPath.startsWith('/service')) ||
+                (item.href === '/about' && currentPath.startsWith('/about'))
                 : false
 
               if (item.isRoute) {

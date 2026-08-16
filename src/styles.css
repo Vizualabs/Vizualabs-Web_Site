@@ -567,6 +567,7 @@
 
 /* Honour reduced-motion: keep the brand beat, drop the movement. */
 @media (prefers-reduced-motion: reduce) {
+
   .brand-intro-v,
   .brand-intro-letter,
   .brand-intro-dot,
@@ -679,6 +680,7 @@ html[data-intro-loading="true"] header {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .nav-link::after,
   .nav-contact-btn {
     transition: none;
@@ -696,14 +698,17 @@ html[data-intro-loading="true"] header {
   0% {
     transform: translateZ(0) rotate(0);
   }
+
   15%,
   35% {
     transform: translateZ(0) rotate(90deg);
   }
+
   65%,
   85% {
     transform: translateZ(0) rotate(270deg);
   }
+
   100% {
     transform: translateZ(0) rotate(360deg);
   }

@@ -174,11 +174,11 @@ export function StrategicJourney() {
     const elapsed = performance.now() - touchStartTime.current
     const velocity = Math.abs(deltaY) / Math.max(elapsed, 1)
 
-    // Magnetic trigger threshold (flick velocity > 0.35 or drag > 35px)
+    // Magnetic trigger threshold (infinite loop 1 -> 9 -> 1)
     if (deltaY < -35 || (deltaY < -15 && velocity > 0.35)) {
-      snapToStep(activeIndex < steps.length - 1 ? activeIndex + 1 : 0)
+      snapToStep((activeIndex + 1) % steps.length)
     } else if (deltaY > 35 || (deltaY > 15 && velocity > 0.35)) {
-      snapToStep(activeIndex > 0 ? activeIndex - 1 : steps.length - 1)
+      snapToStep((activeIndex - 1 + steps.length) % steps.length)
     } else {
       // Spring back to current step
       setDragOffset(0)

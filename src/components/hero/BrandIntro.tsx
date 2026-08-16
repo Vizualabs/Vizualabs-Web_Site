@@ -76,12 +76,7 @@ export function BrandIntro({ phase }: { phase: IntroPhase }) {
                 {letter}
               </span>
             ))}
-            <span className="brand-intro-dot ml-2 h-2 w-2 rounded-full bg-[#FF5E4D] sm:ml-2.5 sm:h-2.5 sm:w-2.5" />
           </div>
-
-          <p className="brand-intro-tagline mt-4 text-center text-[9px] font-semibold uppercase tracking-[0.42em] text-gray-500 sm:text-[11px]">
-            Precision in Engineering
-          </p>
         </div>
       </div>
     </div>

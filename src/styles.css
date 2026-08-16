@@ -592,11 +592,15 @@
    Navbar — gray resting state, orange on hover, animated underline
    ========================================================================== */
 
-/* Completely hide navbar during intro loading screen */
-html[data-intro-loading="true"] header {
+/* Completely hide navbar & fixed widgets during intro loading screen */
+html[data-intro-loading="true"] header,
+html[data-intro-loading="true"] .fixed:not([data-testid="brand-intro"]) {
   opacity: 0 !important;
-  transform: translateY(-100%) !important;
   pointer-events: none !important;
+}
+
+html[data-intro-loading="true"] header {
+  transform: translateY(-100%) !important;
 }
 
 .nav-link {

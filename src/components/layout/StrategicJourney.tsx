@@ -79,42 +79,76 @@ const ITEM_HEIGHT = 142 // Height of each step on desktop / tablet
 
 export function StrategicJourney() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [stepOffset, setStepOffset] = useState(0) // 0 = resting at slot 0, -1 = sliding forward, +1 = sliding backward
+  const [isTransitioning, setIsTransitioning] = useState(true)
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const isMagneticLocked = useRef(false)
+  const isLocked = useRef(false)
   const touchStartY = useRef(0)
   const touchStartTime = useRef(0)
   const wheelLockTimer = useRef<number | null>(null)
   const wheelDeltaAccumulator = useRef(0)
 
-  // Magnetic snap to specific step
-  const snapToStep = useCallback((index: number) => {
-    const targetIdx = Math.max(0, Math.min(steps.length - 1, index))
-    isMagneticLocked.current = true
-    setActiveIndex(targetIdx)
-    setDragOffset(0)
+  // Continuous forward wheel roll (1 -> 2 -> ... -> 9 -> 1 seamlessly)
+  const rollNext = useCallback(() => {
+    if (isLocked.current) return
+    isLocked.current = true
+    setIsTransitioning(true)
+    setStepOffset(-1)
+
     setTimeout(() => {
-      isMagneticLocked.current = false
+      // Instantly advance activeIndex and reset offset without jump
+      setIsTransitioning(false)
+      setActiveIndex((prev) => (prev + 1) % steps.length)
+      setStepOffset(0)
+      setDragOffset(0)
+
+      // Re-enable smooth transition on next tick
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitioning(true)
+          isLocked.current = false
+        })
+      })
     }, 450)
   }, [])
 
-  const snapNext = useCallback(() => {
-    snapToStep((activeIndex + 1) % steps.length)
-  }, [activeIndex, snapToStep])
+  // Continuous backward wheel roll (1 -> 9 -> 8 ...)
+  const rollPrev = useCallback(() => {
+    if (isLocked.current) return
+    isLocked.current = true
+    setIsTransitioning(true)
+    setStepOffset(1)
 
-  const snapPrev = useCallback(() => {
-    snapToStep((activeIndex - 1 + steps.length) % steps.length)
-  }, [activeIndex, snapToStep])
+    setTimeout(() => {
+      setIsTransitioning(false)
+      setActiveIndex((prev) => (prev - 1 + steps.length) % steps.length)
+      setStepOffset(0)
+      setDragOffset(0)
 
-  // Non-passive wheel event listener: intercepts wheel and PREVENTS full page from moving down
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitioning(true)
+          isLocked.current = false
+        })
+      })
+    }, 450)
+  }, [])
+
+  // Jump to specific dot index smoothly
+  const snapToStep = useCallback((targetIndex: number) => {
+    if (isLocked.current || targetIndex === activeIndex) return
+    setActiveIndex(targetIndex)
+  }, [activeIndex])
+
+  // Non-passive wheel event listener: intercepts wheel and isolates page scroll
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
     const handleNativeWheel = (e: WheelEvent) => {
-      // Stop the whole website from scrolling down when cursor is over the list items
       e.preventDefault()
       e.stopPropagation()
 
@@ -124,17 +158,13 @@ export function StrategicJourney() {
         window.clearTimeout(wheelLockTimer.current)
       }
 
-      if (Math.abs(wheelDeltaAccumulator.current) > 20 && !isMagneticLocked.current) {
+      if (Math.abs(wheelDeltaAccumulator.current) > 20 && !isLocked.current) {
         if (wheelDeltaAccumulator.current > 0) {
-          setActiveIndex((prev) => (prev < steps.length - 1 ? prev + 1 : 0))
+          rollNext()
         } else {
-          setActiveIndex((prev) => (prev > 0 ? prev - 1 : steps.length - 1))
+          rollPrev()
         }
         wheelDeltaAccumulator.current = 0
-        isMagneticLocked.current = true
-        setTimeout(() => {
-          isMagneticLocked.current = false
-        }, 380)
       }
 
       wheelLockTimer.current = window.setTimeout(() => {
@@ -146,10 +176,11 @@ export function StrategicJourney() {
     return () => {
       container.removeEventListener('wheel', handleNativeWheel)
     }
-  }, [])
+  }, [rollNext, rollPrev])
 
-  // Magnetic Touch Gestures for Mobile & Pointer Drag for PC
+  // Touch / Pointer Drag Gestures for Mobile & PC
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (isLocked.current) return
     setIsDragging(true)
     touchStartY.current = e.clientY
     touchStartTime.current = performance.now()
@@ -162,7 +193,6 @@ export function StrategicJourney() {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return
     const deltaY = e.clientY - touchStartY.current
-    // Magnetic resistance elastic dampening
     setDragOffset(deltaY * 0.75)
   }
 
@@ -174,13 +204,11 @@ export function StrategicJourney() {
     const elapsed = performance.now() - touchStartTime.current
     const velocity = Math.abs(deltaY) / Math.max(elapsed, 1)
 
-    // Magnetic trigger threshold (infinite loop 1 -> 9 -> 1)
     if (deltaY < -35 || (deltaY < -15 && velocity > 0.35)) {
-      snapToStep((activeIndex + 1) % steps.length)
+      rollNext()
     } else if (deltaY > 35 || (deltaY > 15 && velocity > 0.35)) {
-      snapToStep((activeIndex - 1 + steps.length) % steps.length)
+      rollPrev()
     } else {
-      // Spring back to current step
       setDragOffset(0)
     }
 
@@ -194,11 +222,28 @@ export function StrategicJourney() {
     if (isDragging) return
 
     const interval = setInterval(() => {
-      snapNext()
+      rollNext()
     }, 4500)
 
     return () => clearInterval(interval)
-  }, [isDragging, snapNext])
+  }, [isDragging, rollNext])
+
+  // Infinite Rotary Wheel Slots:
+  // - slotOffset -1: Item above view
+  // - slotOffset 0: Active top item
+  // - slotOffset 1: Preview bottom item (ALWAYS populated, e.g. at step 9, slot 1 is step 1!)
+  // - slotOffset 2: Next upcoming item below view
+  const wheelSlots = [-1, 0, 1, 2].map((slotOffset) => {
+    const wrappedIndex = ((activeIndex + slotOffset) % steps.length + steps.length) % steps.length
+    return {
+      slotOffset,
+      step: steps[wrappedIndex],
+      stepIndex: wrappedIndex,
+    }
+  })
+
+  // Dynamic active highlight based on stepOffset animation state
+  const effectiveActiveSlot = stepOffset === -1 ? 1 : stepOffset === 1 ? -1 : 0
 
   return (
     <section
@@ -223,50 +268,56 @@ export function StrategicJourney() {
           </h2>
         </div>
 
-        {/* Magnetic Scroll Viewport: Shows 2 items with springy magnetic physics */}
+        {/* Magnetic Rotary Wheel Viewport: Infinite unbroken reel */}
         <div className="relative">
-
+          
           <div
             ref={containerRef}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none ${isDragging ? 'cursor-grabbing' : ''
-              }`}
+            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none ${
+              isDragging ? 'cursor-grabbing' : ''
+            }`}
             style={{
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
               touchAction: 'none',
             }}
           >
-            {/* Magnetically Translating Track */}
+            {/* Magnetically Translating Continuous Rotary Wheel */}
             <div
-              className={`flex flex-col pt-6 sm:pt-8 pl-4 sm:pl-8 pr-2 sm:pr-4 will-change-transform ${isDragging
+              className={`flex flex-col pt-6 sm:pt-8 pl-4 sm:pl-8 pr-2 sm:pr-4 will-change-transform ${
+                isDragging || !isTransitioning
                   ? 'transition-none'
-                  : 'transition-transform duration-500 [transition-timing-function:cubic-bezier(0.25,1.35,0.36,1)]'
-                }`}
+                  : 'transition-transform duration-450 [transition-timing-function:cubic-bezier(0.25,1.35,0.36,1)]'
+              }`}
               style={{
-                transform: `translateY(${-activeIndex * ITEM_HEIGHT + dragOffset
-                  }px)`,
+                transform: `translateY(${
+                  (-1 + stepOffset) * ITEM_HEIGHT + dragOffset
+                }px)`,
               }}
             >
-              {steps.map((step, index) => {
+              {wheelSlots.map(({ slotOffset, step, stepIndex }) => {
                 const IconComponent = step.icon
-                const isTopActive = index === activeIndex
-                const isBottomPreview = index === activeIndex + 1
+                const isTopActive = slotOffset === effectiveActiveSlot
+                const isBottomPreview = slotOffset === effectiveActiveSlot + 1
 
                 return (
                   <div
-                    key={step.id}
-                    onClick={() => snapToStep(index)}
+                    key={`${step.id}-${stepIndex}-${slotOffset}`}
+                    onClick={() => {
+                      if (slotOffset === 1) rollNext()
+                    }}
                     style={{ height: `${ITEM_HEIGHT}px` }}
-                    className={`relative flex items-start gap-4 sm:gap-6 md:gap-7 cursor-pointer transition-all duration-500 ease-out ${isTopActive
+                    className={`relative flex items-start gap-4 sm:gap-6 md:gap-7 cursor-pointer transition-all duration-400 ease-out ${
+                      isTopActive
                         ? 'opacity-100 scale-100 translate-x-1'
                         : isBottomPreview
-                          ? 'opacity-65 hover:opacity-90 scale-98 translate-x-0'
-                          : 'opacity-25 scale-95 pointer-events-none'
-                      }`}
+                        ? 'opacity-65 hover:opacity-90 scale-98 translate-x-0'
+                        : 'opacity-0 scale-95 pointer-events-none'
+                    }`}
                   >
                     {/* Left Column: Round Icon Badge + Vertical Connecting Line */}
                     <div className="relative flex flex-col items-center shrink-0">
@@ -277,42 +328,45 @@ export function StrategicJourney() {
                           <div className="pointer-events-none absolute -inset-2 rounded-full bg-[#FF553E] opacity-70 blur-lg transition-opacity duration-500 animate-pulse" />
                         )}
                         <div
-                          className={`relative z-10 flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center rounded-full transition-all duration-400 ${isTopActive
+                          className={`relative z-10 flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center rounded-full transition-all duration-400 ${
+                            isTopActive
                               ? 'bg-[#FF553E] text-white scale-105 shadow-[0_0_16px_rgba(255,85,62,0.85)]'
                               : 'border border-white/10 bg-[#18181A] text-[#71717A] shadow-inner scale-95 hover:border-[#FF553E]/40 hover:text-gray-300'
-                            }`}
+                          }`}
                         >
                           <IconComponent
-                            className={`h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${isTopActive
+                            className={`h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${
+                              isTopActive
                                 ? 'text-white stroke-[2.2]'
                                 : 'text-[#71717A] stroke-[1.8]'
-                              }`}
+                            }`}
                           />
                         </div>
                       </div>
 
                       {/* Connecting Line between badges */}
-                      {index < steps.length - 1 && (
-                        <div
-                          className={`w-[1.5px] h-14 sm:h-16 md:h-18 my-1 transition-colors duration-400 ${isTopActive
-                              ? 'bg-gradient-to-b from-[#FF553E]/80 via-white/20 to-white/10'
-                              : 'bg-gradient-to-b from-white/10 to-transparent'
-                            }`}
-                        />
-                      )}
+                      <div
+                        className={`w-[1.5px] h-14 sm:h-16 md:h-18 my-1 transition-colors duration-400 ${
+                          isTopActive
+                            ? 'bg-gradient-to-b from-[#FF553E]/80 via-white/20 to-white/10'
+                            : 'bg-gradient-to-b from-white/10 to-transparent'
+                        }`}
+                      />
                     </div>
 
                     {/* Right Column: Title & Description */}
                     <div className="pt-1.5 sm:pt-2 md:pt-2.5 space-y-1.5 sm:space-y-2 flex-1 min-w-0 pr-2 sm:pr-4">
                       <h3
-                        className={`font-hanken text-xl sm:text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-300 ${isTopActive ? 'text-white' : 'text-[#71717A] hover:text-gray-300'
-                          }`}
+                        className={`font-hanken text-xl sm:text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-300 ${
+                          isTopActive ? 'text-white' : 'text-[#71717A] hover:text-gray-300'
+                        }`}
                       >
                         {step.title}
                       </h3>
                       <p
-                        className={`text-xs sm:text-base md:text-lg font-normal leading-relaxed max-w-xl transition-colors duration-300 ${isTopActive ? 'text-[#9CA3AF]' : 'text-[#52525B]'
-                          }`}
+                        className={`text-xs sm:text-base md:text-lg font-normal leading-relaxed max-w-xl transition-colors duration-300 ${
+                          isTopActive ? 'text-[#9CA3AF]' : 'text-[#52525B]'
+                        }`}
                       >
                         {step.description}
                       </p>
@@ -334,10 +388,11 @@ export function StrategicJourney() {
                     key={step.id}
                     type="button"
                     onClick={() => snapToStep(idx)}
-                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer shrink-0 ${isActive
+                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer shrink-0 ${
+                      isActive
                         ? 'w-7 sm:w-9 bg-[#FF553E] shadow-[0_0_12px_#FF553E]'
                         : 'w-2 bg-white/20 hover:bg-white/40'
-                      }`}
+                    }`}
                     aria-label={`Go to step ${step.title}`}
                   />
                 )
@@ -345,7 +400,7 @@ export function StrategicJourney() {
             </div>
 
             <span className="text-[11px] sm:text-xs text-gray-500 font-medium">
-              Magnetic scroll • Swipe or scroll
+              Rotary wheel • Swipe or scroll
             </span>
           </div>
 

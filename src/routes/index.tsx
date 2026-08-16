@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ScrollHeroSection } from '../components/hero/ScrollHeroSection'
 import { CapabilitiesSection } from '../components/layout/CapabilitiesSection'
+import { StrategicJourney } from '../components/layout/StrategicJourney'
 import { CtaSection } from '../components/layout/CtaSection'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
@@ -16,11 +17,14 @@ function Home() {
       {/* Scroll-driven canvas image sequence Hero Section */}
       <ScrollHeroSection />
 
-
-      {/* Below-the-fold sections opt into content-visibility so their layout
-          and paint stay off the initial-load critical path. */}
+      {/* Below-the-fold sections */}
       <div className="defer-paint">
         <CapabilitiesSection />
+      </div>
+
+      {/* The Strategic Journey Cyclical Step Animation Section */}
+      <div className="defer-paint">
+        <StrategicJourney />
       </div>
 
       <div className="defer-paint">
@@ -32,4 +36,3 @@ function Home() {
     </div>
   )
 }
-

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Calendar, CheckCircle2, X } from 'lucide-react'
+import { ShimmerButton } from '../ui/shimmer-button'
 
 export function ServicesCtaSection() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -38,14 +39,20 @@ export function ServicesCtaSection() {
 
             {/* Action Buttons */}
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
-              {/* Orange Button: #EE2E10 */}
-              <button
+              {/* Shimmer Button: #EE2E10 with gold shimmer and gold border */}
+              <ShimmerButton
                 type="button"
                 onClick={() => setModalOpen(true)}
-                className="inline-flex items-center justify-center rounded-full bg-[#EE2E10] px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-zinc-950 shadow-lg shadow-[#EE2E10]/25 transition-all duration-200 hover:bg-[#d8260b] hover:shadow-[#EE2E10]/40 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                background="#EE2E10"
+                shimmerColor="#FFD700"
+                borderColor="#FFD700"
+                textColor="text-zinc-950"
+                shimmerSize="0.15em"
+                shimmerDuration="2.5s"
+                className="px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold shadow-lg shadow-[#EE2E10]/25"
               >
-                Let's Build
-              </button>
+                <span>Let's Build</span>
+              </ShimmerButton>
 
               {/* View Case Studies Button: bg #FFFFFF 10%, text #E5E2E1 */}
               <a

@@ -1,19 +1,21 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Search,
   Wrench,
   Rocket,
   TrendingUp,
+  Cpu,
+  Cloud,
+  ShieldCheck,
+  Database,
+  Sparkles,
 } from 'lucide-react'
-import { AnimatedList } from '../ui/animated-list'
 
 interface JourneyStep {
   id: number
   title: string
   description: string
   icon: typeof Search
-  metrics: { label: string; value: string }[]
-  highlights: string[]
 }
 
 const steps: JourneyStep[] = [
@@ -22,190 +24,229 @@ const steps: JourneyStep[] = [
     title: 'Strategic Audit',
     description: 'Analyzing the landscape to identify technical debt and growth potential.',
     icon: Search,
-    metrics: [
-      { label: 'System Health', value: '99.8%' },
-      { label: 'Debt Reduced', value: '45%' },
-    ],
-    highlights: [
-      'Deep Codebase Analysis',
-      'Infrastructure Bottleneck Detection',
-      'Security & Compliance Scan',
-      'Performance Benchmarking',
-      'Technical Debt Assessment',
-      'Roadmap Prioritization',
-    ],
   },
   {
     id: 2,
     title: 'Precision Build',
     description: 'Agile execution with a focus on code quality and architectural integrity.',
     icon: Wrench,
-    metrics: [
-      { label: 'Code Coverage', value: '98.5%' },
-      { label: 'Sprint Speed', value: '2.4x' },
-    ],
-    highlights: [
-      'Modular System Architecture',
-      'Strict Type-Safe Workflows',
-      'CI/CD Automated Pipelines',
-      'Test-Driven Development',
-      'Code Review Gates',
-      'Performance Profiling',
-    ],
   },
   {
     id: 3,
     title: 'Seamless Deployment',
     description: 'Zero-downtime release strategies paired with instant observability.',
     icon: Rocket,
-    metrics: [
-      { label: 'Uptime', value: '99.99%' },
-      { label: 'Deploy Latency', value: '< 45ms' },
-    ],
-    highlights: [
-      'Blue-Green Releases',
-      'Real-Time Telemetry',
-      'Automated Fallback Guards',
-      'Canary Rollouts',
-      'Synthetic Monitoring',
-      'Instant Rollback',
-    ],
   },
   {
     id: 4,
     title: 'Scalable Evolution',
     description: 'Continuous optimization and scaling to drive sustainable market dominance.',
     icon: TrendingUp,
-    metrics: [
-      { label: 'Scale Factor', value: '10x' },
-      { label: 'ROI Growth', value: '+320%' },
-    ],
-    highlights: [
-      'AI-Driven Analytics',
-      'Elastic Microservices',
-      'Proactive Threat Shielding',
-      'Predictive Scaling',
-      'Global Edge Caching',
-      'Continuous A/B Testing',
-    ],
+  },
+  {
+    id: 5,
+    title: 'Intelligent Systems',
+    description: 'Deep AI integrations, autonomous agent pipelines, and enterprise LLM infrastructure.',
+    icon: Cpu,
+  },
+  {
+    id: 6,
+    title: 'Cloud Architecture',
+    description: 'Multi-region Kubernetes orchestration, elastic infrastructure, and automated failover.',
+    icon: Cloud,
+  },
+  {
+    id: 7,
+    title: 'Enterprise Shield',
+    description: 'Zero-trust network topology, cryptographic verification, and end-to-end security compliance.',
+    icon: ShieldCheck,
+  },
+  {
+    id: 8,
+    title: 'Data Mastery',
+    description: 'High-throughput stream processing pipelines, real-time analytics, and executive dashboards.',
+    icon: Database,
+  },
+  {
+    id: 9,
+    title: 'Continuous Innovation',
+    description: 'Rapid prototyping cycles, user telemetry feedback loops, and market leadership.',
+    icon: Sparkles,
   },
 ]
 
-const timelinePath = 'M 32 28 C 54 68 10 108 32 148 C 54 188 10 228 32 268 C 54 308 10 348 32 388 C 54 428 10 468 32 508'
+const ITEM_HEIGHT = 138 // Height of each step
 
 export function StrategicJourney() {
-  const [activeStep, setActiveStep] = useState(1)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const isAutoScrolling = useRef(false)
+
+  // Track native scroll position on the list to dynamically set the active top item
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return
+    const scrollTop = scrollContainerRef.current.scrollTop
+    const newActiveIndex = Math.min(
+      steps.length - 1,
+      Math.max(0, Math.round(scrollTop / ITEM_HEIGHT))
+    )
+    if (newActiveIndex !== activeIndex) {
+      setActiveIndex(newActiveIndex)
+    }
+  }
+
+  // Scroll to specific step
+  const scrollToStep = (index: number) => {
+    if (!scrollContainerRef.current) return
+    const targetTop = index * ITEM_HEIGHT
+    isAutoScrolling.current = true
+    scrollContainerRef.current.scrollTo({
+      top: targetTop,
+      behavior: 'smooth',
+    })
+    setTimeout(() => {
+      isAutoScrolling.current = false
+    }, 500)
+  }
 
   return (
-    <section className="relative z-30 w-full bg-[#050505] py-20 sm:py-28 px-6 sm:px-12 border-t border-white/10 text-white selection:bg-[#FF5E4D] selection:text-white overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="pointer-events-none absolute top-1/4 left-0 h-96 w-96 rounded-full bg-[#FF5E4D]/5 blur-[140px]" />
+    <section
+      id="process"
+      className="relative z-30 w-full bg-[#050505] py-24 sm:py-32 px-6 sm:px-12 border-t border-white/10 text-white selection:bg-[#FF5E4D] selection:text-white overflow-hidden"
+    >
+      {/* Background ambient radial glow */}
+      <div className="pointer-events-none absolute top-1/3 left-0 h-96 w-96 rounded-full bg-[#FF5E4D]/5 blur-[140px]" />
+      <div className="pointer-events-none absolute bottom-1/4 right-0 h-96 w-96 rounded-full bg-[#FF5E4D]/5 blur-[160px]" />
 
-      <div className="relative mx-auto max-w-3xl">
-        {/* Header section matching exact reference image */}
-        <div className="space-y-3 mb-12 sm:mb-16">
+      <div className="relative mx-auto max-w-4xl">
+        {/* Section Heading matching exact reference layout */}
+        <div className="space-y-3 mb-14 sm:mb-16">
           <span className="text-xs sm:text-sm font-normal tracking-[0.2em] text-[#FF5E4D] uppercase block">
             THE STRATEGIC JOURNEY
           </span>
-          <h2 className="text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-white leading-tight">
-            Digital Success{' '}
-            <span className="font-serif-italic text-[#FF5E4D] block sm:inline font-normal">
+          <h2 className="font-hanken text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-white leading-[1.08]">
+            Digital Success
+            <span className="text-[#FF5E4D] italic block font-normal">
               Mastered.
             </span>
           </h2>
         </div>
 
-        {/* Animated curved timeline: the SVG stays behind the interactive step nodes. */}
-        <div className="strategic-timeline relative pl-0 sm:pl-2" data-testid="strategic-timeline">
-          <svg
-            aria-hidden="true"
-            className="strategic-timeline-curve pointer-events-none absolute left-0 top-0 h-[536px] w-16 sm:w-[4.5rem]"
-            viewBox="0 0 64 536"
-            preserveAspectRatio="none"
+        {/* Scrollable Container with native website scroll */}
+        <div className="relative">
+          
+          {/* Scroll Viewport: Shows 2 items with smooth scroll snapping and smooth fade mask */}
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="relative h-[320px] sm:h-[330px] scroll-pt-8 overflow-y-auto overscroll-contain snap-y snap-mandatory scroll-smooth select-none focus:outline-none"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)',
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)',
+            }}
           >
-            <path className="strategic-timeline-path" d={timelinePath} />
-            <path
-              className="strategic-timeline-path strategic-timeline-progress"
-              d={timelinePath}
-              pathLength="1"
-              strokeDasharray={`${Math.max(0.04, (activeStep - 1) / (steps.length - 1))} 1`}
-            />
-            <circle className="strategic-timeline-traveler" r="3.5" cx="32" cy="28">
-              <animateMotion dur="5.8s" repeatCount="indefinite" path={timelinePath} />
-            </circle>
-          </svg>
+            <div className="flex flex-col pt-8 pl-8 pr-4 pb-[160px]">
+              {steps.map((step, index) => {
+                const IconComponent = step.icon
+                const isTopActive = index === activeIndex
+                const isBottomPreview = index === activeIndex + 1
 
-          <div className="relative space-y-10">
-            {steps.map((step) => {
-              const IconComponent = step.icon
-              const isActive = step.id === activeStep
-
-              return (
-                <button
-                  type="button"
-                  key={step.id}
-                  onClick={() => setActiveStep(step.id)}
-                  aria-current={isActive ? 'step' : undefined}
-                  aria-pressed={isActive}
-                  className={`group relative flex min-h-[116px] w-full items-start gap-5 text-left transition-[transform,opacity] duration-500 sm:min-h-[116px] sm:gap-6 ${isActive ? 'opacity-100' : 'opacity-65 hover:opacity-100'}`}
-                >
-                  {/* Step Icon Circle Badge */}
+                return (
                   <div
-                    className={`strategic-timeline-node relative z-10 mt-1 flex h-14 w-14 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${isActive
-                      ? 'strategic-timeline-node-active bg-[#FF5E4D] text-white shadow-[0_0_0_8px_rgba(255,94,77,0.08),0_0_28px_rgba(255,94,77,0.35)]'
-                      : 'border border-white/15 bg-[#171717] text-gray-500 group-hover:border-[#FF5E4D]/50 group-hover:text-gray-300'
-                      }`}
+                    key={step.id}
+                    onClick={() => scrollToStep(index)}
+                    style={{ height: `${ITEM_HEIGHT}px` }}
+                    className={`snap-start relative flex items-start gap-6 sm:gap-7 cursor-pointer transition-opacity duration-300 ${
+                      isTopActive
+                        ? 'opacity-100'
+                        : isBottomPreview
+                        ? 'opacity-65 hover:opacity-90'
+                        : 'opacity-30 hover:opacity-60'
+                    }`}
                   >
-                    <IconComponent className="h-6 w-6" strokeWidth={1.7} />
-                  </div>
+                    {/* Left Column: Round Icon Badge + Vertical Connecting Line */}
+                    <div className="relative flex flex-col items-center shrink-0">
+                      {/* Icon Circle */}
+                      <div className="relative">
+                        {/* Smooth Circular Glow without any square bounding box clipping */}
+                        {isTopActive && (
+                          <div className="pointer-events-none absolute -inset-2 rounded-full bg-[#FF553E] opacity-65 blur-lg animate-pulse" />
+                        )}
+                        <div
+                          className={`relative z-10 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full transition-all duration-300 ${isTopActive
+                              ? 'bg-[#FF553E] text-white scale-100 shadow-[0_0_12px_rgba(255,85,62,0.8)]'
+                              : 'border border-white/10 bg-[#18181A] text-[#71717A] shadow-inner scale-95 hover:border-[#FF553E]/40 hover:text-gray-300'
+                            }`}
+                        >
+                          <IconComponent
+                            className={`h-6 w-6 sm:h-7 sm:w-7 transition-colors duration-300 ${isTopActive
+                                ? 'text-white stroke-[2.2]'
+                                : 'text-[#71717A] stroke-[1.8]'
+                              }`}
+                          />
+                        </div>
+                      </div>
 
-                  {/* Step Content */}
-                  <div className="min-w-0 flex-1 space-y-2 pt-1">
-                    <h3
-                      className={`text-xl font-bold tracking-tight transition-colors sm:text-2xl ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-200'
-                        }`}
-                    >
-                      {step.title}
-                    </h3>
-                    <p
-                      className={`max-w-xl text-sm font-normal leading-relaxed transition-colors sm:text-base ${isActive ? 'text-gray-300' : 'text-gray-500 group-hover:text-gray-400'
-                        }`}
-                    >
-                      {step.description}
-                    </p>
-
-                    <div className={`flex flex-wrap gap-2 pt-1 transition-all duration-500 ${isActive ? 'translate-y-0 opacity-100' : 'pointer-events-none h-0 translate-y-1 overflow-hidden opacity-0'}`}>
-                      {step.metrics.map((metric) => (
-                        <span key={metric.label} className="rounded-full border border-white/10 bg-white/[0.045] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-gray-400 sm:text-[11px]">
-                          <strong className="mr-1.5 font-semibold text-[#FF8A7D]">{metric.value}</strong>
-                          {metric.label}
-                        </span>
-                      ))}
+                      {/* Connecting Line between badges */}
+                      {index < steps.length - 1 && (
+                        <div
+                          className={`w-[1.5px] h-16 sm:h-18 my-1 transition-colors duration-300 ${isTopActive
+                              ? 'bg-gradient-to-b from-[#FF553E]/80 via-white/20 to-white/10'
+                              : 'bg-gradient-to-b from-white/10 to-transparent'
+                            }`}
+                        />
+                      )}
                     </div>
 
-                    {/* Animated highlights: each item springs in sequence when the
-                        step becomes active. Remounts per step so the stagger
-                        replays on every activation. */}
-                    {isActive && (
-                      <AnimatedList delay={400} className="pt-2">
-                        {step.highlights.map((highlight) => (
-                          <div
-                            key={highlight}
-                            className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5"
-                          >
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF5E4D]" />
-                            <span className="text-sm font-medium text-gray-300">
-                              {highlight}
-                            </span>
-                          </div>
-                        ))}
-                      </AnimatedList>
-                    )}
+                    {/* Right Column: Title & Description */}
+                    <div className="pt-2 sm:pt-2.5 space-y-2 flex-1 min-w-0 pr-4">
+                      <h3
+                        className={`font-hanken text-2xl sm:text-3xl font-bold tracking-tight transition-colors duration-300 ${isTopActive ? 'text-white' : 'text-[#71717A] hover:text-gray-300'
+                          }`}
+                      >
+                        {step.title}
+                      </h3>
+                      <p
+                        className={`text-base sm:text-lg font-normal leading-relaxed max-w-xl transition-colors duration-300 ${isTopActive ? 'text-[#9CA3AF]' : 'text-[#52525B]'
+                          }`}
+                      >
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
-                </button>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
+
+          {/* Interactive Navigation & Progress Controls */}
+          <div className="mt-8 sm:mt-10 flex items-center gap-4">
+            {/* Step Progress Dots */}
+            <div className="flex items-center gap-2">
+              {steps.map((step, idx) => {
+                const isActive = idx === activeIndex
+                return (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => scrollToStep(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${isActive
+                        ? 'w-8 bg-[#FF553E] shadow-[0_0_10px_#FF553E]'
+                        : 'w-2 bg-white/20 hover:bg-white/40'
+                      }`}
+                    aria-label={`Go to step ${step.title}`}
+                  />
+                )
+              })}
+            </div>
+
+            <span className="text-xs text-gray-500 font-medium ml-auto hidden sm:inline">
+              Scroll with mouse wheel over items
+            </span>
+          </div>
+
         </div>
       </div>
     </section>

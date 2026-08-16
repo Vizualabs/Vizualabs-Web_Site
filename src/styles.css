@@ -567,7 +567,6 @@
 
 /* Honour reduced-motion: keep the brand beat, drop the movement. */
 @media (prefers-reduced-motion: reduce) {
-
   .brand-intro-v,
   .brand-intro-letter,
   .brand-intro-dot,
@@ -613,7 +612,7 @@
   bottom: -6px;
   height: 2px;
   border-radius: 1px;
-  background: #FF5540;
+  background: #FF553E;
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -622,7 +621,7 @@
 .nav-link:hover,
 .nav-link:focus-visible,
 .nav-link.active {
-  color: #FF5540;
+  color: #FF553E;
 }
 
 .nav-link:hover::after,
@@ -641,7 +640,7 @@
   bottom: 0.35rem;
 }
 
-/* Contact button — solid red-orange (#FF5540) with crisp white text. */
+/* Contact button — solid red-orange (#FF553E) with crisp dark text. */
 .nav-contact-btn {
   display: inline-flex;
   align-items: center;
@@ -651,17 +650,17 @@
   font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 700;
-  color: #ffffff;
-  background-color: #FF5540;
-  box-shadow: 0 4px 20px rgba(255, 85, 64, 0.35);
+  color: #0a0a0a;
+  background-color: #FF553E;
+  box-shadow: 0 4px 20px rgba(255, 85, 62, 0.35);
   text-decoration: none;
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .nav-contact-btn:hover {
   transform: translateY(-1px);
-  background-color: #ff432d;
-  box-shadow: 0 8px 28px rgba(255, 85, 64, 0.5);
+  background-color: #ff422a;
+  box-shadow: 0 8px 28px rgba(255, 85, 62, 0.5);
 }
 
 .nav-contact-btn:active {
@@ -669,7 +668,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .nav-link::after,
   .nav-contact-btn {
     transition: none;

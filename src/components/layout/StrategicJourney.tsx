@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Search,
   Wrench,
@@ -75,39 +75,130 @@ const steps: JourneyStep[] = [
   },
 ]
 
-const ITEM_HEIGHT = 138 // Height of each step
+const ITEM_HEIGHT = 142 // Height of each step on desktop / tablet
 
 export function StrategicJourney() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const isAutoScrolling = useRef(false)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
 
-  // Track native scroll position on the list to dynamically set the active top item
-  const handleScroll = () => {
-    if (!scrollContainerRef.current) return
-    const scrollTop = scrollContainerRef.current.scrollTop
-    const newActiveIndex = Math.min(
-      steps.length - 1,
-      Math.max(0, Math.round(scrollTop / ITEM_HEIGHT))
-    )
-    if (newActiveIndex !== activeIndex) {
-      setActiveIndex(newActiveIndex)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isMagneticLocked = useRef(false)
+  const touchStartY = useRef(0)
+  const touchStartTime = useRef(0)
+  const wheelLockTimer = useRef<number | null>(null)
+  const wheelDeltaAccumulator = useRef(0)
+
+  // Magnetic snap to specific step
+  const snapToStep = useCallback((index: number) => {
+    const targetIdx = Math.max(0, Math.min(steps.length - 1, index))
+    isMagneticLocked.current = true
+    setActiveIndex(targetIdx)
+    setDragOffset(0)
+    setTimeout(() => {
+      isMagneticLocked.current = false
+    }, 450)
+  }, [])
+
+  const snapNext = useCallback(() => {
+    snapToStep((activeIndex + 1) % steps.length)
+  }, [activeIndex, snapToStep])
+
+  const snapPrev = useCallback(() => {
+    snapToStep((activeIndex - 1 + steps.length) % steps.length)
+  }, [activeIndex, snapToStep])
+
+  // Non-passive wheel event listener: intercepts wheel and PREVENTS full page from moving down
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      // Stop the whole website from scrolling down when cursor is over the list items
+      e.preventDefault()
+      e.stopPropagation()
+
+      wheelDeltaAccumulator.current += e.deltaY
+
+      if (wheelLockTimer.current) {
+        window.clearTimeout(wheelLockTimer.current)
+      }
+
+      if (Math.abs(wheelDeltaAccumulator.current) > 20 && !isMagneticLocked.current) {
+        if (wheelDeltaAccumulator.current > 0) {
+          setActiveIndex((prev) => (prev < steps.length - 1 ? prev + 1 : 0))
+        } else {
+          setActiveIndex((prev) => (prev > 0 ? prev - 1 : steps.length - 1))
+        }
+        wheelDeltaAccumulator.current = 0
+        isMagneticLocked.current = true
+        setTimeout(() => {
+          isMagneticLocked.current = false
+        }, 380)
+      }
+
+      wheelLockTimer.current = window.setTimeout(() => {
+        wheelDeltaAccumulator.current = 0
+      }, 150)
+    }
+
+    container.addEventListener('wheel', handleNativeWheel, { passive: false })
+    return () => {
+      container.removeEventListener('wheel', handleNativeWheel)
+    }
+  }, [])
+
+  // Magnetic Touch Gestures for Mobile & Pointer Drag for PC
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setIsDragging(true)
+    touchStartY.current = e.clientY
+    touchStartTime.current = performance.now()
+    setDragOffset(0)
+    if (containerRef.current) {
+      containerRef.current.setPointerCapture(e.pointerId)
     }
   }
 
-  // Scroll to specific step
-  const scrollToStep = (index: number) => {
-    if (!scrollContainerRef.current) return
-    const targetTop = index * ITEM_HEIGHT
-    isAutoScrolling.current = true
-    scrollContainerRef.current.scrollTo({
-      top: targetTop,
-      behavior: 'smooth',
-    })
-    setTimeout(() => {
-      isAutoScrolling.current = false
-    }, 500)
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return
+    const deltaY = e.clientY - touchStartY.current
+    // Magnetic resistance elastic dampening
+    setDragOffset(deltaY * 0.75)
   }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const deltaY = e.clientY - touchStartY.current
+    const elapsed = performance.now() - touchStartTime.current
+    const velocity = Math.abs(deltaY) / Math.max(elapsed, 1)
+
+    // Magnetic trigger threshold (flick velocity > 0.35 or drag > 35px)
+    if (deltaY < -35 || (deltaY < -15 && velocity > 0.35)) {
+      snapToStep(activeIndex < steps.length - 1 ? activeIndex + 1 : 0)
+    } else if (deltaY > 35 || (deltaY > 15 && velocity > 0.35)) {
+      snapToStep(activeIndex > 0 ? activeIndex - 1 : steps.length - 1)
+    } else {
+      // Spring back to current step
+      setDragOffset(0)
+    }
+
+    if (containerRef.current && containerRef.current.hasPointerCapture(e.pointerId)) {
+      containerRef.current.releasePointerCapture(e.pointerId)
+    }
+  }
+
+  // Auto-cycle gently every 4.5s when stationary
+  useEffect(() => {
+    if (isDragging) return
+
+    const interval = setInterval(() => {
+      snapNext()
+    }, 4500)
+
+    return () => clearInterval(interval)
+  }, [isDragging, snapNext])
 
   return (
     <section
@@ -119,7 +210,7 @@ export function StrategicJourney() {
       <div className="pointer-events-none absolute bottom-1/4 right-0 h-72 sm:h-96 w-72 sm:w-96 rounded-full bg-[#FF5E4D]/5 blur-[120px] sm:blur-[160px]" />
 
       <div className="relative mx-auto max-w-4xl">
-        {/* Section Heading matching exact reference layout */}
+        {/* Section Heading: completely solid and anchored */}
         <div className="space-y-2 sm:space-y-3 mb-10 sm:mb-14 md:mb-16">
           <span className="text-[11px] sm:text-xs md:text-sm font-normal tracking-[0.2em] text-[#FF5E4D] uppercase block">
             THE STRATEGIC JOURNEY
@@ -132,22 +223,34 @@ export function StrategicJourney() {
           </h2>
         </div>
 
-        {/* Scrollable Container with native website scroll */}
+        {/* Magnetic Scroll Viewport: Shows 2 items with springy magnetic physics */}
         <div className="relative">
-          
-          {/* Scroll Viewport: Shows 2 items with smooth scroll snapping and smooth fade mask */}
+
           <div
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            className="relative h-[290px] sm:h-[320px] md:h-[330px] scroll-pt-6 sm:scroll-pt-8 overflow-y-auto overscroll-contain snap-y snap-mandatory scroll-smooth select-none focus:outline-none"
+            ref={containerRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none ${isDragging ? 'cursor-grabbing' : ''
+              }`}
             style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
+              touchAction: 'none',
             }}
           >
-            <div className="flex flex-col pt-6 sm:pt-8 pl-4 sm:pl-8 pr-2 sm:pr-4 pb-[140px] sm:pb-[160px]">
+            {/* Magnetically Translating Track */}
+            <div
+              className={`flex flex-col pt-6 sm:pt-8 pl-4 sm:pl-8 pr-2 sm:pr-4 will-change-transform ${isDragging
+                  ? 'transition-none'
+                  : 'transition-transform duration-500 [transition-timing-function:cubic-bezier(0.25,1.35,0.36,1)]'
+                }`}
+              style={{
+                transform: `translateY(${-activeIndex * ITEM_HEIGHT + dragOffset
+                  }px)`,
+              }}
+            >
               {steps.map((step, index) => {
                 const IconComponent = step.icon
                 const isTopActive = index === activeIndex
@@ -156,37 +259,34 @@ export function StrategicJourney() {
                 return (
                   <div
                     key={step.id}
-                    onClick={() => scrollToStep(index)}
+                    onClick={() => snapToStep(index)}
                     style={{ height: `${ITEM_HEIGHT}px` }}
-                    className={`snap-start relative flex items-start gap-4 sm:gap-6 md:gap-7 cursor-pointer transition-opacity duration-300 ${
-                      isTopActive
-                        ? 'opacity-100'
+                    className={`relative flex items-start gap-4 sm:gap-6 md:gap-7 cursor-pointer transition-all duration-500 ease-out ${isTopActive
+                        ? 'opacity-100 scale-100 translate-x-1'
                         : isBottomPreview
-                        ? 'opacity-65 hover:opacity-90'
-                        : 'opacity-30 hover:opacity-60'
-                    }`}
+                          ? 'opacity-65 hover:opacity-90 scale-98 translate-x-0'
+                          : 'opacity-25 scale-95 pointer-events-none'
+                      }`}
                   >
                     {/* Left Column: Round Icon Badge + Vertical Connecting Line */}
                     <div className="relative flex flex-col items-center shrink-0">
                       {/* Icon Circle */}
-                      <div className="relative">
-                        {/* Smooth Circular Glow without any square bounding box clipping */}
+                      <div className="relative flex items-center justify-center">
+                        {/* Magnetic Glow Bloom when active */}
                         {isTopActive && (
-                          <div className="pointer-events-none absolute -inset-2 rounded-full bg-[#FF553E] opacity-65 blur-lg animate-pulse" />
+                          <div className="pointer-events-none absolute -inset-2 rounded-full bg-[#FF553E] opacity-70 blur-lg transition-opacity duration-500 animate-pulse" />
                         )}
                         <div
-                          className={`relative z-10 flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center rounded-full transition-all duration-300 ${
-                            isTopActive
-                              ? 'bg-[#FF553E] text-white scale-100 shadow-[0_0_12px_rgba(255,85,62,0.8)]'
+                          className={`relative z-10 flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center rounded-full transition-all duration-400 ${isTopActive
+                              ? 'bg-[#FF553E] text-white scale-105 shadow-[0_0_16px_rgba(255,85,62,0.85)]'
                               : 'border border-white/10 bg-[#18181A] text-[#71717A] shadow-inner scale-95 hover:border-[#FF553E]/40 hover:text-gray-300'
-                          }`}
+                            }`}
                         >
                           <IconComponent
-                            className={`h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${
-                              isTopActive
+                            className={`h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${isTopActive
                                 ? 'text-white stroke-[2.2]'
                                 : 'text-[#71717A] stroke-[1.8]'
-                            }`}
+                              }`}
                           />
                         </div>
                       </div>
@@ -194,11 +294,10 @@ export function StrategicJourney() {
                       {/* Connecting Line between badges */}
                       {index < steps.length - 1 && (
                         <div
-                          className={`w-[1.5px] h-14 sm:h-16 md:h-18 my-1 transition-colors duration-300 ${
-                            isTopActive
+                          className={`w-[1.5px] h-14 sm:h-16 md:h-18 my-1 transition-colors duration-400 ${isTopActive
                               ? 'bg-gradient-to-b from-[#FF553E]/80 via-white/20 to-white/10'
                               : 'bg-gradient-to-b from-white/10 to-transparent'
-                          }`}
+                            }`}
                         />
                       )}
                     </div>
@@ -206,16 +305,14 @@ export function StrategicJourney() {
                     {/* Right Column: Title & Description */}
                     <div className="pt-1.5 sm:pt-2 md:pt-2.5 space-y-1.5 sm:space-y-2 flex-1 min-w-0 pr-2 sm:pr-4">
                       <h3
-                        className={`font-hanken text-xl sm:text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-300 ${
-                          isTopActive ? 'text-white' : 'text-[#71717A] hover:text-gray-300'
-                        }`}
+                        className={`font-hanken text-xl sm:text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-300 ${isTopActive ? 'text-white' : 'text-[#71717A] hover:text-gray-300'
+                          }`}
                       >
                         {step.title}
                       </h3>
                       <p
-                        className={`text-xs sm:text-base md:text-lg font-normal leading-relaxed max-w-xl transition-colors duration-300 ${
-                          isTopActive ? 'text-[#9CA3AF]' : 'text-[#52525B]'
-                        }`}
+                        className={`text-xs sm:text-base md:text-lg font-normal leading-relaxed max-w-xl transition-colors duration-300 ${isTopActive ? 'text-[#9CA3AF]' : 'text-[#52525B]'
+                          }`}
                       >
                         {step.description}
                       </p>
@@ -226,9 +323,9 @@ export function StrategicJourney() {
             </div>
           </div>
 
-          {/* Interactive Navigation & Progress Controls */}
+          {/* Magnetic Progress Indicator & Dots */}
           <div className="mt-6 sm:mt-8 md:mt-10 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-            {/* Step Progress Dots */}
+            {/* Step Progress Dots with Magnetic Glow */}
             <div className="flex items-center gap-1.5 sm:gap-2 max-w-full overflow-x-auto scrollbar-none py-1">
               {steps.map((step, idx) => {
                 const isActive = idx === activeIndex
@@ -236,12 +333,11 @@ export function StrategicJourney() {
                   <button
                     key={step.id}
                     type="button"
-                    onClick={() => scrollToStep(idx)}
-                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${
-                      isActive
-                        ? 'w-6 sm:w-8 bg-[#FF553E] shadow-[0_0_10px_#FF553E]'
+                    onClick={() => snapToStep(idx)}
+                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer shrink-0 ${isActive
+                        ? 'w-7 sm:w-9 bg-[#FF553E] shadow-[0_0_12px_#FF553E]'
                         : 'w-2 bg-white/20 hover:bg-white/40'
-                    }`}
+                      }`}
                     aria-label={`Go to step ${step.title}`}
                   />
                 )
@@ -249,7 +345,7 @@ export function StrategicJourney() {
             </div>
 
             <span className="text-[11px] sm:text-xs text-gray-500 font-medium">
-              Swipe or scroll to navigate
+              Magnetic scroll • Swipe or scroll
             </span>
           </div>
 

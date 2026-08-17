@@ -746,12 +746,31 @@ export function FlameWrap({
     const content = contentRef.current;
     const output = outputRef.current;
     if (!source || !content || !output) return;
-    instanceRef.current = createFlameWrap(
-      { source, content, output },
-      initialOptions,
-    );
-    if (native && !instanceRef.current) setFailed(true);
+
+    let cancelled = false;
+    let handle: number | undefined;
+
+    const init = () => {
+      if (cancelled) return;
+      instanceRef.current = createFlameWrap(
+        { source, content, output },
+        initialOptions,
+      );
+      if (native && !instanceRef.current) setFailed(true);
+    };
+
+    const hasIdle =
+      typeof window.requestIdleCallback === "function";
+    handle = hasIdle
+      ? window.requestIdleCallback(init, { timeout: 2000 })
+      : window.setTimeout(init, 100);
+
     return () => {
+      cancelled = true;
+      if (handle !== undefined) {
+        if (hasIdle) window.cancelIdleCallback(handle);
+        else window.clearTimeout(handle);
+      }
       instanceRef.current?.destroy();
       instanceRef.current = null;
     };

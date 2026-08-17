@@ -144,7 +144,7 @@ export function ContactSection() {
             </div>
 
             <div className="mt-12 border-t border-white/10 pt-7">
-              <p className="mb-4 font-geist text-xs font-medium uppercase tracking-[0.16em] text-[#E5E2E1]">Connect with us</p>
+              <p className="mb-4 font-geist text-xs font-medium uppercase tracking-[0.16em] text-[#E5E2E1]/40">Connect with us</p>
               <div className="flex gap-3">
                 {socialLinks.map((social) => (
                   <a

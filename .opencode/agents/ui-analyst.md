@@ -1,6 +1,7 @@
 ---
 description: Analyzes uploaded design images and outputs a comprehensive UI implementation spec (colors, typography, grid, layout, spacing, animation, responsive behavior) for the primary model to build, mapped to a concrete design system.
 mode: subagent
+model: opencode-go/gpt-5.6-luna
 temperature: 0.1
 permission:
   edit: deny

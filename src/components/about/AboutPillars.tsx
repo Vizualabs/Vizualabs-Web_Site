@@ -85,11 +85,11 @@ export function AboutPillars() {
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.45, ease: EASE, delay: 0 }}
-              className="lg:col-span-2 rounded-[20px] bg-[#11100F] border border-[#2A2826] p-6 sm:p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735]"
+              className="lg:col-span-2 rounded-[20px] bg-[#2A2A2A] border border-[#3A3735] p-6 sm:p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#4A4745]"
             >
               <div>
                 {/* Compass Icon */}
-                <div className="text-[#E7978B] mb-6">
+                <div className="text-[#FFB4A8] mb-6">
                   <CompassIcon className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
 
@@ -110,7 +110,7 @@ export function AboutPillars() {
                 <div className="flex-1 max-w-xl">
                   <div className="h-[3px] w-full rounded-full bg-[#383330] overflow-hidden">
                     <motion.div
-                      className="h-full bg-[#FF5540] rounded-full"
+                      className="h-full bg-[#FFB4A8] rounded-full"
                       initial={{ scaleX: 0 }}
                       whileInView={{ scaleX: 1 }}
                       viewport={{ once: true }}
@@ -122,7 +122,7 @@ export function AboutPillars() {
 
                 {/* Stat Label */}
                 <div className="shrink-0 text-left sm:text-right">
-                  <span className="text-xs sm:text-sm font-normal text-[#F4F0EB] leading-tight block">
+                  <span className="text-xs sm:text-sm font-normal text-[#FFB4A8] leading-tight block">
                     84% Efficiency
                   </span>
                   <span className="text-xs sm:text-sm font-normal text-[#A6A09A] leading-tight block">

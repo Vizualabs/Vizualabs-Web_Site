@@ -163,13 +163,13 @@ export function AboutPillars() {
               className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-6 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[220px]"
             >
               <div>
-                <div className="text-[#E7978B] mb-5">
+                <div className="text-[#C6C6C7] mb-5">
                   <Shield className="h-6 w-6 sm:h-7 sm:w-7 stroke-[1.8]" />
                 </div>
-                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#F4F0EB] mb-2.5">
+                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
                   Security
                 </h3>
-                <p className="text-sm sm:text-base font-light leading-relaxed text-[#A6A09A]">
+                <p className="text-sm sm:text-base font-light leading-relaxed text-[#E5E2E1]/60">
                   Rigorous protocols embedded into every line of code.
                 </p>
               </div>
@@ -183,13 +183,13 @@ export function AboutPillars() {
               className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-6 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[220px]"
             >
               <div>
-                <div className="text-[#E7978B] mb-5">
+                <div className="text-[#C6C6C7] mb-5">
                   <IntegrationIcon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
-                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#F4F0EB] mb-2.5">
+                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
                   Integration
                 </h3>
-                <p className="text-sm sm:text-base font-light leading-relaxed text-[#A6A09A]">
+                <p className="text-sm sm:text-base font-light leading-relaxed text-[#E5E2E1]/60">
                   Seamlessly bridging legacy systems with AI-driven futures.
                 </p>
               </div>
@@ -203,13 +203,13 @@ export function AboutPillars() {
               className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-6 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[220px]"
             >
               <div>
-                <div className="text-[#E7978B] mb-5">
+                <div className="text-[#C6C6C7] mb-5">
                   <InsightIcon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
-                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#F4F0EB] mb-2.5">
+                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
                   Data Insight
                 </h3>
-                <p className="text-sm sm:text-base font-light leading-relaxed text-[#A6A09A]">
+                <p className="text-sm sm:text-base font-light leading-relaxed text-[#E5E2E1]/60">
                   Transforming raw data into actionable strategic threads.
                 </p>
               </div>

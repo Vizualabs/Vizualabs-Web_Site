@@ -83,13 +83,10 @@ export function ContactSection() {
             transition={{ duration: 0.55, ease: EASE }}
             className="max-w-xl"
           >
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#FFB4A8]">
-              Contact Us
-            </p>
-            <h1 className="font-hanken text-5xl font-bold leading-[1.04] tracking-tight text-[#E5E2E1] sm:text-6xl lg:text-[4.25rem]">
-              Initiate Strategic <span className="text-[#FF5540]">Contact</span>
+            <h1 className="font-hanken text-4xl sm:text-5xl lg:text-[4rem] font-bold leading-[1.08] tracking-tight text-[#E5E2E1]">
+              Initiate Strategic Contact
             </h1>
-            <p className="mt-7 max-w-lg text-base font-light leading-relaxed text-[#E5E2E1]/65 sm:text-lg">
+            <p className="mt-6 max-w-lg text-base sm:text-lg font-light leading-relaxed text-[#E5E2E1]/70">
               Ready to accelerate your engineering roadmap? Our team of architects and strategists are standing by.
             </p>
 
@@ -100,7 +97,7 @@ export function ContactSection() {
                 </div>
                 <div className="pt-0.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFB4A8]">Global Headquarters</p>
-                  <address className="mt-1.5 not-italic text-sm leading-relaxed text-[#E5E2E1]/75 sm:text-base">
+                  <address className="mt-1.5 not-italic text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
                     101 Silicon Valley Way, Suite 500
                     <br />
                     San Jose, CA 95110
@@ -114,11 +111,11 @@ export function ContactSection() {
                 </div>
                 <div className="pt-0.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFB4A8]">Communications</p>
-                  <div className="mt-1.5 flex flex-col text-sm leading-relaxed text-[#E5E2E1]/75 sm:text-base">
-                    <a className="transition-colors hover:text-[#FF5540] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:strategy@vizualabs.tech">
+                  <div className="mt-1.5 flex flex-col text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
+                    <a className="transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:strategy@vizualabs.tech">
                       strategy@vizualabs.tech
                     </a>
-                    <a className="transition-colors hover:text-[#FF5540] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:press@vizualabs.tech">
+                    <a className="transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:press@vizualabs.tech">
                       press@vizualabs.tech
                     </a>
                   </div>

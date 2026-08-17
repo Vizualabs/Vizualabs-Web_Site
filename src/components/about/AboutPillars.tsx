@@ -115,7 +115,7 @@ export function AboutPillars() {
                       whileInView={{ scaleX: 1 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
-                      style={{ width: '84%', transformOrigin: 'left center' }}
+                      style={{ width: '100%', transformOrigin: 'left center' }}
                     />
                   </div>
                 </div>
@@ -123,7 +123,7 @@ export function AboutPillars() {
                 {/* Stat Label */}
                 <div className="shrink-0 text-left sm:text-right">
                   <span className="text-xs sm:text-sm font-normal text-[#FFB4A8] leading-tight block">
-                    84% Efficiency
+                    100% Efficiency
                   </span>
                   <span className="text-xs sm:text-sm font-normal text-[#A6A09A] leading-tight block">
                     Gain

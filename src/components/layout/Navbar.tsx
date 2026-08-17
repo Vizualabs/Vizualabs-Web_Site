@@ -143,7 +143,7 @@ export function Navbar() {
 
         {/* Contact button — solid red-orange pill button */}
         <div className="hidden md:block">
-          <a href="/#contact" className="nav-contact-btn">
+            <a href="/contact#contact" className="nav-contact-btn">
             Contact Us
           </a>
         </div>
@@ -196,7 +196,7 @@ export function Navbar() {
               )
             })}
             <a
-              href="/#contact"
+              href="/contact#contact"
               onClick={() => setOpen(false)}
               className="nav-contact-btn mt-4 justify-center"
             >

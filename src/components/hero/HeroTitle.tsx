@@ -31,7 +31,11 @@ export function HeroTitle({ start }: { start: boolean }) {
     <div
       data-testid="hero-title"
       aria-hidden={!start}
-      className="pointer-events-none absolute inset-x-0 top-[18vh] flex flex-col items-center px-4 text-center sm:top-[23vh] overflow-hidden"
+      /* Mobile sits far lower than desktop because the sequence anchors the
+         subject to the bottom at 70% height there, putting its head near 47vh —
+         the heading has to start below that to run behind it. Breakpoint is md
+         (768px) to match the isMobile threshold in computeImageRect. */
+      className="pointer-events-none absolute inset-x-0 top-[42vh] flex flex-col items-center px-4 text-center md:top-[23vh] overflow-hidden"
     >
       <h1 className="hero-title-type font-hanken m-0 w-full font-black leading-[0.92] tracking-[-0.02em]">
         <span className="hero-title-line block overflow-hidden mt-0">
@@ -43,7 +47,7 @@ export function HeroTitle({ start }: { start: boolean }) {
           </span>
         </span>
 
-        <span className="hero-title-line hero-title-marquee block overflow-hidden -mt-6 sm:-mt-11">
+        <span className="hero-title-line hero-title-marquee block overflow-hidden">
           <span
             className={`hero-title-inner inline-block ${start ? 'is-in' : ''}`}
             style={{ animationDelay: '130ms' }}

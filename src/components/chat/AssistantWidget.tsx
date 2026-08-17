@@ -47,7 +47,7 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
   return (
     <>
       {chatOpen && (
-        <div className="fixed bottom-20 right-5 sm:right-6 z-50 w-80 sm:w-96 rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-40 left-5 right-5 sm:bottom-20 sm:left-auto sm:right-6 z-50 w-auto sm:w-96 max-h-[70vh] overflow-y-auto rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2.5">
               <BlobMascotIcon className="h-7 w-7 drop-shadow-[0_0_6px_rgba(255,94,77,0.5)]" />
@@ -116,8 +116,11 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
         </div>
       )}
 
-      {/* Floating Corner Message Icon Button */}
-      <div className="fixed bottom-5 right-5 sm:right-6 z-50">
+      {/* Floating Corner Message Icon Button.
+          Sits higher on mobile so it clears the hero's full-width stats bar,
+          which runs edge to edge along the bottom there. From sm up the stats
+          card shrinks back to the right corner and the button returns to it. */}
+      <div className="fixed bottom-28 right-5 sm:bottom-5 sm:right-6 z-50">
         <button
           onClick={() => onOpenChange(!chatOpen)}
           aria-label="Toggle Quick Message"

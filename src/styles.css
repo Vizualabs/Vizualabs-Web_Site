@@ -185,7 +185,7 @@
 
 .hero-title-type {
   font-family: var(--font-hanken);
-  font-size: clamp(1.4rem, 6.5vw, 7.6rem);
+  font-size: clamp(1.4rem, 12vw, 7.6rem);
 }
 
 @media (min-width: 768px) {
@@ -258,6 +258,10 @@
 .hero-title-marquee {
   width: 100%;
   font-size: 0.75em;
+  /* Em-relative so the two lines keep the same visual kiss at every font size —
+     a fixed px pull swallowed most of line one at mobile type sizes. Divided by
+     the 0.75 above because margin em resolves against this element's own size. */
+  margin-top: calc(-0.4636em / 0.75);
 }
 
 .hero-marquee-track {

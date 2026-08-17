@@ -38,7 +38,7 @@ export function ServicesCtaSection() {
             </p>
 
             {/* Action Buttons */}
-            <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+            <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
               {/* Shimmer Button: #EE2E10 with gold shimmer and gold border */}
               <ShimmerButton
                 type="button"
@@ -49,7 +49,7 @@ export function ServicesCtaSection() {
                 textColor="text-zinc-950"
                 shimmerSize="0.15em"
                 shimmerDuration="2.5s"
-                className="px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold shadow-lg shadow-[#EE2E10]/25"
+                className="px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-bold shadow-md shadow-[#EE2E10]/20"
               >
                 <span>Let's Build</span>
               </ShimmerButton>
@@ -57,7 +57,7 @@ export function ServicesCtaSection() {
               {/* View Case Studies Button: bg #FFFFFF 10%, text #E5E2E1 */}
               <a
                 href="/#cases"
-                className="inline-flex items-center justify-center rounded-full bg-white/10 px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-medium text-[#E5E2E1] backdrop-blur-sm transition-all duration-200 hover:bg-white/15 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                className="inline-flex items-center justify-center rounded-full bg-white/10 px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-[#E5E2E1] backdrop-blur-sm transition-all duration-200 hover:bg-white/15 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 View Case Studies
               </a>

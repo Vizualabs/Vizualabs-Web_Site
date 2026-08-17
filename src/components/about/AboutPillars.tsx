@@ -144,8 +144,8 @@ export function AboutPillars() {
                 color={[1, 0.333, 0.251]}
                 radius={20}
                 intensity={0.9}
-                height={120}
-                spread={8}
+                height={165}
+                spread={18}
                 speed={0.28}
                 scale={0.7}
                 turbulence={0.5}

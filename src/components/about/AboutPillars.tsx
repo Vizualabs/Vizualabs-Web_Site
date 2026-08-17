@@ -132,25 +132,25 @@ export function AboutPillars() {
               </div>
             </motion.div>
 
-            {/* Top-Right Accent Card: Momentum (Solid vibrant red-orange) */}
+            {/* Top-Right Accent Card: Momentum (Solid vibrant red-orange, centered) */}
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.4, ease: EASE, delay: 0.08 }}
               whileHover={{ y: -2 }}
-              className="lg:col-span-1 rounded-[20px] bg-[#FF5540] p-6 sm:p-8 md:p-10 flex flex-col items-start justify-between text-left shadow-2xl"
+              className="lg:col-span-1 rounded-[20px] bg-[#FF5540] p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center text-center shadow-2xl"
             >
-              {/* Rocket Icon */}
-              <div className="text-[#1A100E] mb-4 sm:mb-6">
-                <Rocket className="h-12 w-12 sm:h-14 sm:w-14 -rotate-45 stroke-[2.2]" />
+              {/* Rocket Icon (Centered, 45 degree angle) */}
+              <div className="text-[#2B0E0A] mb-5 sm:mb-6 flex items-center justify-center">
+                <Rocket className="h-11 w-11 sm:h-12 sm:w-12" fill="currentColor" />
               </div>
 
               {/* Title */}
-              <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#141414] mb-3">
+              <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#2B0E0A] mb-2.5">
                 Momentum
               </h3>
 
               {/* Description */}
-              <p className="text-sm sm:text-base font-light leading-relaxed text-[#1A100E]/90 max-w-xs">
+              <p className="text-sm sm:text-base font-normal leading-relaxed text-[#3A1410]/85 max-w-xs">
                 Driving strategic velocity for global market leaders since 2018.
               </p>
             </motion.div>

@@ -121,11 +121,11 @@ export function AboutPillars() {
                 </div>
 
                 {/* Stat Label */}
-                <div className="shrink-0 text-left">
+                <div className="shrink-0 text-left sm:text-right">
                   <span className="text-xs sm:text-sm font-normal text-[#FFB4A8] leading-tight block">
                     100% Efficiency
                   </span>
-                  <span className="text-xs sm:text-sm font-normal text-[#FFB4A8] leading-tight block">
+                  <span className="text-xs sm:text-sm font-normal text-[#A6A09A] leading-tight block">
                     Gain
                   </span>
                 </div>

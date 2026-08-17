@@ -2,7 +2,6 @@ import { useState } from 'react'
 import {
   MessageSquare,
   Mail,
-  ArrowUpRight,
 } from 'lucide-react'
 import { AssistantWidget } from '#/components/chat/AssistantWidget'
 
@@ -65,21 +64,18 @@ export function Footer() {
             </h3>
             <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
-                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>Custom Software</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Custom Software
                 </a>
               </li>
               <li>
-                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>Product Development</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Product Development
                 </a>
               </li>
               <li>
-                <a href="#solutions" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>AI Solutions</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  AI Solutions
                 </a>
               </li>
             </ul>
@@ -92,21 +88,23 @@ export function Footer() {
             </h3>
             <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
-                <a href="#about" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>About Us</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/about" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  About Us
                 </a>
               </li>
               <li>
-                <a href="#services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>Case Studies</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Services
                 </a>
               </li>
               <li>
-                <a href="#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>Contact</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/#cases" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Case Studies
+                </a>
+              </li>
+              <li>
+                <a href="/#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Contact
                 </a>
               </li>
             </ul>
@@ -119,15 +117,13 @@ export function Footer() {
             </h3>
             <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
-                <a href="#privacy" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>Privacy Policy</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/#privacy" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#terms" className="hover:text-white transition-colors duration-200 text-[#EBBBB4] flex items-center gap-1 group">
-                  <span>Terms of Service</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#FF5540]" />
+                <a href="/#terms" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Terms of Service
                 </a>
               </li>
             </ul>

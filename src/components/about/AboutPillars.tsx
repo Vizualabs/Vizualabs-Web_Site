@@ -75,7 +75,7 @@ function InsightIcon({ className = 'h-6 w-6' }: { className?: string }) {
 
 export function AboutPillars() {
   return (
-    <section className="relative w-full bg-[#0a0a0a] py-16 sm:py-24 px-6 sm:px-10 lg:px-16 overflow-hidden selection:bg-[#FF5540] selection:text-white">
+    <section className="relative w-full bg-[#0a0a0a] py-12 sm:py-20 md:py-24 px-4 sm:px-8 lg:px-16 overflow-hidden selection:bg-[#FF5540] selection:text-white">
       <MotionConfig reducedMotion="user">
         <div className="relative mx-auto max-w-7xl">
           {/* Bento Grid */}
@@ -85,16 +85,16 @@ export function AboutPillars() {
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.45, ease: EASE, delay: 0 }}
-              className="lg:col-span-2 rounded-[20px] bg-[#2A2A2A] border border-[#3A3735] p-6 sm:p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#4A4745]"
+              className="lg:col-span-2 rounded-[20px] bg-[#2A2A2A] border border-[#3A3735] p-5 sm:p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#4A4745]"
             >
               <div>
                 {/* Compass Icon */}
-                <div className="text-[#FFB4A8] mb-6">
+                <div className="text-[#FFB4A8] mb-5 sm:mb-6">
                   <CompassIcon className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
 
                 {/* Title */}
-                <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#E5E2E1] mb-4">
+                <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#E5E2E1] mb-3 sm:mb-4">
                   The Architectural Void
                 </h2>
 
@@ -105,7 +105,7 @@ export function AboutPillars() {
               </div>
 
               {/* Bottom Stat & Progress Bar */}
-              <div className="mt-10 sm:mt-14 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="mt-8 sm:mt-14 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 {/* Progress Track */}
                 <div className="flex-1 max-w-xl">
                   <div className="h-[3px] w-full rounded-full bg-[#E5E2E1]/20 overflow-hidden">
@@ -160,13 +160,13 @@ export function AboutPillars() {
               {...fadeUp}
               transition={{ duration: 0.38, ease: EASE, delay: 0.1 }}
               whileHover={{ y: -2 }}
-              className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-6 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[220px]"
+              className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-5 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[190px] sm:min-h-[220px]"
             >
               <div>
-                <div className="text-[#C6C6C7] mb-5">
+                <div className="text-[#C6C6C7] mb-4 sm:mb-5">
                   <Shield className="h-6 w-6 sm:h-7 sm:w-7 stroke-[1.8]" />
                 </div>
-                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
+                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2">
                   Security
                 </h3>
                 <p className="text-sm sm:text-base font-light leading-relaxed text-[#E5E2E1]/60">
@@ -180,13 +180,13 @@ export function AboutPillars() {
               {...fadeUp}
               transition={{ duration: 0.38, ease: EASE, delay: 0.15 }}
               whileHover={{ y: -2 }}
-              className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-6 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[220px]"
+              className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-5 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[190px] sm:min-h-[220px]"
             >
               <div>
-                <div className="text-[#C6C6C7] mb-5">
+                <div className="text-[#C6C6C7] mb-4 sm:mb-5">
                   <IntegrationIcon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
-                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
+                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2">
                   Integration
                 </h3>
                 <p className="text-sm sm:text-base font-light leading-relaxed text-[#E5E2E1]/60">
@@ -200,13 +200,13 @@ export function AboutPillars() {
               {...fadeUp}
               transition={{ duration: 0.38, ease: EASE, delay: 0.2 }}
               whileHover={{ y: -2 }}
-              className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-6 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[220px]"
+              className="rounded-[16px] bg-[#171615] border border-[#2A2826] p-5 sm:p-8 flex flex-col justify-between shadow-2xl transition-colors duration-300 hover:border-[#3A3735] min-h-[190px] sm:min-h-[220px]"
             >
               <div>
-                <div className="text-[#C6C6C7] mb-5">
+                <div className="text-[#C6C6C7] mb-4 sm:mb-5">
                   <InsightIcon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
-                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
+                <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-2">
                   Data Insight
                 </h3>
                 <p className="text-sm sm:text-base font-light leading-relaxed text-[#E5E2E1]/60">

@@ -91,7 +91,7 @@ export function ContactSection() {
   return (
     <section
       id="contact"
-      className="relative isolate overflow-hidden bg-[#0a0a0a] px-6 py-28 text-[#E5E2E1] selection:bg-[#FF5540] selection:text-[#0a0a0a] sm:px-10 sm:py-32 lg:px-16 lg:py-40"
+      className="relative isolate overflow-hidden bg-[#0a0a0a] px-4 py-20 text-[#E5E2E1] selection:bg-[#FF5540] selection:text-[#0a0a0a] sm:px-8 sm:py-28 lg:px-16 lg:py-36"
     >
       <div className="pointer-events-none absolute -left-40 top-1/3 h-96 w-96 rounded-full bg-[#FF5540]/[0.035] blur-[140px]" />
       <div className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-[#FF5540]/[0.035] blur-[130px]" />
@@ -110,7 +110,7 @@ export function ContactSection() {
               Ready to accelerate your engineering roadmap? Our team of architects and strategists are standing by.
             </p>
 
-            <div className="mt-12 space-y-7">
+            <div className="mt-10 sm:mt-12 space-y-6 sm:space-y-7">
               <div className="flex gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#3A3735] bg-[#171615] text-[#FFB4A8]">
                   <MapPin className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
@@ -132,10 +132,10 @@ export function ContactSection() {
                 <div className="pt-0.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFB4A8]">Communications</p>
                   <div className="mt-1.5 flex flex-col text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
-                    <a className="transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:strategy@vizualabs.tech">
+                    <a className="break-all sm:break-normal transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:strategy@vizualabs.tech">
                       strategy@vizualabs.tech
                     </a>
-                    <a className="transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:press@vizualabs.tech">
+                    <a className="break-all sm:break-normal transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:press@vizualabs.tech">
                       press@vizualabs.tech
                     </a>
                   </div>
@@ -143,7 +143,7 @@ export function ContactSection() {
               </div>
             </div>
 
-            <div className="mt-12 border-t border-white/10 pt-7">
+            <div className="mt-10 sm:mt-12 border-t border-white/10 pt-6 sm:pt-7">
               <p className="mb-4 font-geist text-xs font-medium uppercase tracking-[0.16em] text-[#E5E2E1]/40">Connect with us</p>
               <div className="flex gap-3">
                 {socialLinks.map((social) => (
@@ -167,7 +167,7 @@ export function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
-            className="w-full max-w-[560px] justify-self-end rounded-[20px] border border-[#2A2826] bg-[#171615] p-6 sm:p-8 lg:p-9 shadow-[0_24px_64px_rgba(0,0,0,0.34),0_8px_24px_rgba(0,0,0,0.2)]"
+            className="w-full max-w-[560px] justify-self-end rounded-[20px] border border-[#2A2826] bg-[#171615] p-5 sm:p-7 lg:p-8 shadow-[0_24px_64px_rgba(0,0,0,0.34),0_8px_24px_rgba(0,0,0,0.2)]"
           >
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>

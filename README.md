@@ -27,6 +27,41 @@ The dev server runs on `http://localhost:3000`.
 | `bun run preview`    | Preview the production build locally     |
 | `bun run generate-routes` | Regenerate the TanStack Router route tree |
 
+## Quick Start (Makefile / make.bat)
+
+The project ships with two cross-platform command runners — a `Makefile` (for
+Linux/macOS/WSL/Git Bash) and a `make.bat` (for Windows CMD). They expose the
+same commands, so you can use whichever works on your machine.
+
+| Command        | Description                                                  |
+| -------------- | ------------------------------------------------------------ |
+| `start`        | One-shot setup: install deps + `.env` (if missing), then run dev |
+| `install`      | Install dependencies (`bun install`)                          |
+| `dev`          | Start the dev server (`http://localhost:3000`)                |
+| `build`        | Build the app for production                                  |
+| `preview`      | Preview the production build locally                          |
+| `routes`       | Regenerate the TanStack Router route tree                     |
+| `typecheck`    | Run TypeScript type checking (`tsc --noEmit`)                 |
+| `test`         | Run Playwright end-to-end tests                               |
+| `test-ui`      | Run Playwright tests in UI mode                               |
+| `clean`        | Remove build artifacts (`dist`, `test-results`, `.tanstack`)  |
+| `env`          | Copy `.env.example` -> `.env` (if missing)                    |
+
+### Windows
+
+```bat
+make.bat start
+```
+
+Or double-click `start-dev.bat` to launch the full project in one go (installs
+dependencies and creates `.env` on first run, then starts the dev server).
+
+### Linux / macOS / WSL / Git Bash
+
+```bash
+make start
+```
+
 ## Project Structure
 
 ```

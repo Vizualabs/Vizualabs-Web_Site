@@ -10,7 +10,7 @@ export const Route = createFileRoute('/about')({
 
 function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#313131] text-white font-sans selection:bg-[#FF5540] selection:text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#FF5540] selection:text-white">
       {/* Dynamic Header */}
       <Navbar />
 

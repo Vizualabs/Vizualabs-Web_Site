@@ -140,17 +140,17 @@ export function AboutPillars() {
               className="lg:col-span-1 rounded-[20px] bg-[#FF5540] p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center text-center shadow-2xl"
             >
               {/* Rocket Icon (Centered, 45 degree angle) */}
-              <div className="text-[#2B0E0A] mb-5 sm:mb-6 flex items-center justify-center">
+              <div className="text-[#5C0000] mb-5 sm:mb-6 flex items-center justify-center">
                 <Rocket className="h-11 w-11 sm:h-12 sm:w-12" fill="currentColor" />
               </div>
 
               {/* Title */}
-              <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#2B0E0A] mb-2.5">
+              <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#5C0000] mb-2.5">
                 Momentum
               </h3>
 
               {/* Description */}
-              <p className="text-sm sm:text-base font-normal leading-relaxed text-[#3A1410]/85 max-w-xs">
+              <p className="text-sm sm:text-base font-normal leading-relaxed text-[#5C0000] max-w-xs">
                 Driving strategic velocity for global market leaders since 2018.
               </p>
             </motion.div>

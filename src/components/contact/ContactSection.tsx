@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { ArrowRight, AtSign, ChevronDown, MapPin, Mail } from 'lucide-react'
+import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail } from 'lucide-react'
 import { motion, MotionConfig } from 'motion/react'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
@@ -251,10 +251,10 @@ export function ContactSection() {
 
                 <button
                   type="submit"
-                  className="group mt-2 flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#FF5540] px-5 py-3 text-sm sm:text-base font-bold text-[#5C0000] shadow-[0_8px_24px_rgba(255,85,64,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ff422a] hover:shadow-[0_12px_30px_rgba(255,85,64,0.28)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB4A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
+                  className="group mt-2 flex min-h-13 w-full items-center justify-center gap-2.5 rounded-full bg-[#FF5540] px-5 py-3 text-sm sm:text-base font-bold text-[#5C0000] shadow-[0_8px_24px_rgba(255,85,64,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ff422a] hover:shadow-[0_12px_30px_rgba(255,85,64,0.28)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB4A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
                 >
                   Send Transmission
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+                  <SendHorizontal className="h-4.5 w-4.5 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={2.2} aria-hidden="true" />
                 </button>
               </form>
             )}

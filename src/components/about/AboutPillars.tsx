@@ -94,12 +94,12 @@ export function AboutPillars() {
                 </div>
 
                 {/* Title */}
-                <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#F4F0EB] mb-4">
+                <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#E5E2E1] mb-4">
                   The Architectural Void
                 </h2>
 
                 {/* Description */}
-                <p className="text-sm sm:text-base md:text-lg font-light leading-relaxed text-[#A6A09A] max-w-2xl">
+                <p className="text-sm sm:text-base md:text-lg font-light leading-relaxed text-[#E5E2E1]/60 max-w-2xl">
                   We specialize in turning "the void"—untapped technical potential—into stable, high-performance architectures. Our engineering core is built for enterprise-grade scalability.
                 </p>
               </div>

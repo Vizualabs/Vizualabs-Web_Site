@@ -83,7 +83,7 @@ export function ContactSection() {
             transition={{ duration: 0.55, ease: EASE }}
             className="max-w-xl"
           >
-            <h1 className="font-hanken text-4xl sm:text-5xl lg:text-[4rem] font-bold leading-[1.08] tracking-tight text-[#E5E2E1]">
+            <h1 className="font-hanken text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-bold leading-tight tracking-tight text-[#E5E2E1] sm:whitespace-nowrap">
               Initiate Strategic Contact
             </h1>
             <p className="mt-6 max-w-lg text-base sm:text-lg font-light leading-relaxed text-[#E5E2E1]/70">

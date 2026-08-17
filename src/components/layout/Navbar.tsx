@@ -6,12 +6,13 @@ interface NavItem {
   label: string
   href: string
   isRoute?: boolean
+  disabled?: boolean
 }
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
-  { label: 'Process', href: '/#process' },
+  { label: 'Process', href: '/#process', disabled: true },
   { label: 'Case Studies', href: '/#cases' },
 ]
 
@@ -111,6 +112,18 @@ export function Navbar() {
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-8">
           {NAV_ITEMS.map((item) => {
+            if (item.disabled) {
+              return (
+                <span
+                  key={item.label}
+                  className="nav-link cursor-not-allowed opacity-35 select-none hover:text-inherit"
+                  aria-disabled="true"
+                >
+                  {item.label}
+                </span>
+              )
+            }
+
             const isActive = item.isRoute
               ? currentPath === item.href ||
               (item.href === '/services' && currentPath.startsWith('/service')) ||
@@ -165,6 +178,18 @@ export function Navbar() {
         <div className="md:hidden bg-black/95 px-5 pb-8 pt-2 backdrop-blur-xl border-b border-white/10">
           <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => {
+              if (item.disabled) {
+                return (
+                  <span
+                    key={item.label}
+                    className="nav-link nav-link-mobile cursor-not-allowed opacity-35 select-none hover:text-inherit"
+                    aria-disabled="true"
+                  >
+                    {item.label}
+                  </span>
+                )
+              }
+
               const isActive = item.isRoute
                 ? currentPath === item.href ||
                 (item.href === '/services' && currentPath.startsWith('/service')) ||

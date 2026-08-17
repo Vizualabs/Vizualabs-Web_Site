@@ -77,7 +77,7 @@ export function ContactSection() {
       <div className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-[#FF5540]/[0.035] blur-[130px]" />
 
       <MotionConfig reducedMotion="user">
-        <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-20">
+        <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-16">
           <motion.div
             {...fadeUp}
             transition={{ duration: 0.55, ease: EASE }}
@@ -86,7 +86,7 @@ export function ContactSection() {
             <h1 className="font-hanken text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-bold leading-tight tracking-tight text-[#E5E2E1] sm:whitespace-nowrap">
               Initiate Strategic Contact
             </h1>
-            <p className="mt-6 max-w-lg text-base sm:text-lg font-light leading-relaxed text-[#E5E2E1]/70">
+            <p className="mt-6 max-w-lg text-sm sm:text-base font-light font-[300] leading-relaxed text-[#E5E2E1]/70">
               Ready to accelerate your engineering roadmap? Our team of architects and strategists are standing by.
             </p>
 
@@ -147,29 +147,29 @@ export function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
-            className="rounded-[20px] border border-[#2A2826] bg-[#171615] p-5 sm:p-6 lg:p-7 shadow-[0_24px_64px_rgba(0,0,0,0.34),0_8px_24px_rgba(0,0,0,0.2)]"
+            className="w-full max-w-[560px] justify-self-end rounded-[20px] border border-[#2A2826] bg-[#171615] p-6 sm:p-8 lg:p-9 shadow-[0_24px_64px_rgba(0,0,0,0.34),0_8px_24px_rgba(0,0,0,0.2)]"
           >
-            <div className="mb-5 flex items-start justify-between gap-4">
+            <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#FFB4A8]">Project inquiry</p>
-                <h2 className="mt-1 font-hanken text-xl font-bold tracking-tight text-[#E5E2E1] sm:text-2xl">Send a transmission</h2>
+                <h2 className="mt-1.5 font-hanken text-xl font-bold tracking-tight text-[#E5E2E1] sm:text-2xl">Send a transmission</h2>
               </div>
               <Mail className="mt-0.5 h-5 w-5 shrink-0 text-[#FFB4A8]" strokeWidth={1.6} aria-hidden="true" />
             </div>
 
             {submitted ? (
-              <div className="flex min-h-[280px] flex-col items-center justify-center text-center" role="status" aria-live="polite">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#FF5540]/40 bg-[#FF5540]/10 text-[#FFB4A8]">
-                  <Mail className="h-5 w-5" aria-hidden="true" />
+              <div className="flex min-h-[320px] flex-col items-center justify-center text-center" role="status" aria-live="polite">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#FF5540]/40 bg-[#FF5540]/10 text-[#FFB4A8]">
+                  <Mail className="h-6 w-6" aria-hidden="true" />
                 </div>
-                <h3 className="mt-4 font-hanken text-xl font-bold text-[#E5E2E1]">Transmission received.</h3>
-                <p className="mt-2 max-w-sm text-xs sm:text-sm leading-relaxed text-[#E5E2E1]/60">
+                <h3 className="mt-5 font-hanken text-2xl font-bold text-[#E5E2E1]">Transmission received.</h3>
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#E5E2E1]/60">
                   Our engineering strategists will review your message and be in touch shortly.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
-                  className="mt-5 min-h-10 rounded-xl border border-[#3A3735] px-4 text-xs sm:text-sm font-semibold text-[#E5E2E1] transition-colors hover:border-[#FF5540] hover:text-[#FF5540] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
+                  className="mt-6 min-h-11 rounded-xl border border-[#3A3735] px-5 text-sm font-semibold text-[#E5E2E1] transition-colors hover:border-[#FF5540] hover:text-[#FF5540] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
                 >
                   Send another
                 </button>
@@ -178,7 +178,7 @@ export function ContactSection() {
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="contact-name" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
+                    <label htmlFor="contact-name" className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
                       Full Name
                     </label>
                     <input
@@ -190,11 +190,11 @@ export function ContactSection() {
                       value={formData.name}
                       onChange={(event) => handleFieldChange('name', event.target.value)}
                       placeholder="John Doe"
-                      className="h-10 w-full rounded-xl border border-white/10 bg-black/35 px-3.5 text-sm text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
+                      className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-4 text-sm text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                     />
                   </div>
                   <div>
-                    <label htmlFor="contact-email" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
+                    <label htmlFor="contact-email" className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
                       Work Email
                     </label>
                     <input
@@ -206,13 +206,13 @@ export function ContactSection() {
                       value={formData.email}
                       onChange={(event) => handleFieldChange('email', event.target.value)}
                       placeholder="john@enterprise.com"
-                      className="h-10 w-full rounded-xl border border-white/10 bg-black/35 px-3.5 text-sm text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
+                      className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-4 text-sm text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="contact-subject" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
+                  <label htmlFor="contact-subject" className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
                     Subject of Inquiry
                   </label>
                   <div className="relative">
@@ -221,7 +221,7 @@ export function ContactSection() {
                       name="subject"
                       value={formData.subject}
                       onChange={(event) => handleFieldChange('subject', event.target.value)}
-                      className="h-10 w-full appearance-none rounded-xl border border-white/10 bg-black/35 px-3.5 pr-10 text-sm text-[#E5E2E1] outline-none transition-colors focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
+                      className="h-11 w-full appearance-none rounded-xl border border-white/10 bg-black/35 px-4 pr-10 text-sm text-[#E5E2E1] outline-none transition-colors focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                     >
                       <option>Product Development</option>
                       <option>Custom Software</option>
@@ -229,12 +229,12 @@ export function ContactSection() {
                       <option>Strategic Consulting</option>
                       <option>Press &amp; Media</option>
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#E5E2E1]/55" aria-hidden="true" />
+                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#E5E2E1]/55" aria-hidden="true" />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="contact-message" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
+                  <label htmlFor="contact-message" className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
                     Message
                   </label>
                   <textarea
@@ -245,13 +245,13 @@ export function ContactSection() {
                     value={formData.message}
                     onChange={(event) => handleFieldChange('message', event.target.value)}
                     placeholder="Describe your strategic engineering needs..."
-                    className="min-h-24 w-full resize-y rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-sm leading-relaxed text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
+                    className="min-h-32 w-full resize-y rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-sm leading-relaxed text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="group mt-1 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#FF5540] px-5 py-2.5 text-sm sm:text-base font-bold text-[#5C0000] shadow-[0_8px_24px_rgba(255,85,64,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ff422a] hover:shadow-[0_12px_30px_rgba(255,85,64,0.28)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB4A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
+                  className="group mt-2 flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#FF5540] px-5 py-3 text-sm sm:text-base font-bold text-[#5C0000] shadow-[0_8px_24px_rgba(255,85,64,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ff422a] hover:shadow-[0_12px_30px_rgba(255,85,64,0.28)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB4A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
                 >
                   Send Transmission
                   <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />

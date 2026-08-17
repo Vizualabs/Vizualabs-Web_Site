@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
-import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail } from 'lucide-react'
-import { motion, MotionConfig } from 'motion/react'
+import { useState, useRef, useEffect, type FormEvent } from 'react'
+import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check } from 'lucide-react'
+import { AnimatePresence, motion, MotionConfig } from 'motion/react'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -9,6 +9,14 @@ const fadeUp = {
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.2 },
 }
+
+const SUBJECT_OPTIONS = [
+  'Product Development',
+  'Custom Software',
+  'AI Solutions',
+  'Strategic Consulting',
+  'Press & Media',
+]
 
 type ContactFormData = {
   name: string
@@ -57,6 +65,18 @@ const socialLinks = [
 export function ContactSection() {
   const [formData, setFormData] = useState(initialFormData)
   const [submitted, setSubmitted] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleFieldChange = (field: keyof ContactFormData, value: string) => {
     setSubmitted(false)
@@ -211,26 +231,65 @@ export function ContactSection() {
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="contact-subject" className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
+                <div ref={dropdownRef} className="relative">
+                  <label htmlFor="contact-subject-btn" className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#E5E2E1]/55">
                     Subject of Inquiry
                   </label>
-                  <div className="relative">
-                    <select
-                      id="contact-subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={(event) => handleFieldChange('subject', event.target.value)}
-                      className="h-11 w-full appearance-none rounded-xl border border-white/10 bg-black/35 px-4 pr-10 text-sm text-[#E5E2E1] outline-none transition-colors focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
-                    >
-                      <option>Product Development</option>
-                      <option>Custom Software</option>
-                      <option>AI Solutions</option>
-                      <option>Strategic Consulting</option>
-                      <option>Press &amp; Media</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#E5E2E1]/55" aria-hidden="true" />
-                  </div>
+                  <button
+                    id="contact-subject-btn"
+                    type="button"
+                    onClick={() => setDropdownOpen((prev) => !prev)}
+                    className={`flex h-11 w-full items-center justify-between rounded-xl border bg-black/35 px-4 text-sm text-[#E5E2E1] outline-none transition-all duration-200 ${
+                      dropdownOpen
+                        ? 'border-[#FF5540] ring-1 ring-[#FF5540]'
+                        : 'border-white/10 hover:border-white/20'
+                    }`}
+                    aria-haspopup="listbox"
+                    aria-expanded={dropdownOpen}
+                  >
+                    <span>{formData.subject}</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${dropdownOpen ? 'rotate-180 text-[#FF5540]' : 'text-[#E5E2E1]/55'}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {dropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                        transition={{ duration: 0.18, ease: EASE }}
+                        className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border border-[#3A3735] bg-[#171615] p-1.5 shadow-[0_16px_36px_rgba(0,0,0,0.65),0_4px_12px_rgba(0,0,0,0.4)] backdrop-blur-md"
+                        role="listbox"
+                      >
+                        {SUBJECT_OPTIONS.map((option) => {
+                          const isSelected = formData.subject === option
+                          return (
+                            <button
+                              key={option}
+                              type="button"
+                              onClick={() => {
+                                handleFieldChange('subject', option)
+                                setDropdownOpen(false)
+                              }}
+                              className={`flex w-full items-center justify-between rounded-lg px-3.5 py-2.5 text-left text-sm transition-colors duration-150 ${
+                                isSelected
+                                  ? 'bg-[#FF5540]/15 font-medium text-[#FFB4A8]'
+                                  : 'text-[#E5E2E1]/85 hover:bg-white/5 hover:text-[#E5E2E1]'
+                              }`}
+                              role="option"
+                              aria-selected={isSelected}
+                            >
+                              <span>{option}</span>
+                              {isSelected && <Check className="h-4 w-4 text-[#FFB4A8]" />}
+                            </button>
+                          )
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div>

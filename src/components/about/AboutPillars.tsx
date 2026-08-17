@@ -1,6 +1,5 @@
 import { motion, MotionConfig } from 'motion/react'
 import { Rocket, Shield } from 'lucide-react'
-import { FlameWrap } from '../canvasui/FlameWrap'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -133,53 +132,27 @@ export function AboutPillars() {
               </div>
             </motion.div>
 
-            {/* Top-Right Accent Card: Momentum (Fire-wrapped vibrant red-orange, centered) */}
+            {/* Top-Right Accent Card: Momentum (Solid vibrant red-orange, centered) */}
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.4, ease: EASE, delay: 0.08 }}
               whileHover={{ y: -2 }}
-              className="lg:col-span-1 rounded-[20px] shadow-2xl"
+              className="lg:col-span-1 rounded-[20px] bg-[#FF5540] p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center text-center shadow-2xl"
             >
-              <FlameWrap
-                color={[1, 0.333, 0.251]}
-                radius={20}
-                intensity={0.8}
-                height={150}
-                spread={14}
-                speed={0.28}
-                scale={0.7}
-                turbulence={0.5}
-                turbulenceScale={0.5}
-                turbulenceReach={20}
-                sparks={1.3}
-                sparkSize={0.35}
-                sparkDensity={1}
-                sparkSpeed={1}
-                rim={2.5}
-                melt={4}
-                distortion={8}
-                smoke={1.2}
-                ember={2}
-                scorch={0}
-                className="h-full w-full"
-              >
-                <div className="h-full w-full rounded-[20px] bg-[#FF5540] p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center text-center">
-                  {/* Rocket Icon (Centered, 45 degree angle) */}
-                  <div className="text-[#5C0000] mb-5 sm:mb-6 flex items-center justify-center">
-                    <Rocket className="h-11 w-11 sm:h-12 sm:w-12" fill="currentColor" />
-                  </div>
+              {/* Rocket Icon (Centered, 45 degree angle) */}
+              <div className="text-[#5C0000] mb-5 sm:mb-6 flex items-center justify-center">
+                <Rocket className="h-11 w-11 sm:h-12 sm:w-12" fill="currentColor" />
+              </div>
 
-                  {/* Title */}
-                  <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#5C0000] mb-2.5">
-                    Momentum
-                  </h3>
+              {/* Title */}
+              <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#5C0000] mb-2.5">
+                Momentum
+              </h3>
 
-                  {/* Description */}
-                  <p className="text-sm sm:text-base font-normal leading-relaxed text-[#5C0000] max-w-xs">
-                    Driving strategic velocity for global market leaders since 2018.
-                  </p>
-                </div>
-              </FlameWrap>
+              {/* Description */}
+              <p className="text-sm sm:text-base font-normal leading-relaxed text-[#5C0000] max-w-xs">
+                Driving strategic velocity for global market leaders since 2018.
+              </p>
             </motion.div>
 
             {/* Bottom Row - Card 1: Security */}

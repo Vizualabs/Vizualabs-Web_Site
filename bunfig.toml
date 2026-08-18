@@ -1,0 +1,4 @@
+[run]
+# Make `bun run <script>` use the Bun runtime, same as `bun --bun run <script>`.
+# Matches Netlify (`bun --bun run build` / `bun --bun run dev`).
+bun = true

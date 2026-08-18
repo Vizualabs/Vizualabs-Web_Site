@@ -57,6 +57,7 @@ export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
+  const maskBitmapRef = useRef<ImageBitmap | null>(null)
 
   // Pre-cropped, pre-scaled GPU bitmaps — the ONLY thing kept in memory.
   const bitmapsRef = useRef<(ImageBitmap | undefined)[]>([])
@@ -144,33 +145,28 @@ export function ScrollHeroSection() {
   }
 
   /**
-   * Where the frame lands inside the viewport, in CSS pixels.
-   *
-   * Single source of truth: drawFrame calls it with the real bitmap size, and
-   * the silhouette mask calls it with the source aspect so the mask always
-   * lines up with the pixels being drawn.
+   * CSS box of the canvas — not window.innerHeight. On mobile, 100vh / h-screen
+   * and the visual viewport disagree, and stretching a smaller bitmap into a
+   * taller CSS box is what sliced the face with the silhouette mask.
+   */
+  const getViewSize = () => {
+    const canvas = canvasRef.current
+    const width = canvas?.clientWidth || window.innerWidth
+    const height = canvas?.clientHeight || window.innerHeight
+    return { width, height }
+  }
+
+  /**
+   * Where the frame lands inside the canvas, in CSS pixels.
+   * Same scale on every breakpoint so the heading sits behind the subject
+   * the way the desktop composition does.
    */
   const computeImageRect = (bmpW: number, bmpH: number) => {
-    const width = window.innerWidth
-    const height = window.innerHeight
-    const isMobile = width < 768
-
-    // Desktop anchors the subject near full viewport height so the heading sits
-    // behind it. Mobile keeps the subject noticeably smaller so the heading and
-    // stats stay legible instead of overflowing the screen.
-    const targetRenderHeight = isMobile ? height * 0.7 : height * 0.86
-    let scale = targetRenderHeight / bmpH
-
-    // Ensure minimum scale on very narrow screens so subject doesn't shrink too small
-    if (isMobile) {
-      const minWScale = (width * 0.84) / bmpW
-      scale = Math.max(scale, minWScale)
-    }
-
+    const { width, height } = getViewSize()
+    const scale = (height * 0.86) / bmpH
     const renderW = bmpW * scale
     const renderH = bmpH * scale
 
-    // Center horizontally, anchor bottom flush to the hero bottom
     return {
       renderW,
       renderH,
@@ -181,34 +177,22 @@ export function ScrollHeroSection() {
     }
   }
 
-  // Point the CSS silhouette mask at exactly the rect the frame is drawn into.
-  const syncMaskGeometry = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const { renderW, renderH, offsetX, offsetY } = computeImageRect(
-      SOURCE_WIDTH,
-      CROPPED_SOURCE_HEIGHT
-    )
-    canvas.style.setProperty('--hero-mask-size', `${renderW}px ${renderH}px`)
-    canvas.style.setProperty('--hero-mask-pos', `${offsetX}px ${offsetY}px`)
-  }
-
-  // Keep canvas bitmap size in sync with the viewport (call on resize).
+  // Keep canvas bitmap size in sync with the CSS box (call on resize).
   const syncCanvasSize = () => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = ensureContext()
     if (!ctx) return
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
-    const targetW = Math.round(window.innerWidth * dpr)
-    const targetH = Math.round(window.innerHeight * dpr)
+    const { width, height } = getViewSize()
+    const targetW = Math.round(width * dpr)
+    const targetH = Math.round(height * dpr)
     if (canvas.width !== targetW || canvas.height !== targetH) {
       canvas.width = targetW
       canvas.height = targetH
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
     }
-    syncMaskGeometry()
   }
 
   // Draw specific frame. Bitmaps are already cropped & scaled to display
@@ -223,10 +207,9 @@ export function ScrollHeroSection() {
     if (!bitmap) return
 
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
-    const width = window.innerWidth
-    const height = window.innerHeight
+    const { width, height } = getViewSize()
 
-    // Ensure physical canvas resolution accounts for retina screens
+    // Ensure physical canvas resolution matches the CSS box — never stretch.
     const targetW = Math.round(width * dpr)
     const targetH = Math.round(height * dpr)
     if (canvas.width !== targetW || canvas.height !== targetH) {
@@ -248,6 +231,16 @@ export function ScrollHeroSection() {
     )
 
     ctx.drawImage(bitmap, offsetX, offsetY, renderW, renderH)
+
+    // Punch the silhouette in canvas space. CSS mask-image + GPU layers on
+    // mobile was shifting the matte and cutting horizontal holes through the
+    // face; destination-in stays locked to the same rect as the frame.
+    const mask = maskBitmapRef.current
+    if (mask) {
+      ctx.globalCompositeOperation = 'destination-in'
+      ctx.drawImage(mask, offsetX, offsetY, renderW, renderH)
+      ctx.globalCompositeOperation = 'source-over'
+    }
   }
 
   /**
@@ -527,6 +520,35 @@ export function ScrollHeroSection() {
     }
   }, [isLoading])
 
+  // Silhouette matte: decoded once, then composited in drawFrame so the cut
+  // cannot drift from the subject on mobile viewports.
+  useEffect(() => {
+    let cancelled = false
+    void fetch('/hero-subject-mask.png')
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        return response.blob()
+      })
+      .then((blob) => createImageBitmap(blob))
+      .then((bitmap) => {
+        if (cancelled) {
+          bitmap.close()
+          return
+        }
+        maskBitmapRef.current = bitmap
+        drawFrame(currentFrameRef.current)
+      })
+      .catch(() => {
+        // Frames still paint; without the matte the heading stays covered.
+      })
+
+    return () => {
+      cancelled = true
+      maskBitmapRef.current?.close()
+      maskBitmapRef.current = null
+    }
+  }, [])
+
   // The hero canvas only exists once Blaze mounts, so paint the current frame
   // as soon as it does — during 'warmup', while the plane is still opaque —
   // guaranteeing a fully drawn hero the instant the iris opens.
@@ -630,11 +652,13 @@ export function ScrollHeroSection() {
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleResize)
+    window.visualViewport?.addEventListener('resize', handleResize)
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
+      window.visualViewport?.removeEventListener('resize', handleResize)
       window.removeEventListener('mousemove', handleMouseMove)
       if (scrollRafRef.current) {
         cancelAnimationFrame(scrollRafRef.current)
@@ -648,11 +672,11 @@ export function ScrollHeroSection() {
       ref={containerRef}
       data-testid="hero-scroll-container"
       className="relative w-full bg-black"
-      style={{ height: '105vh' }}
+      style={{ height: '105dvh' }}
     >
       {/* Sticky Hero Container pinned during scroll sequence */}
       <div
-        className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black flex items-center justify-center select-none"
+        className="sticky top-0 left-0 w-full h-screen h-dvh overflow-hidden bg-black flex items-center justify-center select-none"
         style={{ willChange: 'transform' }}
       >
 
@@ -694,8 +718,7 @@ export function ScrollHeroSection() {
                    so the canvas sits above the heading that precedes it while the
                    Blaze fire — a later sibling of this wrapper — still paints over
                    the canvas exactly as it did before. */
-                className="hero-sequence-canvas absolute inset-0 w-full h-full block"
-                style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+                className="absolute inset-0 w-full h-full block"
               />
 
               {/* Subtle Radial Edge Vignette Falloff */}
@@ -706,11 +729,8 @@ export function ScrollHeroSection() {
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_92%_at_50%_52%,transparent_52%,rgba(0,0,0,0.72)_100%)] z-10" />
 
               {/* Top Center Pill Badge — sits below the fixed navbar (h-20) so it
-                  no longer collides with the nav links / logo.
-                  Mobile centres it in the empty band between the navbar and the
-                  heading (~10vh..42vh) instead of pinning it near the top, which
-                  pooled all the dead space into one gap under the badge. */}
-              <div className="absolute top-[26vh] md:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
+                  no longer collides with the nav links / logo. */}
+              <div className="absolute top-24 md:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-md shadow-[#FF5E4D]/10">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_6px_#FF5E4D]" />
                   <span className="text-[8.5px] sm:text-[11px] font-semibold tracking-[0.14em] sm:tracking-[0.2em] text-[#FF5E4D] uppercase">

@@ -154,30 +154,14 @@
    ========================================================================== */
 
 /*
-  The frames are opaque photos on black, so the canvas would paint a solid
-  rectangle over anything behind it. Masking to the subject's silhouette
-  removes that rectangle, leaving only the boy — which is what lets the
-  heading sit genuinely underneath him. Geometry vars are written from JS to
-  match the exact rect the frame is drawn into.
+  The frames are opaque photos on black. The silhouette cut is applied in
+  canvas (destination-in) so the matte cannot drift from the subject when
+  mobile browsers disagree about 100vh vs the visual viewport.
 */
-.hero-sequence-canvas {
-  --hero-mask-size: 100% 100%;
-  --hero-mask-pos: 0 0;
-  -webkit-mask-image: url('/hero-subject-mask.png');
-  mask-image: url('/hero-subject-mask.png');
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: var(--hero-mask-size);
-  mask-size: var(--hero-mask-size);
-  -webkit-mask-position: var(--hero-mask-pos);
-  mask-position: var(--hero-mask-pos);
-}
 
 /*
   Sized so "Your Digital Success" stays on ONE line at every width — if it
   wraps, the third line falls entirely behind the subject and disappears.
-  Mobile needs a smaller ratio because the sequence scales the subject up
-  there (105% of viewport height), leaving far less clear space.
 */
 .font-hanken {
   font-family: var(--font-hanken);

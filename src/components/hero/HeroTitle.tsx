@@ -31,11 +31,9 @@ export function HeroTitle({ start }: { start: boolean }) {
     <div
       data-testid="hero-title"
       aria-hidden={!start}
-      /* Mobile sits far lower than desktop because the sequence anchors the
-         subject to the bottom at 70% height there, putting its head near 47vh —
-         the heading has to start below that to run behind it. Breakpoint is md
-         (768px) to match the isMobile threshold in computeImageRect. */
-      className="pointer-events-none absolute inset-x-0 top-[42vh] flex flex-col items-center px-4 text-center md:top-[23vh] overflow-hidden"
+      /* Same band as desktop: the subject is bottom-anchored at 86% of the
+         hero, so the heading sits behind the head and reads around the profile. */
+      className="pointer-events-none absolute inset-x-0 top-[22vh] flex flex-col items-center px-4 text-center md:top-[23vh] overflow-hidden"
     >
       <h1 className="hero-title-type font-hanken m-0 w-full font-black leading-[0.92] tracking-[-0.02em]">
         <span className="hero-title-line block overflow-hidden mt-0">

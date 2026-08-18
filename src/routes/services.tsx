@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Navbar } from '../components/layout/Navbar'
 import { ServicesHero } from '../components/services/ServicesHero'
+import { ServicesShowcase } from '../components/services/ServicesShowcase'
 import { ServicesCtaSection } from '../components/services/ServicesCtaSection'
 import { Footer } from '../components/layout/Footer'
 
@@ -14,6 +15,9 @@ function ServicesPage() {
 
       {/* Services Hero Section matching exact design */}
       <ServicesHero />
+
+      {/* Interactive service selector and project showcase */}
+      <ServicesShowcase />
 
       {/* Services CTA Section: Ready to Architect Your Future? */}
       <ServicesCtaSection />

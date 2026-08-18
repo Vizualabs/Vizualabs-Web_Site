@@ -613,6 +613,18 @@ html[data-intro-loading="true"] header {
   transform: translateY(-100%) !important;
 }
 
+header,
+header a,
+header a:focus,
+header a:focus-visible,
+header a:active,
+header span {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 .nav-link {
   position: relative;
   font-family: var(--font-sans);

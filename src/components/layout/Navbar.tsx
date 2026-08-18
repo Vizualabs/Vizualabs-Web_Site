@@ -97,14 +97,18 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${visible && !introLoading ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+      className={`fixed inset-x-0 top-0 z-40 border-0 border-none outline-none transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${visible && !introLoading ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
         } ${scrolled ? 'bg-black/80 backdrop-blur-xl shadow-lg shadow-black/50' : 'bg-transparent'
         }`}
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
         {/* Brand logo — Hanken Grotesk wordmark */}
-        <Link to="/" className="flex items-center gap-2" aria-label="Vizualabs home">
-          <span className="font-hanken text-[1.65rem] font-extrabold tracking-tight text-white">
+        <Link
+          to="/"
+          className="flex items-center gap-2 border-0 border-none outline-none ring-0 shadow-none select-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none active:border-none no-underline"
+          aria-label="Vizualabs home"
+        >
+          <span className="font-hanken text-[1.65rem] font-extrabold tracking-tight text-white border-0 border-none outline-none ring-0 select-none">
             Vizualabs
           </span>
         </Link>
@@ -156,7 +160,7 @@ export function Navbar() {
 
         {/* Contact button — solid red-orange pill button */}
         <div className="hidden md:block">
-            <a href="/contact#contact" className="nav-contact-btn">
+          <a href="/contact#contact" className="nav-contact-btn">
             Contact Us
           </a>
         </div>

@@ -315,7 +315,7 @@ export function ServicesShowcase() {
                   <h2 className="font-hanken text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
                     {service.title}
                   </h2>
-                  <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4]/80 max-w-2xl mx-auto">
+                  <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4] max-w-2xl mx-auto">
                     {service.subtitle}
                   </p>
                 </div>
@@ -335,8 +335,8 @@ export function ServicesShowcase() {
                         {service.primaryCard.title}
                       </h3>
 
-                      {/* Description */}
-                      <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]/75">
+                      {/* Description (100% #EBBBB4) */}
+                      <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]">
                         {service.primaryCard.description}
                       </p>
                     </div>
@@ -365,7 +365,7 @@ export function ServicesShowcase() {
                           <h3 className="font-hanken text-2xl sm:text-3xl font-bold tracking-tight text-[#E5E2E1] mb-3">
                             {service.topRightCard.title}
                           </h3>
-                          <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]/75">
+                          <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]">
                             {service.topRightCard.description}
                           </p>
                         </div>
@@ -386,22 +386,22 @@ export function ServicesShowcase() {
                         <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
                           {service.bottomMiddleCard.title}
                         </h4>
-                        <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]/75">
+                        <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]">
                           {service.bottomMiddleCard.description}
                         </p>
                       </div>
 
-                      {/* Bottom-Right Action Card (Soft Peach / Coral background routing to /contact) */}
+                      {/* Bottom-Right Action Card (Cream/Peach #FFB4A8 box with #690100 text) */}
                       <a
                         href={`/contact?service=${service.contactParam}`}
-                        className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-7 sm:p-8 shadow-xl text-[#78170B] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
+                        className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-7 sm:p-8 shadow-xl text-[#690100] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
                       >
-                        <h4 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight leading-snug pr-2">
+                        <h4 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight leading-snug pr-2 text-[#690100]">
                           {service.actionCard.title}
                         </h4>
 
                         <div className="mt-8 flex items-center justify-start">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#78170B] text-[#78170B] transition-all duration-300 group-hover:bg-[#78170B] group-hover:text-[#FFB4A8] group-hover:scale-105">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#690100] text-[#690100] transition-all duration-300 group-hover:bg-[#690100] group-hover:text-[#FFB4A8] group-hover:scale-105">
                             <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={2.4} />
                           </div>
                         </div>

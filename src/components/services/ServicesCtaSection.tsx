@@ -39,13 +39,12 @@ export function ServicesCtaSection() {
 
             {/* Action Buttons */}
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
-              {/* Shimmer Button: #EE2E10 with gold shimmer and gold border */}
+              {/* Shimmer Button: #EE2E10 with gold shimmer */}
               <ShimmerButton
                 type="button"
                 onClick={() => setModalOpen(true)}
                 background="#EE2E10"
                 shimmerColor="#FFD700"
-                borderColor="#FFD700"
                 textColor="text-zinc-950"
                 shimmerSize="0.15em"
                 shimmerDuration="2.5s"

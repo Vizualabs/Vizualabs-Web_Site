@@ -358,37 +358,35 @@ export function ServicesShowcase() {
 
                   {/* Right Column: Grid of 3 Cards (Span 6 on LG) */}
                   <div className="lg:col-span-6 flex flex-col gap-5 sm:gap-6">
-                    {/* Top-Right Card (Full width of right column) */}
-                    <div className="flex-1 flex items-start justify-between gap-6 rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
-                      <div className="max-w-md">
-                        <h3 className="font-hanken text-2xl sm:text-3xl font-bold tracking-tight text-[#E5E2E1] mb-3">
-                          {service.topRightCard.title}
-                        </h3>
-                        <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]/75">
-                          {service.topRightCard.description}
-                        </p>
-                      </div>
-
-                      {TopRightIcon && (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] shadow-inner">
-                          <TopRightIcon className="h-5 w-5" strokeWidth={1.8} />
+                    {/* Top-Right Card */}
+                    <div className="flex-1 min-h-[170px] sm:min-h-[190px] flex flex-col justify-center rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
+                      <div className="flex items-start justify-between gap-6">
+                        <div className="max-w-md">
+                          <h3 className="font-hanken text-2xl sm:text-3xl font-bold tracking-tight text-[#E5E2E1] mb-3">
+                            {service.topRightCard.title}
+                          </h3>
+                          <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]/75">
+                            {service.topRightCard.description}
+                          </p>
                         </div>
-                      )}
+
+                        {TopRightIcon && (
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] shadow-inner">
+                            <TopRightIcon className="h-5 w-5" strokeWidth={1.8} />
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Bottom Sub-grid: 2 Cards (Middle Bottom Card + Peach Action Card) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                    <div className="flex-[1.25] grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 min-h-[220px] sm:min-h-[250px]">
                       {/* Bottom-Middle Card */}
-                      <div className="flex flex-col justify-between rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-6 sm:p-8 shadow-xl transition-all duration-300 hover:border-white/15">
-                        <div>
-                          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-5 shadow-inner">
-                            <BottomMiddleIcon className="h-4 w-4" strokeWidth={1.8} />
-                          </div>
-                          <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight text-[#E5E2E1] mb-2">
-                            {service.bottomMiddleCard.title}
-                          </h4>
-                        </div>
-                        <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]/75 mt-2">
+                      <div className="h-full flex flex-col justify-start rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-8 shadow-xl transition-all duration-300 hover:border-white/15">
+                        <BottomMiddleIcon className="h-6 w-6 text-[#E7978B] mb-5 shrink-0" strokeWidth={1.8} />
+                        <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
+                          {service.bottomMiddleCard.title}
+                        </h4>
+                        <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]/75">
                           {service.bottomMiddleCard.description}
                         </p>
                       </div>
@@ -396,22 +394,16 @@ export function ServicesShowcase() {
                       {/* Bottom-Right Action Card (Soft Peach / Coral background routing to /contact) */}
                       <a
                         href={`/contact?service=${service.contactParam}`}
-                        className="group relative flex flex-col justify-between rounded-[2rem] sm:rounded-[2.25rem] bg-[#FFB4A8] p-6 sm:p-8 shadow-xl text-[#78170B] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
+                        className="h-full group relative flex flex-col justify-between rounded-[2rem] sm:rounded-[2.25rem] bg-[#FFB4A8] p-7 sm:p-8 shadow-xl text-[#78170B] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
                       >
                         <h4 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight leading-snug pr-2">
                           {service.actionCard.title}
                         </h4>
 
                         <div className="mt-8 flex items-center justify-start">
-                          {service.actionCard.circledArrow ? (
-                            <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#78170B] text-[#78170B] transition-all duration-300 group-hover:bg-[#78170B] group-hover:text-[#FFB4A8] group-hover:scale-105">
-                              <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={2.4} />
-                            </div>
-                          ) : (
-                            <div className="flex items-center text-[#78170B] transition-transform duration-300 group-hover:translate-x-1">
-                              <ArrowRight className="h-7 w-7" strokeWidth={2.5} />
-                            </div>
-                          )}
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#78170B] text-[#78170B] transition-all duration-300 group-hover:bg-[#78170B] group-hover:text-[#FFB4A8] group-hover:scale-105">
+                            <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={2.4} />
+                          </div>
                         </div>
                       </a>
                     </div>

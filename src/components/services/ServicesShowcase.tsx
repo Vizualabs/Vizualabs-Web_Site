@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import {
   Rocket,
   Settings,
@@ -9,9 +10,6 @@ import {
   TrendingUp,
   Share2,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  Network,
 } from 'lucide-react'
 
 interface ServiceData {
@@ -26,6 +24,8 @@ interface ServiceData {
     description: string
     image: string
     imageAlt: string
+    aspectRatio?: string
+    imagePosition?: string
     graphicType?: 'image' | 'architecture' | 'ai-brain'
   }
   topRightCard: {
@@ -59,6 +59,7 @@ const servicesData: ServiceData[] = [
         'We handle the entire lifecycle, from rapid prototyping to GTM strategies that ensure your product captures market share instantly.',
       image: '/service/image1.webp',
       imageAlt: 'Market acceleration product design across desktop, tablet, and mobile devices',
+      imagePosition: 'object-center',
       graphicType: 'image',
     },
     topRightCard: {
@@ -90,6 +91,7 @@ const servicesData: ServiceData[] = [
         'Building scalable, secure, and performant backends that handle the most demanding enterprise workloads.',
       image: '/service/image2.webp',
       imageAlt: 'High-concurrency microservices systems architecture mockup',
+      imagePosition: 'object-center',
       graphicType: 'image',
     },
     topRightCard: {
@@ -122,6 +124,7 @@ const servicesData: ServiceData[] = [
         'Private, secure, and fine-tuned language models specialized for your domain data and production-grade requirements.',
       image: '/service/image3.webp',
       imageAlt: 'Custom LLM deployment and AI neural systems interface',
+      imagePosition: 'object-center',
       graphicType: 'image',
     },
     topRightCard: {
@@ -143,275 +146,231 @@ const servicesData: ServiceData[] = [
   },
 ]
 
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 50 : -50,
+    opacity: 0,
+    filter: 'blur(3px)',
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    filter: 'blur(0px)',
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -50 : 50,
+    opacity: 0,
+    filter: 'blur(3px)',
+  }),
+}
+
 export function ServicesShowcase() {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const isProgrammaticScroll = useRef(false)
+  const [[page, direction], setPage] = useState([0, 1])
+  const [isPaused, setIsPaused] = useState(false)
 
-  // Scroll to slide when tab is clicked
-  const scrollToSlide = useCallback((index: number) => {
-    if (!scrollContainerRef.current) return
-    isProgrammaticScroll.current = true
-    setActiveIndex(index)
+  // Real index: 0, 1, 2
+  const activeIndex =
+    ((page % servicesData.length) + servicesData.length) % servicesData.length
 
-    const container = scrollContainerRef.current
-    const targetChild = container.children[index] as HTMLElement
-    if (targetChild) {
-      container.scrollTo({
-        left: targetChild.offsetLeft - container.offsetLeft,
-        behavior: 'smooth',
-      })
-    }
-
-    setTimeout(() => {
-      isProgrammaticScroll.current = false
-    }, 600)
+  const paginate = useCallback((newDirection: number) => {
+    setPage(([prevPage]) => [prevPage + newDirection, newDirection])
   }, [])
 
-  // Sync activeIndex on user horizontal scroll / touch swipe
-  const handleScroll = useCallback(() => {
-    if (isProgrammaticScroll.current || !scrollContainerRef.current) return
-    const container = scrollContainerRef.current
-    const scrollLeft = container.scrollLeft
-    const slideWidth = container.clientWidth
+  const goToSlide = useCallback((targetIndex: number) => {
+    setPage(([prevPage]) => {
+      const currentActive =
+        ((prevPage % servicesData.length) + servicesData.length) %
+        servicesData.length
+      if (targetIndex === currentActive) return [prevPage, 1]
+      const diff = targetIndex - currentActive
+      return [prevPage + diff, diff > 0 ? 1 : -1]
+    })
+  }, [])
 
-    if (slideWidth > 0) {
-      const newIndex = Math.round(scrollLeft / slideWidth)
-      if (newIndex >= 0 && newIndex < servicesData.length && newIndex !== activeIndex) {
-        setActiveIndex(newIndex)
-      }
-    }
-  }, [activeIndex])
-
+  // Automatic slide transition every 8 seconds in continuous forward cycling
   useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
+    if (isPaused) return
 
-    container.addEventListener('scroll', handleScroll, { passive: true })
-    return () => container.removeEventListener('scroll', handleScroll)
-  }, [handleScroll])
+    const interval = setInterval(() => {
+      paginate(1)
+    }, 8000)
 
-  const handlePrev = () => {
-    const nextIndex = activeIndex === 0 ? servicesData.length - 1 : activeIndex - 1
-    scrollToSlide(nextIndex)
-  }
+    return () => clearInterval(interval)
+  }, [isPaused, paginate])
 
-  const handleNext = () => {
-    const nextIndex = activeIndex === servicesData.length - 1 ? 0 : activeIndex + 1
-    scrollToSlide(nextIndex)
-  }
+  const currentService = servicesData[activeIndex]
+  const PrimaryIcon = currentService.primaryCard.icon
+  const BottomMiddleIcon = currentService.bottomMiddleCard.icon
+  const TopRightIcon = currentService.topRightCard.icon
 
   return (
     <section
       id="service-offerings"
-      className="relative z-10 w-full bg-black py-16 sm:py-20 md:py-28 px-4 sm:px-8 lg:px-12 text-white selection:bg-[#FF553E] selection:text-zinc-950 overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      className="relative z-10 w-full bg-black py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-8 text-white selection:bg-[#FF553E] selection:text-zinc-950 overflow-hidden"
     >
-      <div className="mx-auto w-full max-w-7xl">
-        {/* Top Sticky/Header Switcher Navigation */}
-        <div className="mb-10 sm:mb-14 flex flex-col items-center gap-5">
-          <div
-            role="tablist"
-            aria-label="Services Horizontal Slider Navigation"
-            className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-white/10 bg-[#121214]/90 p-1.5 backdrop-blur-md shadow-2xl"
-          >
-            {servicesData.map((service, index) => {
-              const isActive = index === activeIndex
-              return (
-                <button
-                  key={service.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  id={`tab-${service.id}`}
-                  onClick={() => scrollToSlide(index)}
-                  className={`relative rounded-full px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 cursor-pointer ${
-                    isActive
-                      ? 'text-white bg-[#262628] border border-white/15 shadow-md'
-                      : 'text-[#E5E2E1]/60 hover:text-[#E5E2E1] hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span
-                      className={`text-[10px] sm:text-xs font-mono transition-colors ${
-                        isActive ? 'text-[#FF8D80]' : 'text-[#E5E2E1]/40'
-                      }`}
-                    >
-                      0{index + 1}
-                    </span>
-                    <span>{service.title}</span>
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Slide Navigation Controls & Indicators */}
-          <div className="flex items-center gap-4">
+      <div className="mx-auto w-full max-w-6xl xl:max-w-7xl">
+        {/* Clean 3-Dots Awareness Indicator */}
+        <div className="mb-5 sm:mb-6 flex justify-center items-center gap-2">
+          {servicesData.map((service, dotIdx) => (
             <button
+              key={dotIdx}
               type="button"
-              onClick={handlePrev}
-              aria-label="Previous service"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#E5E2E1] transition-all hover:bg-white/15 hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-
-            {/* Dots */}
-            <div className="flex items-center gap-2">
-              {servicesData.map((_, dotIdx) => (
-                <button
-                  key={dotIdx}
-                  type="button"
-                  aria-label={`Go to slide ${dotIdx + 1}`}
-                  onClick={() => scrollToSlide(dotIdx)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    dotIdx === activeIndex
-                      ? 'w-8 bg-[#FF8D80]'
-                      : 'w-2 bg-white/20 hover:bg-white/40'
-                  }`}
-                />
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next service"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#E5E2E1] transition-all hover:bg-white/15 hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+              aria-label={`Go to ${service.title}`}
+              onClick={() => goToSlide(dotIdx)}
+              className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
+                dotIdx === activeIndex
+                  ? 'w-7 bg-[#FF553E] shadow-sm shadow-[#FF553E]/40'
+                  : 'w-2 bg-white/20 hover:bg-white/40'
+              }`}
+            />
+          ))}
         </div>
 
-        {/* Horizontal Scroll Track containing all 3 Bento Grid sections */}
-        <div
-          ref={scrollContainerRef}
-          tabIndex={0}
-          role="region"
-          aria-label="Services carousel"
-          className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-8 sm:gap-12 pb-6 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-3xl"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-        >
-          {servicesData.map((service, index) => {
-            const PrimaryIcon = service.primaryCard.icon
-            const BottomMiddleIcon = service.bottomMiddleCard.icon
-            const TopRightIcon = service.topRightCard.icon
+        {/* Hardware-Accelerated Smooth Motion Track with Touch & Drag Support */}
+        <div className="relative w-full overflow-hidden min-h-[480px] sm:min-h-[520px]">
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={page}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                duration: 0.45,
+                ease: [0.25, 1, 0.5, 1],
+              }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.15}
+              onDragEnd={(_, info) => {
+                const swipeThreshold = 50
+                if (info.offset.x < -swipeThreshold || info.velocity.x < -200) {
+                  paginate(1)
+                } else if (
+                  info.offset.x > swipeThreshold ||
+                  info.velocity.x > 200
+                ) {
+                  paginate(-1)
+                }
+              }}
+              className="w-full flex flex-col cursor-grab active:cursor-grabbing"
+            >
+              {/* Section Header */}
+              <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-6">
+                <span className="inline-block text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] uppercase text-[#E7978B] mb-1.5 sm:mb-2">
+                  {currentService.serviceNumber}
+                </span>
+                <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+                  {currentService.title}
+                </h2>
+                <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-[0.935rem] font-normal leading-relaxed text-[#EBBBB4] max-w-xl mx-auto">
+                  {currentService.subtitle}
+                </p>
+              </div>
 
-            return (
-              <div
-                key={service.id}
-                id={`slide-${service.id}`}
-                className="w-full min-w-full snap-center shrink-0 flex flex-col"
-              >
-                {/* Section Header */}
-                <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
-                  <span className="inline-block text-[11px] sm:text-xs font-semibold tracking-[0.22em] uppercase text-[#E7978B] mb-3">
-                    {service.serviceNumber}
-                  </span>
-                  <h2 className="font-hanken text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
-                    {service.title}
-                  </h2>
-                  <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4] max-w-2xl mx-auto">
-                    {service.subtitle}
-                  </p>
-                </div>
-
-                {/* Bento Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 w-full">
-                  {/* Left Column: Large Feature Card (Span 6 on LG) */}
-                  <div className="lg:col-span-6 flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
-                    <div>
-                      {/* Icon Badge */}
-                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-6 shadow-inner">
-                        <PrimaryIcon className="h-5 w-5" strokeWidth={1.8} />
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="font-hanken text-2xl sm:text-3xl font-bold tracking-tight text-[#E5E2E1] mb-3">
-                        {service.primaryCard.title}
-                      </h3>
-
-                      {/* Description (100% #EBBBB4) */}
-                      <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]">
-                        {service.primaryCard.description}
-                      </p>
+              {/* Bento Grid Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 w-full">
+                {/* Left Column: Large Feature Card (Span 6 on LG) */}
+                <div className="lg:col-span-6 flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-5 sm:p-6 lg:p-7 shadow-xl transition-all duration-300 hover:border-white/15">
+                  <div>
+                    {/* Icon Badge */}
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-4 shadow-inner">
+                      <PrimaryIcon className="h-4.5 w-4.5" strokeWidth={1.8} />
                     </div>
 
-                    {/* Bottom Image Container */}
-                    <div className="mt-8 relative aspect-[16/10] w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
-                      <div className="relative w-full h-full">
-                        <img
-                          src={service.primaryCard.image}
-                          alt={service.primaryCard.imageAlt}
-                          loading={index === 0 ? 'eager' : 'lazy'}
-                          decoding="async"
-                          className="h-full w-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
-                        />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#141416]/40 via-transparent to-transparent" />
-                      </div>
-                    </div>
+                    {/* Title */}
+                    <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-1.5 sm:mb-2">
+                      {currentService.primaryCard.title}
+                    </h3>
+
+                    {/* Description (100% #EBBBB4) */}
+                    <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]">
+                      {currentService.primaryCard.description}
+                    </p>
                   </div>
 
-                  {/* Right Column: Grid of 3 Cards (Span 6 on LG) */}
-                  <div className="lg:col-span-6 flex flex-col gap-5 sm:gap-6">
-                    {/* Top-Right Card */}
-                    <div className="flex-1 min-h-[170px] sm:min-h-[190px] flex flex-col justify-center rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
-                      <div className="flex items-start justify-between gap-6">
-                        <div className="max-w-md">
-                          <h3 className="font-hanken text-2xl sm:text-3xl font-bold tracking-tight text-[#E5E2E1] mb-3">
-                            {service.topRightCard.title}
-                          </h3>
-                          <p className="text-sm sm:text-base leading-relaxed text-[#EBBBB4]">
-                            {service.topRightCard.description}
-                          </p>
-                        </div>
-
-                        {TopRightIcon && (
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] shadow-inner">
-                            <TopRightIcon className="h-5 w-5" strokeWidth={1.8} />
-                          </div>
-                        )}
-                      </div>
+                  {/* Bottom Image Container */}
+                  <div className="mt-4 relative aspect-[16/8.8] sm:aspect-[16/8.4] w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
+                    <div className="relative w-full h-full">
+                      <img
+                        src={currentService.primaryCard.image}
+                        alt={currentService.primaryCard.imageAlt}
+                        loading={activeIndex === 0 ? 'eager' : 'lazy'}
+                        decoding="async"
+                        className={`h-full w-full object-cover ${
+                          currentService.primaryCard.imagePosition ||
+                          'object-center'
+                        } transition-transform duration-700 ease-out hover:scale-[1.03]`}
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#141416]/40 via-transparent to-transparent" />
                     </div>
+                  </div>
+                </div>
 
-                    {/* Bottom Sub-grid: 2 Cards (Middle Bottom Card + Peach Action Card) */}
-                    <div className="flex-[1.25] grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 min-h-[220px] sm:min-h-[250px]">
-                      {/* Bottom-Middle Card */}
-                      <div className="h-full flex flex-col justify-start rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-8 shadow-xl transition-all duration-300 hover:border-white/15">
-                        <BottomMiddleIcon className="h-6 w-6 text-[#E7978B] mb-5 shrink-0" strokeWidth={1.8} />
-                        <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
-                          {service.bottomMiddleCard.title}
-                        </h4>
+                {/* Right Column: Grid of 3 Cards (Span 6 on LG) */}
+                <div className="lg:col-span-6 flex flex-col gap-4 sm:gap-5">
+                  {/* Top-Right Card */}
+                  <div className="flex-1 min-h-[130px] sm:min-h-[145px] flex flex-col justify-center rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-5 sm:p-6 lg:p-7 shadow-xl transition-all duration-300 hover:border-white/15">
+                    <div className="flex items-start justify-between gap-4 sm:gap-6">
+                      <div className="max-w-md">
+                        <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-1.5 sm:mb-2">
+                          {currentService.topRightCard.title}
+                        </h3>
                         <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]">
-                          {service.bottomMiddleCard.description}
+                          {currentService.topRightCard.description}
                         </p>
                       </div>
 
-                      {/* Bottom-Right Action Card (Cream/Peach #FFB4A8 box with #690100 text) */}
-                      <a
-                        href={`/contact?service=${service.contactParam}`}
-                        className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-7 sm:p-8 shadow-xl text-[#690100] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
-                      >
-                        <h4 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight leading-snug pr-2 text-[#690100]">
-                          {service.actionCard.title}
-                        </h4>
-
-                        <div className="mt-8 flex items-center justify-start">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#690100] text-[#690100] transition-all duration-300 group-hover:bg-[#690100] group-hover:text-[#FFB4A8] group-hover:scale-105">
-                            <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={2.4} />
-                          </div>
+                      {TopRightIcon && (
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] shadow-inner">
+                          <TopRightIcon className="h-4.5 w-4.5" strokeWidth={1.8} />
                         </div>
-                      </a>
+                      )}
                     </div>
+                  </div>
+
+                  {/* Bottom Sub-grid: 2 Cards (Middle Bottom Card + Peach Action Card) */}
+                  <div className="flex-[1.2] grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-h-[170px] sm:min-h-[190px]">
+                    {/* Bottom-Middle Card */}
+                    <div className="h-full flex flex-col justify-start rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-5 sm:p-6 shadow-xl transition-all duration-300 hover:border-white/15">
+                      <BottomMiddleIcon
+                        className="h-5 w-5 text-[#E7978B] mb-3.5 shrink-0"
+                        strokeWidth={1.8}
+                      />
+                      <h4 className="font-hanken text-base sm:text-lg font-bold tracking-tight text-[#E5E2E1] mb-1.5">
+                        {currentService.bottomMiddleCard.title}
+                      </h4>
+                      <p className="text-xs sm:text-[0.825rem] leading-relaxed text-[#EBBBB4]">
+                        {currentService.bottomMiddleCard.description}
+                      </p>
+                    </div>
+
+                    {/* Bottom-Right Action Card (Cream/Peach #FFB4A8 box with #690100 text) */}
+                    <a
+                      href={`/contact?service=${currentService.contactParam}`}
+                      className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-5 sm:p-6 shadow-xl text-[#690100] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
+                    >
+                      <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight leading-snug pr-1.5 text-[#690100]">
+                        {currentService.actionCard.title}
+                      </h4>
+
+                      <div className="mt-5 sm:mt-6 flex items-center justify-start">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#690100] text-[#690100] transition-all duration-300 group-hover:bg-[#690100] group-hover:text-[#FFB4A8] group-hover:scale-105">
+                          <ArrowRight
+                            className="h-4.5 w-4.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                            strokeWidth={2.4}
+                          />
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </div>
               </div>
-            )
-          })}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>

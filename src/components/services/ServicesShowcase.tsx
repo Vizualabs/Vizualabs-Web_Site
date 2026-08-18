@@ -323,10 +323,10 @@ export function ServicesShowcase() {
                 {/* Bento Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 w-full">
                   {/* Left Column: Large Feature Card (Span 6 on LG) */}
-                  <div className="lg:col-span-6 flex flex-col justify-between rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
+                  <div className="lg:col-span-6 flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
                     <div>
                       {/* Icon Badge */}
-                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-6 shadow-inner">
+                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-6 shadow-inner">
                         <PrimaryIcon className="h-5 w-5" strokeWidth={1.8} />
                       </div>
 
@@ -342,7 +342,7 @@ export function ServicesShowcase() {
                     </div>
 
                     {/* Bottom Image Container */}
-                    <div className="mt-8 relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
+                    <div className="mt-8 relative aspect-[16/10] w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
                       <div className="relative w-full h-full">
                         <img
                           src={service.primaryCard.image}
@@ -359,7 +359,7 @@ export function ServicesShowcase() {
                   {/* Right Column: Grid of 3 Cards (Span 6 on LG) */}
                   <div className="lg:col-span-6 flex flex-col gap-5 sm:gap-6">
                     {/* Top-Right Card */}
-                    <div className="flex-1 min-h-[170px] sm:min-h-[190px] flex flex-col justify-center rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
+                    <div className="flex-1 min-h-[170px] sm:min-h-[190px] flex flex-col justify-center rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-9 md:p-10 shadow-xl transition-all duration-300 hover:border-white/15">
                       <div className="flex items-start justify-between gap-6">
                         <div className="max-w-md">
                           <h3 className="font-hanken text-2xl sm:text-3xl font-bold tracking-tight text-[#E5E2E1] mb-3">
@@ -381,7 +381,7 @@ export function ServicesShowcase() {
                     {/* Bottom Sub-grid: 2 Cards (Middle Bottom Card + Peach Action Card) */}
                     <div className="flex-[1.25] grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 min-h-[220px] sm:min-h-[250px]">
                       {/* Bottom-Middle Card */}
-                      <div className="h-full flex flex-col justify-start rounded-[2rem] sm:rounded-[2.25rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-8 shadow-xl transition-all duration-300 hover:border-white/15">
+                      <div className="h-full flex flex-col justify-start rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-7 sm:p-8 shadow-xl transition-all duration-300 hover:border-white/15">
                         <BottomMiddleIcon className="h-6 w-6 text-[#E7978B] mb-5 shrink-0" strokeWidth={1.8} />
                         <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight text-[#E5E2E1] mb-2.5">
                           {service.bottomMiddleCard.title}
@@ -394,7 +394,7 @@ export function ServicesShowcase() {
                       {/* Bottom-Right Action Card (Soft Peach / Coral background routing to /contact) */}
                       <a
                         href={`/contact?service=${service.contactParam}`}
-                        className="h-full group relative flex flex-col justify-between rounded-[2rem] sm:rounded-[2.25rem] bg-[#FFB4A8] p-7 sm:p-8 shadow-xl text-[#78170B] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
+                        className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-7 sm:p-8 shadow-xl text-[#78170B] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
                       >
                         <h4 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight leading-snug pr-2">
                           {service.actionCard.title}

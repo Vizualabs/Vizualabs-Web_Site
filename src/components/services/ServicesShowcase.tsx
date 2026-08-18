@@ -120,7 +120,7 @@ const servicesData: ServiceData[] = [
       title: 'Custom LLM Deployment',
       description:
         'Private, secure, and fine-tuned language models specialized for your domain data and production-grade requirements.',
-      image: '/service/image4.webp',
+      image: '/service/image3.webp',
       imageAlt: 'Custom LLM deployment and AI neural systems interface',
       graphicType: 'image',
     },

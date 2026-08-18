@@ -90,7 +90,7 @@ const servicesData: ServiceData[] = [
         'Building scalable, secure, and performant backends that handle the most demanding enterprise workloads.',
       image: '/service/image2.webp',
       imageAlt: 'High-concurrency microservices systems architecture mockup',
-      graphicType: 'architecture',
+      graphicType: 'image',
     },
     topRightCard: {
       title: 'Legacy Modernization',
@@ -120,9 +120,9 @@ const servicesData: ServiceData[] = [
       title: 'Custom LLM Deployment',
       description:
         'Private, secure, and fine-tuned language models specialized for your domain data and production-grade requirements.',
-      image: '/service/image3.webp',
+      image: '/service/image4.webp',
       imageAlt: 'Custom LLM deployment and AI neural systems interface',
-      graphicType: 'ai-brain',
+      graphicType: 'image',
     },
     topRightCard: {
       title: 'Predictive Operations',
@@ -341,60 +341,18 @@ export function ServicesShowcase() {
                       </p>
                     </div>
 
-                    {/* Bottom Image / Graphic Mockup Container */}
+                    {/* Bottom Image Container */}
                     <div className="mt-8 relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
-                      {service.primaryCard.graphicType === 'architecture' ? (
-                        <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#161618] to-[#0E0E10] p-6 group">
-                          {/* Image backdrop layer */}
-                          <img
-                            src={service.primaryCard.image}
-                            alt={service.primaryCard.imageAlt}
-                            loading="lazy"
-                            decoding="async"
-                            className="absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-luminosity transition-transform duration-700 group-hover:scale-105"
-                          />
-                          <div className="relative z-10 flex flex-col items-center justify-center">
-                            {/* Hierarchy / Architecture tree icon matching Image 1 */}
-                            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-[#232326]/90 border border-[#E7978B]/20 flex items-center justify-center text-[#E7978B] shadow-2xl backdrop-blur-sm">
-                              <Network className="h-8 w-8 sm:h-10 sm:w-10 stroke-[1.6]" />
-                            </div>
-                            <span className="mt-3 text-[11px] font-mono tracking-widest text-[#EBBBB4]/60 uppercase">
-                              Microservices Architecture
-                            </span>
-                          </div>
-                        </div>
-                      ) : service.primaryCard.graphicType === 'ai-brain' ? (
-                        <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#161618] to-[#0E0E10] p-6 group">
-                          {/* Image backdrop layer */}
-                          <img
-                            src={service.primaryCard.image}
-                            alt={service.primaryCard.imageAlt}
-                            loading="lazy"
-                            decoding="async"
-                            className="absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-luminosity transition-transform duration-700 group-hover:scale-105"
-                          />
-                          <div className="relative z-10 flex flex-col items-center justify-center">
-                            {/* Glowing Brain Neural Network icon matching Image 2 */}
-                            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-[#232326]/90 border border-[#FF8D80]/25 flex items-center justify-center text-[#FF8D80] shadow-[0_0_30px_rgba(255,141,128,0.15)] backdrop-blur-sm">
-                              <Brain className="h-8 w-8 sm:h-10 sm:w-10 stroke-[1.6]" />
-                            </div>
-                            <span className="mt-3 text-[11px] font-mono tracking-widest text-[#EBBBB4]/60 uppercase">
-                              Domain Neural Models
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="relative w-full h-full">
-                          <img
-                            src={service.primaryCard.image}
-                            alt={service.primaryCard.imageAlt}
-                            loading={index === 0 ? 'eager' : 'lazy'}
-                            decoding="async"
-                            className="h-full w-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
-                          />
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#141416]/40 via-transparent to-transparent" />
-                        </div>
-                      )}
+                      <div className="relative w-full h-full">
+                        <img
+                          src={service.primaryCard.image}
+                          alt={service.primaryCard.imageAlt}
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          decoding="async"
+                          className="h-full w-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#141416]/40 via-transparent to-transparent" />
+                      </div>
                     </div>
                   </div>
 

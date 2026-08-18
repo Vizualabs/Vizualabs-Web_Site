@@ -153,7 +153,7 @@ export function CapabilitiesSection() {
               <div
                 key={item.id}
                 data-capability-card
-                className="group relative flex flex-col justify-between w-[320px] sm:w-[380px] lg:w-[400px] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#121212] p-8 sm:p-10 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#FF5E4D]/40 hover:bg-[#161616] hover:shadow-2xl hover:shadow-[#FF5E4D]/10"
+                className="group relative flex flex-col justify-between w-[calc(100vw-3rem)] sm:w-[380px] lg:w-[400px] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#121212] p-8 sm:p-10 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#FF5E4D]/40 hover:bg-[#161616] hover:shadow-2xl hover:shadow-[#FF5E4D]/10"
               >
                 <div>
                   {/* Top Icon Badge */}

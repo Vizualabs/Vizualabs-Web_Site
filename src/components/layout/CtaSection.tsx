@@ -47,7 +47,7 @@ export function CtaSection() {
       {/* Booking Strategy Session Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-3xl border border-white/15 bg-[#121214] p-6 sm:p-8 shadow-2xl text-left">
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border border-white/15 bg-[#121214] p-6 sm:p-8 shadow-2xl text-left">
             <button
               onClick={() => setModalOpen(false)}
               className="absolute top-5 right-5 rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"

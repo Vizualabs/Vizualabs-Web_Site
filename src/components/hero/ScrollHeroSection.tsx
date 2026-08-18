@@ -706,8 +706,11 @@ export function ScrollHeroSection() {
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_92%_at_50%_52%,transparent_52%,rgba(0,0,0,0.72)_100%)] z-10" />
 
               {/* Top Center Pill Badge — sits below the fixed navbar (h-20) so it
-                  no longer collides with the nav links / logo */}
-              <div className="absolute top-26 sm:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
+                  no longer collides with the nav links / logo.
+                  Mobile centres it in the empty band between the navbar and the
+                  heading (~10vh..42vh) instead of pinning it near the top, which
+                  pooled all the dead space into one gap under the badge. */}
+              <div className="absolute top-[26vh] md:top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full flex justify-center px-4">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1 rounded-full border border-[#FF5E4D]/40 bg-black/60 backdrop-blur-md shadow-md shadow-[#FF5E4D]/10">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#FF5E4D] animate-pulse shadow-[0_0_6px_#FF5E4D]" />
                   <span className="text-[8.5px] sm:text-[11px] font-semibold tracking-[0.14em] sm:tracking-[0.2em] text-[#FF5E4D] uppercase">
@@ -724,41 +727,44 @@ export function ScrollHeroSection() {
                 </span>
               </div>
 
-              {/* Bottom Right Premium Glassmorphic Stats Card — full-width row on mobile */}
-              <div className="absolute inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:inset-x-auto sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
-                <div className="liquid-glass relative overflow-hidden px-4 py-3 sm:px-8 sm:py-5 flex items-center justify-between gap-4 sm:justify-start sm:gap-8 shadow-2xl">
+              {/* Bottom Right Premium Glassmorphic Stats Card — true full-width row
+                  on mobile. The chat launcher used to force a reserved gutter here
+                  (right-20); it now lifts itself above this card on mobile instead,
+                  so the row can run edge to edge and read as a balanced 3-up bar. */}
+              <div className="absolute left-3 right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:inset-x-auto sm:bottom-10 sm:right-10 z-20 pointer-events-auto">
+                <div className="liquid-glass relative overflow-hidden px-3 py-3 sm:px-8 sm:py-5 flex items-center justify-between gap-2 sm:justify-start sm:gap-8 shadow-2xl">
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
-                    <div className="text-left">
+                    <div className="text-center sm:text-left">
                       <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
                         15 +
                       </div>
-                      <div className="text-[10px] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
+                      <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         Projects Completed
                       </div>
                     </div>
                   </div>
 
-                  <div className="hidden sm:block h-8 sm:h-10 w-px bg-white/15" />
+                  <div className="h-8 sm:h-10 w-px shrink-0 bg-white/15" />
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
-                    <div className="text-left">
+                    <div className="text-center sm:text-left">
                       <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
                         300+
                       </div>
-                      <div className="text-[10px] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
+                      <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         People reach
                       </div>
                     </div>
                   </div>
 
-                  <div className="hidden sm:block h-8 sm:h-10 w-px bg-white/15" />
+                  <div className="h-8 sm:h-10 w-px shrink-0 bg-white/15" />
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
-                    <div className="text-left">
+                    <div className="text-center sm:text-left">
                       <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
                         100%
                       </div>
-                      <div className="text-[10px] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
+                      <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         Clients' Satisfaction
                       </div>
                     </div>

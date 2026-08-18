@@ -6,6 +6,7 @@ export interface ShimmerButtonProps extends ComponentPropsWithoutRef<'button'> {
   borderRadius?: string
   shimmerDuration?: string
   background?: string
+  hoverBackground?: string
   borderColor?: string
   textColor?: string
   className?: string
@@ -27,6 +28,7 @@ export const ShimmerButton = React.forwardRef<
       shimmerDuration = '3s',
       borderRadius = '100px',
       background = '#FF5540',
+      hoverBackground,
       borderColor,
       textColor,
       className,
@@ -45,13 +47,14 @@ export const ShimmerButton = React.forwardRef<
             '--speed': shimmerDuration,
             '--cut': shimmerSize,
             '--bg': background,
+            '--bg-hover': hoverBackground || background,
             ...(borderColor ? { borderColor } : {}),
           } as CSSProperties
         }
         className={cn(
-          'group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border-2 border-white/30 px-6 sm:px-8 py-2.5 sm:py-3 whitespace-nowrap font-semibold [background:var(--bg)] shadow-lg shadow-[#FF5540]/30',
+          'group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] px-6 sm:px-8 py-2.5 sm:py-3 whitespace-nowrap font-semibold [background:var(--bg)] hover:[background:var(--bg-hover)] shadow-lg shadow-[#FF5540]/30',
           textColor ?? 'text-[#FFFFFF]',
-          'transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px',
+          'transform-gpu transition-all duration-300 ease-in-out active:translate-y-px',
           className
         )}
         ref={ref}
@@ -72,21 +75,10 @@ export const ShimmerButton = React.forwardRef<
         </div>
         {children}
 
-        {/* Highlight */}
-        <div
-          className={cn(
-            'absolute inset-0 size-full',
-            'rounded-full px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]',
-            'transform-gpu transition-all duration-300 ease-in-out',
-            'group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]',
-            'group-active:shadow-[inset_0_-10px_10px_#ffffff3f]'
-          )}
-        />
-
         {/* backdrop */}
         <div
           className={cn(
-            'absolute inset-[var(--cut)] -z-20 [border-radius:var(--radius)] [background:var(--bg)]'
+            'absolute inset-[var(--cut)] -z-20 [border-radius:var(--radius)] [background:var(--bg)] group-hover:[background:var(--bg-hover)] transition-colors duration-300'
           )}
         />
       </button>

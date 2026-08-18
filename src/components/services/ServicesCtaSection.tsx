@@ -39,16 +39,17 @@ export function ServicesCtaSection() {
 
             {/* Action Buttons */}
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
-              {/* Shimmer Button: #EE2E10 with gold shimmer */}
+              {/* Shimmer Button: #FF5540 base with #EE2E10 hover and gold shimmer */}
               <ShimmerButton
                 type="button"
                 onClick={() => setModalOpen(true)}
-                background="#EE2E10"
+                background="#FF5540"
+                hoverBackground="#EE2E10"
                 shimmerColor="#FFD700"
                 textColor="text-zinc-950"
                 shimmerSize="0.15em"
                 shimmerDuration="2.5s"
-                className="px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-bold shadow-md shadow-[#EE2E10]/20"
+                className="px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-bold shadow-md shadow-[#FF5540]/20 hover:shadow-[#EE2E10]/30 transition-all duration-300"
               >
                 <span>Let's Build</span>
               </ShimmerButton>

@@ -82,7 +82,7 @@ export function CtaSection() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="John Doe"
+                    placeholder="e.g. Alex Morgan"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-[#FF5E4D] focus:outline-none focus:ring-1 focus:ring-[#FF5E4D]"
                   />
                 </div>
@@ -96,7 +96,7 @@ export function CtaSection() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="john@company.com"
+                    placeholder="alex@company.com"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-[#FF5E4D] focus:outline-none focus:ring-1 focus:ring-[#FF5E4D]"
                   />
                 </div>

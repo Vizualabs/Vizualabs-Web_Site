@@ -104,7 +104,7 @@ export function ServicesCtaSection() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="John Doe"
+                    placeholder="e.g. Alex Morgan"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-[#EE2E10] focus:outline-none focus:ring-1 focus:ring-[#EE2E10]"
                   />
                 </div>
@@ -118,7 +118,7 @@ export function ServicesCtaSection() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="john@company.com"
+                    placeholder="alex@company.com"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-[#EE2E10] focus:outline-none focus:ring-1 focus:ring-[#EE2E10]"
                   />
                 </div>

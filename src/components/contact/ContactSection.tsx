@@ -223,7 +223,7 @@ export function ContactSection() {
                       required
                       value={formData.name}
                       onChange={(event) => handleFieldChange('name', event.target.value)}
-                      placeholder="John Doe"
+                      placeholder="e.g. Alex Morgan"
                       className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-4 text-sm text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                     />
                   </div>
@@ -239,7 +239,7 @@ export function ContactSection() {
                       required
                       value={formData.email}
                       onChange={(event) => handleFieldChange('email', event.target.value)}
-                      placeholder="john@enterprise.com"
+                      placeholder="alex@enterprise.com"
                       className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-4 text-sm text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                     />
                   </div>
@@ -317,7 +317,7 @@ export function ContactSection() {
                     rows={4}
                     value={formData.message}
                     onChange={(event) => handleFieldChange('message', event.target.value)}
-                    placeholder="Describe your strategic engineering needs..."
+                    placeholder="Describe your project, timeline, and strategic engineering goals..."
                     className="min-h-32 w-full resize-y rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-sm leading-relaxed text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                   />
                 </div>

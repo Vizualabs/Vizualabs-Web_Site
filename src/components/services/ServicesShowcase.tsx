@@ -145,70 +145,153 @@ const servicesData: ServiceData[] = [
   },
 ]
 
+// 3 sets of services for seamless continuous infinite forward & backward cycling
+const extendedServices = [
+  ...servicesData.map((s, i) => ({ ...s, cloneKey: `pre-${i}`, realIndex: i })),
+  ...servicesData.map((s, i) => ({ ...s, cloneKey: `mid-${i}`, realIndex: i })),
+  ...servicesData.map((s, i) => ({ ...s, cloneKey: `post-${i}`, realIndex: i })),
+]
+
 export function ServicesShowcase() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const isProgrammaticScroll = useRef(false)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Scroll to slide when dot is clicked or auto-transition fires
-  const scrollToSlide = useCallback((index: number) => {
-    if (!scrollContainerRef.current) return
-    isProgrammaticScroll.current = true
-    setActiveIndex(index)
-
+  // Initialize scroll position to the middle set (index 3 = Service 01)
+  useEffect(() => {
     const container = scrollContainerRef.current
-    const targetChild = container.children[index] as HTMLElement
-    if (targetChild) {
+    if (!container) return
+    const middleSlide = container.children[3] as HTMLElement
+    if (middleSlide) {
       container.scrollTo({
-        left: targetChild.offsetLeft - container.offsetLeft,
-        behavior: 'smooth',
+        left: middleSlide.offsetLeft,
+        behavior: 'instant',
       })
     }
-
-    setTimeout(() => {
-      isProgrammaticScroll.current = false
-    }, 600)
   }, [])
 
-  // Sync activeIndex on native horizontal scroll / touch swipe
-  const handleScroll = useCallback(() => {
-    if (isProgrammaticScroll.current || !scrollContainerRef.current) return
+  // Check boundary wrap silently when scroll settles
+  const checkBoundaryWrap = useCallback(() => {
     const container = scrollContainerRef.current
-    const scrollLeft = container.scrollLeft
-    const slideWidth = container.clientWidth
+    if (!container) return
+    const slide = container.children[0] as HTMLElement | undefined
+    const slideWidth = slide ? slide.offsetWidth : container.clientWidth
+    if (slideWidth <= 0) return
 
-    if (slideWidth > 0) {
-      const newIndex = Math.round(scrollLeft / slideWidth)
-      if (
-        newIndex >= 0 &&
-        newIndex < servicesData.length &&
-        newIndex !== activeIndex
-      ) {
-        setActiveIndex(newIndex)
+    const rawIndex = Math.round(container.scrollLeft / slideWidth)
+
+    // If reached post-set (>= 6), silently reset to middle-set (-3)
+    if (rawIndex >= 6) {
+      const resetTarget = container.children[rawIndex - 3] as HTMLElement
+      if (resetTarget) {
+        container.scrollTo({
+          left: resetTarget.offsetLeft,
+          behavior: 'instant',
+        })
       }
     }
-  }, [activeIndex])
+    // If reached pre-set (< 3), silently reset to middle-set (+3)
+    else if (rawIndex < 3 && rawIndex >= 0) {
+      const resetTarget = container.children[rawIndex + 3] as HTMLElement
+      if (resetTarget) {
+        container.scrollTo({
+          left: resetTarget.offsetLeft,
+          behavior: 'instant',
+        })
+      }
+    }
+  }, [])
+
+  // Sync active dot on hand-scroll / auto-scroll + debounced silent boundary wrap
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const slide = container.children[0] as HTMLElement | undefined
+    const slideWidth = slide ? slide.offsetWidth : container.clientWidth
+    if (slideWidth <= 0) return
+
+    const rawIndex = Math.round(container.scrollLeft / slideWidth)
+    const realIndex = ((rawIndex % 3) + 3) % 3
+
+    setActiveIndex(realIndex)
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current)
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      isProgrammaticScroll.current = false
+      checkBoundaryWrap()
+    }, 150)
+  }, [checkBoundaryWrap])
 
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
 
     container.addEventListener('scroll', handleScroll, { passive: true })
-    return () => container.removeEventListener('scroll', handleScroll)
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
+    }
   }, [handleScroll])
 
-  // Automatic slide transition every 8 seconds
+  // Scroll forward seamlessly in cycling loop
+  const scrollToNext = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const slide = container.children[0] as HTMLElement | undefined
+    const slideWidth = slide ? slide.offsetWidth : container.clientWidth
+    if (slideWidth <= 0) return
+
+    isProgrammaticScroll.current = true
+    const currentRaw = Math.round(container.scrollLeft / slideWidth)
+    const targetRaw = currentRaw + 1 // Always move forward +1 slide
+
+    const targetChild = container.children[targetRaw] as HTMLElement
+    if (targetChild) {
+      container.scrollTo({
+        left: targetChild.offsetLeft,
+        behavior: 'smooth',
+      })
+    }
+  }, [])
+
+  // Jump to specific dot clicked by user
+  const scrollToDot = useCallback((dotIndex: number) => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const slide = container.children[0] as HTMLElement | undefined
+    const slideWidth = slide ? slide.offsetWidth : container.clientWidth
+    if (slideWidth <= 0) return
+
+    isProgrammaticScroll.current = true
+    const currentRaw = Math.round(container.scrollLeft / slideWidth)
+    const currentReal = ((currentRaw % 3) + 3) % 3
+    const diff = dotIndex - currentReal
+    const targetRaw = currentRaw + diff
+
+    const targetChild = container.children[targetRaw] as HTMLElement
+    if (targetChild) {
+      container.scrollTo({
+        left: targetChild.offsetLeft,
+        behavior: 'smooth',
+      })
+    }
+  }, [])
+
+  // Automatic slide transition every 8 seconds in forward cycling
   useEffect(() => {
     if (isPaused) return
 
     const interval = setInterval(() => {
-      const nextIndex = (activeIndex + 1) % servicesData.length
-      scrollToSlide(nextIndex)
+      scrollToNext()
     }, 8000)
 
     return () => clearInterval(interval)
-  }, [activeIndex, isPaused, scrollToSlide])
+  }, [isPaused, scrollToNext])
 
   return (
     <section
@@ -225,7 +308,7 @@ export function ServicesShowcase() {
               key={dotIdx}
               type="button"
               aria-label={`Go to ${service.title}`}
-              onClick={() => scrollToSlide(dotIdx)}
+              onClick={() => scrollToDot(dotIdx)}
               className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
                 dotIdx === activeIndex
                   ? 'w-7 bg-[#FF553E] shadow-sm shadow-[#FF553E]/40'
@@ -235,7 +318,7 @@ export function ServicesShowcase() {
           ))}
         </div>
 
-        {/* Horizontal Scroll Track containing all 3 Bento Grid sections */}
+        {/* Infinite Horizontal Scroll Track with Native Swipe & Auto-Rotation */}
         <div
           ref={scrollContainerRef}
           tabIndex={0}
@@ -247,15 +330,15 @@ export function ServicesShowcase() {
             msOverflowStyle: 'none',
           }}
         >
-          {servicesData.map((service, index) => {
+          {extendedServices.map((service, index) => {
             const PrimaryIcon = service.primaryCard.icon
             const BottomMiddleIcon = service.bottomMiddleCard.icon
             const TopRightIcon = service.topRightCard.icon
 
             return (
               <div
-                key={service.id}
-                id={`slide-${service.id}`}
+                key={service.cloneKey}
+                id={`slide-${service.cloneKey}`}
                 className="w-full min-w-full snap-center shrink-0 flex flex-col"
               >
                 {/* Section Header */}

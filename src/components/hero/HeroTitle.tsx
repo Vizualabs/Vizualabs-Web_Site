@@ -31,9 +31,9 @@ export function HeroTitle({ start }: { start: boolean }) {
     <div
       data-testid="hero-title"
       aria-hidden={!start}
-      /* Same band as desktop: the subject is bottom-anchored at 86% of the
-         hero, so the heading sits behind the head and reads around the profile. */
-      className="pointer-events-none absolute inset-x-0 top-[22vh] flex flex-col items-center px-4 text-center md:top-[23vh] overflow-hidden"
+      /* Model is bottom-anchored at 64% on mobile, so the head sits near 36vh.
+         Keep the heading in that band — higher left a dead gap under the type. */
+      className="pointer-events-none absolute inset-x-0 top-[32vh] flex flex-col items-center px-4 text-center md:top-[23vh] overflow-hidden"
     >
       <h1 className="hero-title-type font-hanken m-0 w-full font-black leading-[0.92] tracking-[-0.02em]">
         <span className="hero-title-line block overflow-hidden mt-0">

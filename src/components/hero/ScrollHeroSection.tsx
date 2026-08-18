@@ -21,10 +21,16 @@ const MAX_BITMAP_HEIGHT = 1600
 // can drive a complete turn (edge to edge), matching a full scroll.
 const MOUSE_TURN_RANGE = TOTAL_FRAMES - 1
 
-// Per-frame easing toward the target frame (0..1). Higher = snappier,
-// lower = glide-ier. Keeps scroll and mouse steering buttery instead of
-// jumping straight to the nearest decoded frame.
-const FRAME_EASE = 0.1
+const MOBILE_MAX_WIDTH = 768
+const DESKTOP_SUBJECT_RATIO = 0.86
+const MOBILE_SUBJECT_RATIO = 0.64
+
+// Desktop keeps the original 0.1 lerp. Mobile uses a shorter time constant so
+// the turn tracks the finger instead of swimming behind the scroll.
+const DESKTOP_FRAME_EASE = 0.1
+const MOBILE_SMOOTH_SEC = 0.08
+
+const isMobileView = (width: number) => width < MOBILE_MAX_WIDTH
 
 // The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8
@@ -32,7 +38,7 @@ const LOAD_CONCURRENCY = 8
 // Frames streaming in after the reveal. Decoding is off the main thread now
 // (fetch -> Blob -> createImageBitmap), so this no longer competes with the
 // user's first scroll and can run wider than the old serialized pipeline.
-const STREAM_CONCURRENCY = 4
+const STREAM_CONCURRENCY = 6
 
 // How many frames must be decoded before the intro is allowed to lift. This
 // buys roughly the first fifth of the scroll distance as pre-buffered frames,
@@ -91,6 +97,7 @@ export function ScrollHeroSection() {
   // Fractional frame the canvas is currently easing through, so scroll and
   // mouse steering glide between frames instead of snapping.
   const displayFrameRef = useRef(1)
+  const lastEaseAtRef = useRef(0)
 
   // Normalized horizontal mouse position, -1 (left) .. +1 (right).
   const mouseXRef = useRef(0)
@@ -158,12 +165,13 @@ export function ScrollHeroSection() {
 
   /**
    * Where the frame lands inside the canvas, in CSS pixels.
-   * Same scale on every breakpoint so the heading sits behind the subject
-   * the way the desktop composition does.
+   * Desktop keeps the original 86% height; mobile is a step smaller so the
+   * heading and stats stay readable.
    */
   const computeImageRect = (bmpW: number, bmpH: number) => {
     const { width, height } = getViewSize()
-    const scale = (height * 0.86) / bmpH
+    const ratio = isMobileView(width) ? MOBILE_SUBJECT_RATIO : DESKTOP_SUBJECT_RATIO
+    const scale = (height * ratio) / bmpH
     const renderW = bmpW * scale
     const renderH = bmpH * scale
 
@@ -254,13 +262,14 @@ export function ScrollHeroSection() {
    */
   const findReadyFrame = (target: number) => {
     const bitmaps = bitmapsRef.current
-    if (bitmaps[target - 1]) return target
+    const wanted = Math.round(target)
+    if (bitmaps[wanted - 1]) return wanted
     const max = maxLoadedRef.current
-    if (target > max && max > 0) return max
+    if (wanted > max && max > 0) return max
     for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
-      const prev = target - offset
+      const prev = wanted - offset
       if (prev >= 1 && bitmaps[prev - 1]) return prev
-      const next = target + offset
+      const next = wanted + offset
       if (next <= TOTAL_FRAMES && bitmaps[next - 1]) return next
     }
     return 0
@@ -283,7 +292,7 @@ export function ScrollHeroSection() {
 
     return Math.min(
       TOTAL_FRAMES,
-      Math.max(1, Math.floor(scrollProgress * (TOTAL_FRAMES - 1)) + 1)
+      Math.max(1, 1 + scrollProgress * (TOTAL_FRAMES - 1))
     )
   }
 
@@ -295,7 +304,7 @@ export function ScrollHeroSection() {
   const readCombinedFrame = () => {
     const scrollFrame = readScrollFrame()
     const base = scrollFrame > 0 ? scrollFrame : 1
-    const combined = base + Math.round(mouseXRef.current * MOUSE_TURN_RANGE)
+    const combined = base + mouseXRef.current * MOUSE_TURN_RANGE
     return Math.min(TOTAL_FRAMES, Math.max(1, combined))
   }
 
@@ -589,16 +598,26 @@ export function ScrollHeroSection() {
      * line-two marquee is a pure-CSS animation) so scroll work per frame is
      * exactly one canvas draw.
      */
-    const runFrameLoop = () => {
+    const runFrameLoop = (now: number) => {
       scrollRafRef.current = null
       const targetFrame = readCombinedFrame()
       if (targetFrame === 0) return
       const readyFrame = findReadyFrame(targetFrame)
       if (readyFrame === 0) return
 
-      // Ease the displayed frame toward the target so movement glides rather
-      // than snapping between decoded frames.
-      const next = displayFrameRef.current + (readyFrame - displayFrameRef.current) * FRAME_EASE
+      let next: number
+      if (isMobileView(window.innerWidth)) {
+        const last = lastEaseAtRef.current || now
+        const dt = Math.min(0.05, Math.max(0, (now - last) / 1000))
+        lastEaseAtRef.current = now
+        const alpha = 1 - Math.exp(-dt / MOBILE_SMOOTH_SEC)
+        next =
+          displayFrameRef.current + (readyFrame - displayFrameRef.current) * alpha
+      } else {
+        next =
+          displayFrameRef.current +
+          (readyFrame - displayFrameRef.current) * DESKTOP_FRAME_EASE
+      }
       displayFrameRef.current = next
       const rounded = Math.round(next)
       if (rounded !== currentFrameRef.current) {
@@ -606,8 +625,7 @@ export function ScrollHeroSection() {
         drawFrame(rounded)
       }
 
-      // Keep animating until the ease settles close enough to the target.
-      if (Math.abs(readyFrame - next) > 0.01) {
+      if (Math.abs(readyFrame - next) > 0.02) {
         scrollRafRef.current = requestAnimationFrame(runFrameLoop)
       }
     }
@@ -671,8 +689,7 @@ export function ScrollHeroSection() {
     <div
       ref={containerRef}
       data-testid="hero-scroll-container"
-      className="relative w-full bg-black"
-      style={{ height: '105dvh' }}
+      className="relative w-full bg-black h-[220dvh] md:h-[105dvh]"
     >
       {/* Sticky Hero Container pinned during scroll sequence */}
       <div

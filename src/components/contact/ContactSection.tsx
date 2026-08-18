@@ -78,6 +78,20 @@ export function ContactSection() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const serviceParam = params.get('service')
+      if (serviceParam === 'product-development') {
+        setFormData((prev) => ({ ...prev, subject: 'Product Development' }))
+      } else if (serviceParam === 'custom-software') {
+        setFormData((prev) => ({ ...prev, subject: 'Custom Software' }))
+      } else if (serviceParam === 'ai-solutions') {
+        setFormData((prev) => ({ ...prev, subject: 'AI Solutions' }))
+      }
+    }
+  }, [])
+
   const handleFieldChange = (field: keyof ContactFormData, value: string) => {
     setSubmitted(false)
     setFormData((current) => ({ ...current, [field]: value }))

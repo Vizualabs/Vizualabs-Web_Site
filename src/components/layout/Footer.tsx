@@ -98,6 +98,11 @@ export function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/process" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Process
+                </a>
+              </li>
+              <li>
                 <a href="/#cases" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Case Studies
                 </a>

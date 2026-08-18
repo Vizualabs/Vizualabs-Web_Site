@@ -12,7 +12,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
-  { label: 'Process', href: '/#process', disabled: true },
+  { label: 'Process', href: '/process', isRoute: true },
   { label: 'Case Studies', href: '/#cases' },
 ]
 
@@ -131,7 +131,8 @@ export function Navbar() {
             const isActive = item.isRoute
               ? currentPath === item.href ||
               (item.href === '/services' && currentPath.startsWith('/service')) ||
-              (item.href === '/about' && currentPath.startsWith('/about'))
+              (item.href === '/about' && currentPath.startsWith('/about')) ||
+              (item.href === '/process' && currentPath.startsWith('/process'))
               : false
 
             if (item.isRoute) {
@@ -197,7 +198,8 @@ export function Navbar() {
               const isActive = item.isRoute
                 ? currentPath === item.href ||
                 (item.href === '/services' && currentPath.startsWith('/service')) ||
-                (item.href === '/about' && currentPath.startsWith('/about'))
+                (item.href === '/about' && currentPath.startsWith('/about')) ||
+                (item.href === '/process' && currentPath.startsWith('/process'))
                 : false
 
               if (item.isRoute) {

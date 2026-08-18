@@ -26,7 +26,7 @@ export function ServicesHero() {
         {/* Call to Action Buttons */}
         <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-4 sm:gap-5">
           <a
-            href="/#process"
+            href="/process"
             className="inline-flex items-center gap-2 rounded-full bg-[#FF553E] px-7 py-3.5 text-sm sm:text-base font-bold text-zinc-950 shadow-md shadow-[#FF553E]/20 transition-all duration-200 hover:bg-[#FF422A] hover:shadow-lg hover:shadow-[#FF553E]/35 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             <span>View our Process</span>

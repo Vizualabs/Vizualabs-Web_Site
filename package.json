@@ -29,6 +29,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@netlify/vite-plugin-tanstack-start": "^1.3.17",
     "@playwright/test": "^1.62.1",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/react-query-devtools": "^5.101.4",

@@ -298,36 +298,41 @@ export function ServicesShowcase() {
       id="service-offerings"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative z-10 w-full bg-black py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-8 text-white selection:bg-[#FF553E] selection:text-zinc-950 overflow-hidden"
+      className="relative z-10 w-full bg-black py-6 sm:py-10 md:py-12 px-3 sm:px-6 lg:px-8 text-white selection:bg-[#FF553E] selection:text-zinc-950 overflow-hidden"
     >
       <div className="mx-auto w-full max-w-6xl xl:max-w-7xl">
-        {/* Clean 3-Dots Awareness Indicator */}
-        <div className="mb-5 sm:mb-6 flex justify-center items-center gap-2">
+        {/* Clean 3-Dots Awareness Indicator with accessible touch targets */}
+        <div className="mb-4 sm:mb-6 flex justify-center items-center gap-1.5 sm:gap-2">
           {servicesData.map((service, dotIdx) => (
             <button
               key={dotIdx}
               type="button"
               aria-label={`Go to ${service.title}`}
               onClick={() => scrollToDot(dotIdx)}
-              className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
-                dotIdx === activeIndex
-                  ? 'w-7 bg-[#FF553E] shadow-sm shadow-[#FF553E]/40'
-                  : 'w-2 bg-white/20 hover:bg-white/40'
-              }`}
-            />
+              className="p-1.5 sm:p-1 cursor-pointer focus:outline-none"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all duration-500 ${
+                  dotIdx === activeIndex
+                    ? 'w-6 sm:w-7 bg-[#FF553E] shadow-sm shadow-[#FF553E]/40'
+                    : 'w-1.5 sm:w-2 bg-white/20 hover:bg-white/40'
+                }`}
+              />
+            </button>
           ))}
         </div>
 
-        {/* Infinite Horizontal Scroll Track with Native Swipe & Auto-Rotation */}
+        {/* Infinite Horizontal Scroll Track with Touch-Pan-X & Native Swipe */}
         <div
           ref={scrollContainerRef}
           tabIndex={0}
           role="region"
           aria-label="Services carousel"
-          className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-6 sm:gap-8 pb-4 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-2xl"
+          className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 sm:gap-6 md:gap-8 pb-3 sm:pb-4 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-2xl touch-pan-x"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {extendedServices.map((service, index) => {
@@ -342,30 +347,30 @@ export function ServicesShowcase() {
                 className="w-full min-w-full snap-center shrink-0 flex flex-col"
               >
                 {/* Section Header */}
-                <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-6">
-                  <span className="inline-block text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] uppercase text-[#E7978B] mb-1.5 sm:mb-2">
+                <div className="text-center max-w-2xl mx-auto mb-3.5 sm:mb-6 px-1">
+                  <span className="inline-block text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] uppercase text-[#E7978B] mb-1 sm:mb-2">
                     {service.serviceNumber}
                   </span>
-                  <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+                  <h2 className="font-hanken text-xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
                     {service.title}
                   </h2>
-                  <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-[0.935rem] font-normal leading-relaxed text-[#EBBBB4] max-w-xl mx-auto">
+                  <p className="mt-1 sm:mt-2 text-xs sm:text-sm md:text-[0.935rem] font-normal leading-relaxed text-[#EBBBB4] max-w-xl mx-auto">
                     {service.subtitle}
                   </p>
                 </div>
 
                 {/* Bento Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 w-full">
                   {/* Left Column: Large Feature Card (Span 6 on LG) */}
-                  <div className="lg:col-span-6 flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-5 sm:p-6 lg:p-7 shadow-xl transition-all duration-300 hover:border-white/15">
+                  <div className="lg:col-span-6 flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-4 sm:p-6 lg:p-7 shadow-xl transition-all duration-300 hover:border-white/15">
                     <div>
                       {/* Icon Badge */}
-                      <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-4 shadow-inner">
-                        <PrimaryIcon className="h-4.5 w-4.5" strokeWidth={1.8} />
+                      <div className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] mb-3 sm:mb-4 shadow-inner">
+                        <PrimaryIcon className="h-4 w-4 sm:h-4.5 sm:w-4.5" strokeWidth={1.8} />
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-1.5 sm:mb-2">
+                      <h3 className="font-hanken text-lg sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-1 sm:mb-2">
                         {service.primaryCard.title}
                       </h3>
 
@@ -376,12 +381,12 @@ export function ServicesShowcase() {
                     </div>
 
                     {/* Bottom Image Container */}
-                    <div className="mt-4 relative aspect-[16/8.8] sm:aspect-[16/8.4] w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
+                    <div className="mt-3.5 sm:mt-4 relative aspect-[16/9] sm:aspect-[16/8.4] w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
                       <div className="relative w-full h-full">
                         <img
                           src={service.primaryCard.image}
                           alt={service.primaryCard.imageAlt}
-                          loading={index === 0 ? 'eager' : 'lazy'}
+                          loading={index === 3 ? 'eager' : 'lazy'}
                           decoding="async"
                           className={`h-full w-full object-cover ${
                             service.primaryCard.imagePosition || 'object-center'
@@ -393,12 +398,12 @@ export function ServicesShowcase() {
                   </div>
 
                   {/* Right Column: Grid of 3 Cards (Span 6 on LG) */}
-                  <div className="lg:col-span-6 flex flex-col gap-4 sm:gap-5">
+                  <div className="lg:col-span-6 flex flex-col gap-3.5 sm:gap-5">
                     {/* Top-Right Card */}
-                    <div className="flex-1 min-h-[130px] sm:min-h-[145px] flex flex-col justify-center rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-5 sm:p-6 lg:p-7 shadow-xl transition-all duration-300 hover:border-white/15">
-                      <div className="flex items-start justify-between gap-4 sm:gap-6">
+                    <div className="flex-1 min-h-[115px] sm:min-h-[145px] flex flex-col justify-center rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-4 sm:p-6 lg:p-7 shadow-xl transition-all duration-300 hover:border-white/15">
+                      <div className="flex items-start justify-between gap-3 sm:gap-6">
                         <div className="max-w-md">
-                          <h3 className="font-hanken text-xl sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-1.5 sm:mb-2">
+                          <h3 className="font-hanken text-lg sm:text-2xl font-bold tracking-tight text-[#E5E2E1] mb-1 sm:mb-2">
                             {service.topRightCard.title}
                           </h3>
                           <p className="text-xs sm:text-sm leading-relaxed text-[#EBBBB4]">
@@ -407,22 +412,22 @@ export function ServicesShowcase() {
                         </div>
 
                         {TopRightIcon && (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] shadow-inner">
-                            <TopRightIcon className="h-4.5 w-4.5" strokeWidth={1.8} />
+                          <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-[#2A2A2E] border border-white/[0.08] text-[#EBBBB4] shadow-inner">
+                            <TopRightIcon className="h-4 w-4 sm:h-4.5 sm:w-4.5" strokeWidth={1.8} />
                           </div>
                         )}
                       </div>
                     </div>
 
                     {/* Bottom Sub-grid: 2 Cards (Middle Bottom Card + Peach Action Card) */}
-                    <div className="flex-[1.2] grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-h-[170px] sm:min-h-[190px]">
+                    <div className="flex-[1.2] grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 min-h-[140px] sm:min-h-[190px]">
                       {/* Bottom-Middle Card */}
-                      <div className="h-full flex flex-col justify-start rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-5 sm:p-6 shadow-xl transition-all duration-300 hover:border-white/15">
+                      <div className="h-full flex flex-col justify-start rounded-2xl sm:rounded-[1.35rem] bg-[#1E1E20] border border-white/[0.06] p-4 sm:p-6 shadow-xl transition-all duration-300 hover:border-white/15">
                         <BottomMiddleIcon
-                          className="h-5 w-5 text-[#E7978B] mb-3.5 shrink-0"
+                          className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-[#E7978B] mb-2.5 sm:mb-3.5 shrink-0"
                           strokeWidth={1.8}
                         />
-                        <h4 className="font-hanken text-base sm:text-lg font-bold tracking-tight text-[#E5E2E1] mb-1.5">
+                        <h4 className="font-hanken text-base sm:text-lg font-bold tracking-tight text-[#E5E2E1] mb-1">
                           {service.bottomMiddleCard.title}
                         </h4>
                         <p className="text-xs sm:text-[0.825rem] leading-relaxed text-[#EBBBB4]">
@@ -433,16 +438,16 @@ export function ServicesShowcase() {
                       {/* Bottom-Right Action Card (Cream/Peach #FFB4A8 box with #690100 text) */}
                       <a
                         href={`/contact?service=${service.contactParam}`}
-                        className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-5 sm:p-6 shadow-xl text-[#690100] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
+                        className="h-full group relative flex flex-col justify-between rounded-2xl sm:rounded-[1.35rem] bg-[#FFB4A8] p-4 sm:p-6 shadow-xl text-[#690100] transition-all duration-300 hover:bg-[#FFA597] hover:shadow-2xl hover:shadow-[#FFB4A8]/25 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] cursor-pointer"
                       >
-                        <h4 className="font-hanken text-lg sm:text-xl font-bold tracking-tight leading-snug pr-1.5 text-[#690100]">
+                        <h4 className="font-hanken text-base sm:text-xl font-bold tracking-tight leading-snug pr-1.5 text-[#690100]">
                           {service.actionCard.title}
                         </h4>
 
-                        <div className="mt-5 sm:mt-6 flex items-center justify-start">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#690100] text-[#690100] transition-all duration-300 group-hover:bg-[#690100] group-hover:text-[#FFB4A8] group-hover:scale-105">
+                        <div className="mt-4 sm:mt-6 flex items-center justify-start">
+                          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 border-[#690100] text-[#690100] transition-all duration-300 group-hover:bg-[#690100] group-hover:text-[#FFB4A8] group-hover:scale-105">
                             <ArrowRight
-                              className="h-4.5 w-4.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                              className="h-4 w-4 sm:h-4.5 sm:w-4.5 transition-transform duration-300 group-hover:translate-x-0.5"
                               strokeWidth={2.4}
                             />
                           </div>

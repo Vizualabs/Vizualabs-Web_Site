@@ -1,9 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
-import { Blaze } from '../canvasui/Blaze'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { BrandIntro, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
 import { keyHairBackdrop } from './keyHairBackdrop'
+
+// Code-split out of the homepage bundle: this is an ~800-line WebGL engine
+// that never renders before the 'warmup' phase anyway. The prefetch effect
+// below starts fetching it the moment the hero mounts (during the still-
+// opaque 'intro' phase), so by the time 'warmup' needs it the chunk is
+// already resolved — same visible timing, smaller initial bundle.
+const Blaze = lazy(() =>
+  import('../canvasui/Blaze').then((m) => ({ default: m.Blaze }))
+)
 
 // Optimized source frames (1280x2276 WebP; subject ends at Y = 1813 which is
 // the same 3060/3840 crop ratio as the original 2160x3840 masters).
@@ -51,6 +59,12 @@ const REVEAL_THRESHOLD = 24
 // a warm cache this is the only thing gating the reveal.
 const MIN_INTRO_MS = 1150
 
+// A visitor who has already seen the full intro once this session gets this
+// instead — just enough for a clean fade, not the whole choreography.
+const RETURN_INTRO_MS = 250
+
+const INTRO_SEEN_KEY = 'vlabs_intro_seen'
+
 // Beat between mounting the WebGL fire and starting the reveal. Shader compile
 // and texture allocation are synchronous main-thread work; paying that cost
 // here — while the plane is still fully opaque — keeps it off the first scroll.
@@ -75,8 +89,25 @@ export function ScrollHeroSection() {
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
   const [framesReady, setFramesReady] = useState(false)
 
+  // Starts false to match SSR; flipped in an effect (client-only) so a
+  // returning visitor never renders a mismatched first frame during
+  // hydration.
+  const [fastIntro, setFastIntro] = useState(false)
+  useEffect(() => {
+    if (sessionStorage.getItem(INTRO_SEEN_KEY) === '1') {
+      setFastIntro(true)
+    }
+  }, [])
+
   // Scroll stays locked while the plane is still opaque.
   const isLoading = phase === 'intro' || phase === 'warmup'
+
+  // Start fetching the Blaze chunk immediately, in parallel with the frame
+  // decode pipeline, so the lazy import resolves well before 'warmup' asks
+  // for it.
+  useEffect(() => {
+    void import('../canvasui/Blaze')
+  }, [])
 
   // Communicate loading state so the navbar is completely hidden during intro loading
   useEffect(() => {
@@ -324,6 +355,33 @@ export function ScrollHeroSection() {
     bitmapsRef.current = bitmaps
     let completed = 0
 
+    // On a slow or data-saver connection, the reveal-gating frames still
+    // load in full (the sequence can't unlock without them), but the long
+    // background tail — the bulk of the payload — is fetched at half
+    // density. findReadyFrame() already falls back to the nearest decoded
+    // neighbour for any frame that isn't ready, so the skipped slots are
+    // simply never filled rather than treated as failures.
+    const nav = navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string }
+    }
+    const conn = nav.connection
+    const reduceData = Boolean(
+      conn?.saveData ||
+        conn?.effectiveType === 'slow-2g' ||
+        conn?.effectiveType === '2g' ||
+        conn?.effectiveType === '3g'
+    )
+
+    const phase1Indices = Array.from(
+      { length: REVEAL_THRESHOLD },
+      (_, i) => i + 1
+    )
+    const tailIndices: number[] = []
+    for (let i = REVEAL_THRESHOLD + 1; i <= TOTAL_FRAMES; i++) {
+      if (!reduceData || (i - REVEAL_THRESHOLD) % 2 === 1) tailIndices.push(i)
+    }
+    const totalToLoad = phase1Indices.length + tailIndices.length
+
     /**
      * Decode a frame entirely OFF the main thread.
      *
@@ -392,7 +450,7 @@ export function ScrollHeroSection() {
       completed++
       if (cancelled) return
 
-      const allDone = completed === TOTAL_FRAMES
+      const allDone = completed === totalToLoad
 
       // Paint frame 1 as soon as it exists so the hero is never blank.
       // Defer to the next animation frame so the decode callback doesn't
@@ -413,10 +471,14 @@ export function ScrollHeroSection() {
 
       if (allDone) {
         // Patch any failed frames with frame 1 so playback never stalls.
-        for (let i = 0; i < TOTAL_FRAMES; i++) {
-          if (!bitmaps[i]) bitmaps[i] = bitmaps[0]
+        // Skipped on the reduced-data path: those gaps are intentional, and
+        // findReadyFrame()'s nearest-neighbour fallback already handles them.
+        if (!reduceData) {
+          for (let i = 0; i < TOTAL_FRAMES; i++) {
+            if (!bitmaps[i]) bitmaps[i] = bitmaps[0]
+          }
+          maxLoadedRef.current = TOTAL_FRAMES
         }
-        maxLoadedRef.current = TOTAL_FRAMES
         // Paint the exact frame in case the user scrolled during preload.
         requestAnimationFrame(() => {
           syncCanvasSize()
@@ -432,13 +494,11 @@ export function ScrollHeroSection() {
     }
 
     const runPhase = async (
-      from: number,
-      to: number,
+      indices: number[],
       concurrency: number,
       yieldBetweenFrames: boolean
     ) => {
-      const queue: number[] = []
-      for (let i = from; i <= to; i++) queue.push(i)
+      const queue: number[] = [...indices]
       const workers = Array.from({ length: concurrency }, async () => {
         while (queue.length > 0) {
           if (cancelled) return
@@ -461,8 +521,8 @@ export function ScrollHeroSection() {
     // macrotask yield stays as a cheap guarantee that scroll/rAF work always
     // gets a turn between frames.
     void (async () => {
-      await runPhase(1, REVEAL_THRESHOLD, LOAD_CONCURRENCY, false)
-      await runPhase(REVEAL_THRESHOLD + 1, TOTAL_FRAMES, STREAM_CONCURRENCY, true)
+      await runPhase(phase1Indices, LOAD_CONCURRENCY, false)
+      await runPhase(tailIndices, STREAM_CONCURRENCY, true)
     })()
 
     return () => {
@@ -494,10 +554,14 @@ export function ScrollHeroSection() {
   useEffect(() => {
     if (phase !== 'intro' || !framesReady) return
     const elapsed = performance.now() - mountedAtRef.current
-    const remaining = Math.max(0, MIN_INTRO_MS - elapsed)
-    const timer = window.setTimeout(() => setPhase('warmup'), remaining)
+    const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
+    const remaining = Math.max(0, minMs - elapsed)
+    const timer = window.setTimeout(() => {
+      sessionStorage.setItem(INTRO_SEEN_KEY, '1')
+      setPhase('warmup')
+    }, remaining)
     return () => window.clearTimeout(timer)
-  }, [phase, framesReady])
+  }, [phase, framesReady, fastIntro])
 
   // warmup -> revealing, giving the fire a beat to compile behind the plane.
   useEffect(() => {
@@ -704,6 +768,7 @@ export function ScrollHeroSection() {
             paid behind the still-opaque intro plane rather than on the user's
             first scroll. */}
         {fireMounted && (
+          <Suspense fallback={null}>
           <Blaze
             height={0.5}
             distortion={0.6}
@@ -789,7 +854,7 @@ export function ScrollHeroSection() {
                         300+
                       </div>
                       <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
-                        People reach
+                        People Reached
                       </div>
                     </div>
                   </div>
@@ -811,12 +876,13 @@ export function ScrollHeroSection() {
 
             </div>
           </Blaze>
+          </Suspense>
         )}
 
         {/* Branded intro — rendered outside Blaze so the plane stays a clean
             flat black with no heat distortion, and sits above it so the fire
             can warm up hidden underneath. */}
-        {phase !== 'done' && <BrandIntro phase={phase} />}
+        {phase !== 'done' && <BrandIntro phase={phase} fast={fastIntro} />}
 
       </div>
     </div>

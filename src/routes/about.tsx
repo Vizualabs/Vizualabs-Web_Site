@@ -4,6 +4,10 @@ import { Footer } from '#/components/layout/Footer'
 import { AboutHero } from '#/components/about/AboutHero'
 import { AboutPillars } from '#/components/about/AboutPillars'
 
+// No manual code-splitting needed here: TanStack Start's Vite plugin
+// already auto-splits each route's component into its own chunk
+// (`?tsr-split=component`), so AboutPillars' `motion` dependency is
+// already isolated to the /about chunk without any extra work.
 export const Route = createFileRoute('/about')({
   component: AboutPage,
 })

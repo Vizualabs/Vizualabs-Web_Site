@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check } from 'lucide-react'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
+import { trackEvent } from '#/lib/analytics'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -99,6 +100,7 @@ export function ContactSection() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    trackEvent('contact_form_submit', { subject: formData.subject })
     setSubmitted(true)
   }
 
@@ -121,7 +123,7 @@ export function ContactSection() {
               Initiate Strategic Contact
             </h1>
             <p className="mt-6 max-w-lg text-sm sm:text-base font-light font-[300] leading-relaxed text-[#E5E2E1]/70">
-              Ready to accelerate your engineering roadmap? Our team of architects and strategists are standing by.
+              Tell us what you're building — a founder reads every message personally.
             </p>
 
             <div className="mt-10 sm:mt-12 space-y-6 sm:space-y-7">

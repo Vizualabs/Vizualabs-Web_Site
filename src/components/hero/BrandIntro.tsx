@@ -12,12 +12,21 @@ export type IntroPhase = 'intro' | 'warmup' | 'revealing'
 
 const WORDMARK = 'VIZUALABS'
 
-export function BrandIntro({ phase }: { phase: IntroPhase }) {
+export function BrandIntro({
+  phase,
+  fast = false,
+}: {
+  phase: IntroPhase
+  /** Skip the full mark-draw/letter-stagger choreography for a returning
+   *  visitor within the same session — same simplified appearance as
+   *  prefers-reduced-motion, just applied by session state instead. */
+  fast?: boolean
+}) {
   const revealing = phase === 'revealing'
 
   return (
     <div
-      className="fixed inset-0 z-[100] overflow-hidden"
+      className={`fixed inset-0 z-[100] overflow-hidden${fast ? ' brand-intro-fast' : ''}`}
       data-testid="brand-intro"
       data-phase={phase}
       role="status"

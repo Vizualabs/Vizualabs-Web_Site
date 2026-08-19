@@ -1,5 +1,87 @@
 @import "tailwindcss";
 
+/* Self-hosted, latin-subset fonts — replaces the render-blocking Google
+   Fonts stylesheet. Geist and Hanken Grotesk are variable (one file spans
+   their full weight range); Poppins ships static per-weight, matching the
+   weights actually used across the site (font-light through font-black). */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/geist-variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-variable-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/instrument-serif-italic-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/poppins-300.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/poppins-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/poppins-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/poppins-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/poppins-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/poppins-800.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/poppins-900.woff2') format('woff2');
+}
+
 @layer base {
   :root {
     /* Only families the page actually paints are fetched in __root.tsx. */
@@ -580,6 +662,30 @@
   .brand-intro-glow-exit {
     animation: brand-intro-text-exit 300ms ease-out forwards;
   }
+}
+
+/* Returning-session fast path: the same simplified appearance as
+   prefers-reduced-motion above, applied by session state (see
+   ScrollHeroSection) instead of user preference — a repeat visit within the
+   same session gets a quick fade instead of the full first-visit reveal. */
+.brand-intro-fast .brand-intro-v,
+.brand-intro-fast .brand-intro-letter,
+.brand-intro-fast .brand-intro-dot,
+.brand-intro-fast .brand-intro-tagline {
+  animation: none;
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+.brand-intro-fast .brand-intro-iris {
+  -webkit-mask-image: none;
+  mask-image: none;
+  animation: brand-intro-text-exit 300ms ease-out forwards;
+}
+
+.brand-intro-fast .brand-intro-mark-exit,
+.brand-intro-fast .brand-intro-glow-exit {
+  animation: brand-intro-text-exit 300ms ease-out forwards;
 }
 
 /* ==========================================================================

@@ -1,36 +1,26 @@
-import { useEffect, useState } from 'react'
-import { motion, useMotionValue, useSpring } from 'motion/react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+
+// `motion` never enters the eager bundle: it's only fetched for desktop,
+// fine-pointer visitors who can actually see the cursor ring. The matchMedia
+// check below runs before the import, so touch/mobile visitors — the
+// majority of fresh traffic — never download it.
+const CustomCursorInner = lazy(() =>
+  import('./CustomCursorInner').then((m) => ({ default: m.CustomCursorInner }))
+)
 
 export function CustomCursor() {
   const [enabled, setEnabled] = useState(false)
 
-  const cursorX = useMotionValue(-100)
-  const cursorY = useMotionValue(-100)
-
-  const ringX = useSpring(cursorX, { stiffness: 240, damping: 26, mass: 0.7 })
-  const ringY = useSpring(cursorY, { stiffness: 240, damping: 26, mass: 0.7 })
-
   useEffect(() => {
     const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
-    if (!mq.matches) return
-
-    setEnabled(true)
-
-    const move = (e: MouseEvent) => {
-      cursorX.set(e.clientX)
-      cursorY.set(e.clientY)
-    }
-    window.addEventListener('mousemove', move)
-    return () => window.removeEventListener('mousemove', move)
-  }, [cursorX, cursorY])
+    setEnabled(mq.matches)
+  }, [])
 
   if (!enabled) return null
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9999] hidden md:block" aria-hidden="true">
-      <motion.div className="absolute left-0 top-0" style={{ x: ringX, y: ringY }}>
-        <div className="-translate-x-1/2 -translate-y-1/2 h-8 w-8 rounded-full border border-white/40" />
-      </motion.div>
-    </div>
+    <Suspense fallback={null}>
+      <CustomCursorInner />
+    </Suspense>
   )
 }

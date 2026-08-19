@@ -3,10 +3,8 @@ import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
 import { CustomCursor } from '../components/ui/CustomCursor'
+import { AnalyticsInit } from '../components/analytics/AnalyticsInit'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
-
-const FONT_CSS_URL =
-  'https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Instrument+Serif:ital@1&family=Poppins:wght@300;400;500;600;700;800;900&display=swap'
 
 interface RouterContext {
   queryClient: QueryClient
@@ -27,23 +25,24 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
     ],
     links: [
+      // Fonts are self-hosted (src/styles.css) — no more third-party
+      // fonts.googleapis.com round trip blocking first paint. Only the two
+      // weights that matter for above-the-fold content are preloaded: the
+      // body default and the hero/heading weight everything else can wait
+      // for font-display: swap to pick up once idle.
       {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
+        rel: 'preload',
+        as: 'font',
+        type: 'font/woff2',
+        href: '/fonts/poppins-400.woff2',
         crossOrigin: 'anonymous',
       },
-      // Only the families actually rendered are requested. 'Plus Jakarta Sans'
-      // and 'Space Grotesk' were being downloaded but never painted — Jakarta
-      // sits behind Poppins in the --font-sans stack (so it can never win) and
-      // --font-display had no consumers at all. Instrument Serif is only ever
-      // used italic, so the roman axis is dropped too.
       {
-        rel: 'stylesheet',
-        href: FONT_CSS_URL,
+        rel: 'preload',
+        as: 'font',
+        type: 'font/woff2',
+        href: '/fonts/poppins-900.woff2',
+        crossOrigin: 'anonymous',
       },
       {
         rel: 'stylesheet',
@@ -73,6 +72,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         {children}
         <CustomCursor />
+        <AnalyticsInit />
         <Scripts />
       </body>
     </html>

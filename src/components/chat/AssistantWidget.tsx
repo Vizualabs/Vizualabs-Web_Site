@@ -12,7 +12,12 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [messageInput, setMessageInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [inputFocused, setInputFocused] = useState(false)
   const historyRef = useRef<HTMLDivElement>(null)
+
+  const headerMood = sending ? 'hmm' : messages.length > 0 ? 'happy' : 'neutral'
+  const headerGaze = inputFocused ? { x: 18, y: -8 } : undefined
+  const headerNod = inputFocused && messageInput.length > 0
 
   useEffect(() => {
     historyRef.current?.scrollTo({ top: historyRef.current.scrollHeight, behavior: 'smooth' })
@@ -50,7 +55,12 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
         <div className="fixed bottom-20 left-5 right-5 sm:left-auto sm:right-6 z-50 w-auto sm:w-96 max-h-[70vh] overflow-y-auto rounded-2xl border border-white/15 bg-black/90 p-5 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2.5">
-              <BlobMascotIcon className="h-7 w-7 drop-shadow-[0_0_6px_rgba(255,94,77,0.5)]" />
+              <BlobMascotIcon
+                className="h-10 w-10 drop-shadow-[0_0_6px_rgba(255,94,77,0.5)]"
+                mood={headerMood}
+                gaze={headerGaze}
+                nod={headerNod}
+              />
               <div>
                 <h4 className="text-sm font-bold text-white">Vizualabs Assistant</h4>
                 <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
@@ -98,6 +108,8 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
                 rows={3}
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
                 placeholder="Type your message..."
                 className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-[#FF5E4D] focus:outline-none focus:ring-1 focus:ring-[#FF5E4D] transition-all resize-none"
                 disabled={sending}
@@ -130,7 +142,10 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
           {chatOpen ? (
             <X className="h-5 w-5 text-white" />
           ) : (
-            <BlobMascotIcon className="h-10 w-10 transition-transform group-hover:scale-105" />
+            <BlobMascotIcon
+              className="h-11 w-11 transition-transform group-hover:scale-105 pointer-events-none"
+              mood="happy"
+            />
           )}
 
           {/* Tooltip on hover */}

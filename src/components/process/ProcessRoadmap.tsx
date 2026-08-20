@@ -7,8 +7,15 @@ import {
   Settings2,
   Wrench,
 } from 'lucide-react'
+import { JellyBlobMascot } from 'feral-blob'
 import { motion, MotionConfig } from 'motion/react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { BLOB_CORAL_SKIN } from '#/components/chat/BlobMascotIcon'
+import 'feral-blob/blob.css'
+
+const TRAVEL_DURATION_MS = 24_000
+const MASCOT_CENTER_OFFSET = 24
+const STEP_HOVER_RADIUS = 58
 
 const ROADMAP_STEPS = [
   {
@@ -109,8 +116,64 @@ const ROAD_PATH = `
     L 800 170
   `
 
+function getTravelOpacity(elapsedMs: number) {
+  const progress = (elapsedMs % TRAVEL_DURATION_MS) / TRAVEL_DURATION_MS
+
+  // Matches SVG animate values="0;1;1;0" with evenly spaced keyframes.
+  if (progress < 1 / 3) return progress * 3
+  if (progress < 2 / 3) return 1
+  return (1 - progress) * 3
+}
+
+function findNearestStep(x: number, y: number) {
+  let nearestStep: number | null = null
+  let nearestDistance = STEP_HOVER_RADIUS
+
+  STEP_POSITIONS.forEach((position, index) => {
+    const distance = Math.hypot(x - position.cx, y - position.cy)
+    if (distance < nearestDistance) {
+      nearestDistance = distance
+      nearestStep = ROADMAP_STEPS[index].id
+    }
+  })
+
+  return nearestStep
+}
+
 export function ProcessRoadmap() {
-  const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+  const pathRef = useRef<SVGPathElement>(null)
+  const [mascotPoint, setMascotPoint] = useState({ x: 0, y: 0 })
+  const [mascotOpacity, setMascotOpacity] = useState(0)
+  const [travelHoveredStep, setTravelHoveredStep] = useState<number | null>(null)
+  const [manualHoveredStep, setManualHoveredStep] = useState<number | null>(null)
+  const hoveredStep = manualHoveredStep ?? travelHoveredStep
+
+  useEffect(() => {
+    const path = pathRef.current
+    if (!path) return
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) return
+
+    const totalLength = path.getTotalLength()
+    const start = performance.now()
+    let frame = 0
+
+    const tick = (now: number) => {
+      const elapsed = now - start
+      const progress = (elapsed % TRAVEL_DURATION_MS) / TRAVEL_DURATION_MS
+      const point = path.getPointAtLength(progress * totalLength)
+
+      setMascotPoint({ x: point.x, y: point.y })
+      setMascotOpacity(getTravelOpacity(elapsed))
+      setTravelHoveredStep(findNearestStep(point.x, point.y))
+
+      frame = requestAnimationFrame(tick)
+    }
+
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   return (
     <section
@@ -159,7 +222,7 @@ export function ProcessRoadmap() {
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
-                <path id="processMainRoadPath" d={ROAD_PATH} />
+                <path id="processMainRoadPath" ref={pathRef} d={ROAD_PATH} />
               </defs>
 
               <motion.path
@@ -186,12 +249,33 @@ export function ProcessRoadmap() {
                 filter="url(#processRoadShadow)"
               />
 
-              <motion.circle r="10" fill="white" filter="url(#processGlow)">
-                <animateMotion dur="12s" repeatCount="indefinite">
-                  <mpath href="#processMainRoadPath" />
-                </animateMotion>
-                <animate attributeName="opacity" values="0;1;1;0" dur="12s" repeatCount="indefinite" />
-              </motion.circle>
+              {/* Travel marker: same path/timing as the old white ball — mascot only */}
+              <g
+                pointerEvents="none"
+                style={{ pointerEvents: 'none' }}
+                opacity={mascotOpacity}
+                transform={`translate(${mascotPoint.x} ${mascotPoint.y})`}
+              >
+                <foreignObject
+                  x={-MASCOT_CENTER_OFFSET}
+                  y={-MASCOT_CENTER_OFFSET}
+                  width={MASCOT_CENTER_OFFSET * 2}
+                  height={MASCOT_CENTER_OFFSET * 2}
+                  overflow="visible"
+                  pointerEvents="none"
+                >
+                  <div
+                    style={{
+                      ...BLOB_CORAL_SKIN,
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <JellyBlobMascot mood="happy" className="h-full w-full pointer-events-none" />
+                  </div>
+                </foreignObject>
+              </g>
 
               <path
                 d={ROAD_PATH}
@@ -207,12 +291,7 @@ export function ProcessRoadmap() {
                 const pos = STEP_POSITIONS[index]
 
                 return (
-                  <g
-                    key={step.id}
-                    onMouseEnter={() => setHoveredStep(step.id)}
-                    onMouseLeave={() => setHoveredStep(null)}
-                    className="cursor-pointer group/step"
-                  >
+                  <g key={step.id} className="cursor-pointer">
                     <foreignObject
                       x={pos.cx - 30}
                       y={pos.cy - 30}
@@ -229,11 +308,21 @@ export function ProcessRoadmap() {
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20, delay: index * 0.1 }}
                         viewport={{ once: true, margin: '-50px' }}
-                        className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4 border-[#FF0000] bg-white shadow-2xl"
+                        onMouseEnter={() => setManualHoveredStep(step.id)}
+                        onMouseLeave={() => setManualHoveredStep(null)}
+                        className="group/step relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-[#FF0000] bg-white shadow-2xl"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 opacity-0 transition-opacity duration-500 group-hover/step:opacity-100" />
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 transition-opacity duration-500 ${
+                            hoveredStep === step.id ? 'opacity-100' : 'opacity-0'
+                          }`}
+                        />
                         <step.icon
-                          className="relative z-10 h-5 w-5 text-gray-700 transition-all duration-500 group-hover/step:scale-110 group-hover/step:text-white"
+                          className={`relative z-10 h-5 w-5 transition-all duration-500 ${
+                            hoveredStep === step.id
+                              ? 'scale-110 text-white'
+                              : 'text-gray-700'
+                          }`}
                           strokeWidth={2.5}
                           aria-hidden="true"
                         />
@@ -264,17 +353,15 @@ export function ProcessRoadmap() {
                         >
                           {step.title}
                         </motion.h3>
-                        <motion.p
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{
-                            opacity: hoveredStep === step.id ? 1 : 0,
-                            y: hoveredStep === step.id ? 0 : 5,
-                          }}
-                          transition={{ duration: 0.3 }}
-                          className="px-4 text-[10px] leading-relaxed text-white/70 md:text-xs"
+                        <p
+                          className={`px-4 text-[10px] leading-relaxed text-white/70 transition-all duration-300 md:text-xs ${
+                            hoveredStep === step.id
+                              ? 'translate-y-0 opacity-100'
+                              : 'translate-y-1 opacity-0'
+                          }`}
                         >
                           {step.description}
-                        </motion.p>
+                        </p>
                       </motion.div>
                     </foreignObject>
                   </g>

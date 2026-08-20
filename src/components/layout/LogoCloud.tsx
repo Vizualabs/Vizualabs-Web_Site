@@ -1,85 +1,83 @@
-// Illustrative placeholder clients — same fictional roster used in
-// TestimonialsSection for narrative consistency. Swap for real client/partner
-// marks (with permission to use their name/logo) before this ships live.
+// Meridian Health keeps the original mark + name treatment.
+// Other fictional marks are replaced with uploaded partner logos + names.
 
-/** Simple abstract marks, one per placeholder client — inline SVG, no image
- *  requests, inherits text color so the hover brighten applies to the mark
- *  and wordmark together. */
 function PulseMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M2 10h3.5l2-5.5L11 15.5l2.5-9L15 10h3" />
     </svg>
   )
 }
 
-function RouteMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2.5 15.5L11 7" />
-      <path d="M11 3.5h4v4" />
-    </svg>
-  )
-}
+type ClientEntry =
+  | { name: string; kind: 'mark'; mark: typeof PulseMark }
+  | { name: string; kind: 'image'; src: string; tone: 'dark' | 'light' | 'mono' }
 
-function ArcMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-      <path d="M3 13.5A8 8 0 0 1 15.8 5.2" />
-      <circle cx="15.8" cy="5.2" r="1.15" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
+const CLIENTS: ClientEntry[] = [
+  { name: 'Meridian Health', kind: 'mark', mark: PulseMark },
+  { name: 'Neyuki Premium Cars', kind: 'image', src: '/clients/neyuki.png', tone: 'dark' },
+  { name: 'Sugar Co Bakers', kind: 'image', src: '/clients/sugar-co-bakers.png', tone: 'dark' },
+  { name: 'CLCA Associates', kind: 'image', src: '/clients/clca-associates.png', tone: 'dark' },
+  {
+    name: 'Madara Restaurant',
+    kind: 'image',
+    src: '/clients/madara-restaurant-mono.png?v=3',
+    tone: 'mono',
+  },
+  {
+    name: 'Sanura Cosmetics',
+    kind: 'image',
+    src: '/clients/sanura-cosmetics-mono.png?v=3',
+    tone: 'mono',
+  },
+  { name: 'Wenas Events', kind: 'image', src: '/clients/crest-mark.png', tone: 'dark' },
+]
 
-function RingsMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-      <circle cx="10" cy="10" r="2" />
-      <circle cx="10" cy="10" r="5.5" opacity="0.6" />
-      <circle cx="10" cy="10" r="9" opacity="0.3" />
-    </svg>
-  )
-}
+function logoMarkClass(tone: 'dark' | 'light' | 'mono') {
+  const toneClass =
+    tone === 'mono'
+      ? // Pre-flattened white silhouettes — inherit mute from parent text opacity.
+        ''
+      : tone === 'dark'
+        ? 'mix-blend-lighten grayscale brightness-[1.75] contrast-125'
+        : 'brightness-0 invert'
 
-function BarsMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-      <path d="M4 15.5V11" />
-      <path d="M10 15.5V6.5" />
-      <path d="M16 15.5V3" />
-    </svg>
-  )
+  return `h-12 w-auto max-w-[180px] sm:h-14 sm:max-w-[220px] object-contain object-left shrink-0 ${toneClass}`
 }
-
-function RidgeMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2 14l3.5-6 2.5 3 3-7 3.5 6 3.5-4.5" />
-    </svg>
-  )
-}
-
-const PLACEHOLDER_CLIENTS = [
-  { name: 'Meridian Health', mark: PulseMark },
-  { name: 'Northline Logistics', mark: RouteMark },
-  { name: 'Arclight Robotics', mark: ArcMark },
-  { name: 'Solace Systems', mark: RingsMark },
-  { name: 'Fenwick & Cole Capital', mark: BarsMark },
-  { name: 'Ridgeline Analytics', mark: RidgeMark },
-] as const
 
 function LogoGroup({ ariaHidden }: { ariaHidden?: boolean }) {
   return (
     <div className="logo-marquee-group" aria-hidden={ariaHidden}>
-      {PLACEHOLDER_CLIENTS.map(({ name, mark: Mark }, i) => (
+      {CLIENTS.map((client, i) => (
         <span
-          key={`${name}-${i}`}
-          className="flex shrink-0 items-center gap-2.5 px-8 sm:px-12 text-white/25 transition-colors duration-300 hover:text-white/70 select-none whitespace-nowrap"
+          key={`${client.name}-${i}`}
+          className="group flex shrink-0 items-center gap-3.5 px-8 sm:gap-4 sm:px-12 text-white/40 transition-colors duration-300 hover:text-white/80 select-none whitespace-nowrap"
         >
-          <Mark className="h-5 w-5 sm:h-[22px] sm:w-[22px] shrink-0" />
-          <span className="font-hanken text-lg sm:text-xl font-bold tracking-wide">
-            {name}
-          </span>
+          {client.kind === 'mark' ? (
+            <client.mark className="h-7 w-7 sm:h-8 sm:w-8 shrink-0" />
+          ) : (
+            <img
+              src={client.src}
+              alt=""
+              aria-hidden="true"
+              className={`${logoMarkClass(client.tone)} ${
+                client.tone === 'mono'
+                  ? 'opacity-55 group-hover:opacity-90 transition-opacity duration-300'
+                  : 'opacity-[0.95]'
+              }`}
+              draggable={false}
+            />
+          )}
+          <span className="font-hanken text-lg sm:text-xl font-bold tracking-wide">{client.name}</span>
         </span>
       ))}
     </div>

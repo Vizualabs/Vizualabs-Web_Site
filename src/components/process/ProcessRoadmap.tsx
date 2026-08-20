@@ -15,7 +15,17 @@ import 'feral-blob/blob.css'
 
 const TRAVEL_DURATION_MS = 24_000
 const MASCOT_CENTER_OFFSET = 24
-const STEP_HOVER_RADIUS = 58
+
+/** Soft enter/exit band — exit soon after leaving so fade-out can start promptly. */
+const STEP_ENTER_RADIUS = 48
+const STEP_EXIT_RADIUS = 48
+/** Brief dwell before auto-opening — kills one-frame flash-pass pops. */
+const TRAVEL_ENTER_DWELL_MS = 90
+
+const HOVER_SPRING_IN = { type: 'spring' as const, stiffness: 280, damping: 24, mass: 0.7 }
+const HOVER_SPRING_OUT = { type: 'spring' as const, stiffness: 180, damping: 28, mass: 0.85 }
+const LABEL_EASE_IN = { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const }
+const LABEL_EASE_OUT = { duration: 0.38, ease: [0.33, 1, 0.68, 1] as const }
 
 const ROADMAP_STEPS = [
   {
@@ -29,8 +39,7 @@ const ROADMAP_STEPS = [
   {
     id: 2,
     title: 'Discussion',
-    description:
-      'Collaborative brainstorming sessions with stakeholders to align vision and goals.',
+    description: 'Brainstorming with stakeholders to align vision and goals.',
     icon: MessagesSquare,
     position: 'top' as const,
   },
@@ -53,13 +62,12 @@ const ROADMAP_STEPS = [
   {
     id: 5,
     title: 'Building',
-    description:
-      'Engineering robust solutions through iterative development and quality assurance.',
+    description: 'Iterative development and quality assurance to ship robust solutions.',
     icon: Puzzle,
     position: 'top' as const,
   },
   {
-    id: 6, 
+    id: 6,
     title: 'Launch',
     description:
       'Strategic deployment to market with comprehensive testing and monitoring.',
@@ -69,8 +77,7 @@ const ROADMAP_STEPS = [
   {
     id: 7,
     title: 'Maintenance',
-    description:
-      'Continuous optimization, support, and feature enhancements for sustained success.',
+    description: 'Ongoing support, optimization, and feature improvements.',
     icon: Wrench,
     position: 'top' as const,
   },
@@ -116,41 +123,48 @@ const ROAD_PATH = `
     L 800 170
   `
 
-function getTravelOpacity(elapsedMs: number) {
-  const progress = (elapsedMs % TRAVEL_DURATION_MS) / TRAVEL_DURATION_MS
+// Short end fades: long fades make the white jelly read as muddy pink on the red road.
+const TRAVEL_FADE_FRACTION = 0.05
 
-  // Matches SVG animate values="0;1;1;0" with evenly spaced keyframes.
-  if (progress < 1 / 3) return progress * 3
-  if (progress < 2 / 3) return 1
-  return (1 - progress) * 3
+function getTravelOpacity(progress: number) {
+  if (progress < TRAVEL_FADE_FRACTION) return progress / TRAVEL_FADE_FRACTION
+  if (progress > 1 - TRAVEL_FADE_FRACTION) return (1 - progress) / TRAVEL_FADE_FRACTION
+  return 1
 }
 
-function findNearestStep(x: number, y: number) {
-  let nearestStep: number | null = null
-  let nearestDistance = STEP_HOVER_RADIUS
+function distanceToStep(x: number, y: number, stepIndex: number) {
+  const position = STEP_POSITIONS[stepIndex]
+  return Math.hypot(x - position.cx, y - position.cy)
+}
 
-  STEP_POSITIONS.forEach((position, index) => {
-    const distance = Math.hypot(x - position.cx, y - position.cy)
+function findNearestStepId(x: number, y: number, radius: number) {
+  let nearestStep: number | null = null
+  let nearestDistance = radius
+
+  for (let index = 0; index < STEP_POSITIONS.length; index++) {
+    const distance = distanceToStep(x, y, index)
     if (distance < nearestDistance) {
       nearestDistance = distance
       nearestStep = ROADMAP_STEPS[index].id
     }
-  })
+  }
 
   return nearestStep
 }
 
 export function ProcessRoadmap() {
   const pathRef = useRef<SVGPathElement>(null)
-  const [mascotPoint, setMascotPoint] = useState({ x: 0, y: 0 })
-  const [mascotOpacity, setMascotOpacity] = useState(0)
+  const mascotGroupRef = useRef<SVGGElement>(null)
+  const travelStepRef = useRef<number | null>(null)
+  const enterCandidateRef = useRef<{ id: number; since: number } | null>(null)
+
   const [travelHoveredStep, setTravelHoveredStep] = useState<number | null>(null)
   const [manualHoveredStep, setManualHoveredStep] = useState<number | null>(null)
-  const hoveredStep = manualHoveredStep ?? travelHoveredStep
 
   useEffect(() => {
     const path = pathRef.current
-    if (!path) return
+    const mascotGroup = mascotGroupRef.current
+    if (!path || !mascotGroup) return
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) return
@@ -159,15 +173,51 @@ export function ProcessRoadmap() {
     const start = performance.now()
     let frame = 0
 
+    const commitTravelStep = (next: number | null) => {
+      if (travelStepRef.current === next) return
+      travelStepRef.current = next
+      setTravelHoveredStep(next)
+    }
+
     const tick = (now: number) => {
       const elapsed = now - start
       const progress = (elapsed % TRAVEL_DURATION_MS) / TRAVEL_DURATION_MS
       const point = path.getPointAtLength(progress * totalLength)
+      const opacity = getTravelOpacity(progress)
 
-      setMascotPoint({ x: point.x, y: point.y })
-      setMascotOpacity(getTravelOpacity(elapsed))
-      setTravelHoveredStep(findNearestStep(point.x, point.y))
+      // Drive the traveler on the DOM only — never through React state.
+      mascotGroup.setAttribute('transform', `translate(${point.x} ${point.y})`)
+      mascotGroup.setAttribute('opacity', String(opacity))
 
+      const current = travelStepRef.current
+      let next = current
+
+      if (current != null) {
+        const distance = distanceToStep(point.x, point.y, current - 1)
+
+        if (distance <= STEP_EXIT_RADIUS) {
+          enterCandidateRef.current = null
+          next = current
+        } else {
+          // Clear immediately when past — Motion's exit easing handles the soft fade.
+          next = null
+          enterCandidateRef.current = null
+        }
+      }
+
+      if (next == null) {
+        const candidate = findNearestStepId(point.x, point.y, STEP_ENTER_RADIUS)
+        if (candidate == null) {
+          enterCandidateRef.current = null
+        } else if (enterCandidateRef.current?.id !== candidate) {
+          enterCandidateRef.current = { id: candidate, since: now }
+        } else if (now - enterCandidateRef.current.since >= TRAVEL_ENTER_DWELL_MS) {
+          next = candidate
+          enterCandidateRef.current = null
+        }
+      }
+
+      commitTravelStep(next)
       frame = requestAnimationFrame(tick)
     }
 
@@ -249,12 +299,13 @@ export function ProcessRoadmap() {
                 filter="url(#processRoadShadow)"
               />
 
-              {/* Travel marker: same path/timing as the old white ball — mascot only */}
+              {/* Traveler motion is ref-driven; React only mounts it once. */}
               <g
+                ref={mascotGroupRef}
                 pointerEvents="none"
                 style={{ pointerEvents: 'none' }}
-                opacity={mascotOpacity}
-                transform={`translate(${mascotPoint.x} ${mascotPoint.y})`}
+                opacity={0}
+                transform="translate(0 0)"
               >
                 <foreignObject
                   x={-MASCOT_CENTER_OFFSET}
@@ -290,6 +341,12 @@ export function ProcessRoadmap() {
               {ROADMAP_STEPS.map((step, index) => {
                 const pos = STEP_POSITIONS[index]
 
+                // Manual and auto visit share the ambient look exactly
+                // (soft size/color + tilt + title/description).
+                const isActive =
+                  manualHoveredStep === step.id ||
+                  (manualHoveredStep === null && travelHoveredStep === step.id)
+
                 return (
                   <g key={step.id} className="cursor-pointer">
                     <foreignObject
@@ -299,33 +356,42 @@ export function ProcessRoadmap() {
                       height="60"
                       className="overflow-visible"
                     >
+                      {/* Reveal-on-scroll owns outer scale. Hover lives on the nested node
+                          so whileInView cannot permanently mask interaction springs. */}
                       <motion.div
                         initial={{ scale: 0, rotate: -10 }}
                         whileInView={{ scale: 1, rotate: 0 }}
-                        animate={{
-                          scale: hoveredStep === step.id ? 1.2 : 1,
-                          rotate: hoveredStep === step.id ? 5 : 0,
-                        }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: index * 0.1 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 22, delay: index * 0.1 }}
                         viewport={{ once: true, margin: '-50px' }}
-                        onMouseEnter={() => setManualHoveredStep(step.id)}
-                        onMouseLeave={() => setManualHoveredStep(null)}
-                        className="group/step relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-[#FF0000] bg-white shadow-2xl"
+                        className="h-full w-full"
                       >
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 transition-opacity duration-500 ${
-                            hoveredStep === step.id ? 'opacity-100' : 'opacity-0'
+                        <motion.div
+                          animate={{
+                            scale: isActive ? 1.05 : 1,
+                            rotate: isActive ? 3 : 0,
+                          }}
+                          transition={isActive ? HOVER_SPRING_IN : HOVER_SPRING_OUT}
+                          onMouseEnter={() => setManualHoveredStep(step.id)}
+                          onMouseLeave={() => setManualHoveredStep(null)}
+                          className={`relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 bg-white shadow-2xl transition-[border-color,box-shadow] duration-300 ease-out ${
+                            isActive
+                              ? 'border-[#FF0000] shadow-[0_0_14px_rgba(255,0,0,0.3)]'
+                              : 'border-[#FF0000]/80 shadow-2xl'
                           }`}
-                        />
-                        <step.icon
-                          className={`relative z-10 h-5 w-5 transition-all duration-500 ${
-                            hoveredStep === step.id
-                              ? 'scale-110 text-white'
-                              : 'text-gray-700'
-                          }`}
-                          strokeWidth={2.5}
-                          aria-hidden="true"
-                        />
+                        >
+                          <div
+                            className={`absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 transition-opacity duration-300 ease-out ${
+                              isActive ? 'opacity-30' : 'opacity-0'
+                            }`}
+                          />
+                          <step.icon
+                            className={`relative z-10 h-5 w-5 transition-all duration-300 ease-out ${
+                              isActive ? 'scale-105 text-gray-800' : 'text-gray-700'
+                            }`}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
+                        </motion.div>
                       </motion.div>
                     </foreignObject>
 
@@ -346,22 +412,24 @@ export function ProcessRoadmap() {
                         <motion.h3
                           className="mb-2 font-hanken text-xs font-bold uppercase tracking-wide text-white md:text-sm"
                           animate={{
-                            color: hoveredStep === step.id ? '#ef4444' : '#ffffff',
-                            scale: hoveredStep === step.id ? 1.1 : 1,
+                            color: isActive ? '#ef4444' : '#ffffff',
+                            scale: isActive ? 1.06 : 1,
                           }}
-                          transition={{ duration: 0.3 }}
+                          transition={isActive ? LABEL_EASE_IN : LABEL_EASE_OUT}
                         >
                           {step.title}
                         </motion.h3>
-                        <p
-                          className={`px-4 text-[10px] leading-relaxed text-white/70 transition-all duration-300 md:text-xs ${
-                            hoveredStep === step.id
-                              ? 'translate-y-0 opacity-100'
-                              : 'translate-y-1 opacity-0'
-                          }`}
+                        <motion.p
+                          initial={false}
+                          animate={{
+                            opacity: isActive ? 1 : 0,
+                            y: isActive ? 0 : 6,
+                          }}
+                          transition={isActive ? LABEL_EASE_IN : LABEL_EASE_OUT}
+                          className="px-4 text-[10px] leading-relaxed text-white/75 md:text-xs"
                         >
                           {step.description}
-                        </p>
+                        </motion.p>
                       </motion.div>
                     </foreignObject>
                   </g>

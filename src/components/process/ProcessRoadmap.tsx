@@ -10,7 +10,7 @@ import {
 import { JellyBlobMascot } from 'feral-blob'
 import { motion, MotionConfig } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
-import { BLOB_CORAL_SKIN } from '#/components/chat/BlobMascotIcon'
+import { BLOB_WHITE_SKIN } from '#/components/chat/BlobMascotIcon'
 import 'feral-blob/blob.css'
 
 const TRAVEL_DURATION_MS = 24_000
@@ -59,7 +59,7 @@ const ROADMAP_STEPS = [
     position: 'top' as const,
   },
   {
-    id: 6,
+    id: 6, 
     title: 'Launch',
     description:
       'Strategic deployment to market with comprehensive testing and monitoring.',
@@ -266,7 +266,7 @@ export function ProcessRoadmap() {
                 >
                   <div
                     style={{
-                      ...BLOB_CORAL_SKIN,
+                      ...BLOB_WHITE_SKIN,
                       width: '100%',
                       height: '100%',
                       pointerEvents: 'none',

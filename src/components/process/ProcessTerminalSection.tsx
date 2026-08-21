@@ -50,11 +50,11 @@ export function ProcessTerminalSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative z-10 w-full bg-[#131313] px-5 py-16 sm:px-8 sm:py-20 lg:px-12"
+      className="relative z-10 w-full overflow-x-hidden bg-[#131313] px-5 py-16 sm:px-8 sm:py-20 lg:px-12"
       aria-labelledby="process-terminal-heading"
     >
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
-        <div>
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-8 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
+        <div className="min-w-0">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#E7978B]">
             Execution view
           </p>
@@ -70,12 +70,15 @@ export function ProcessTerminalSection() {
           </p>
         </div>
 
-        <Terminal
-          fileName={PROCESS_FILE_NAME}
-          code={PROCESS_CODE}
-          playing={playing}
-          resetOnHover
-        />
+        <div className="min-w-0 w-full overflow-hidden">
+          <Terminal
+            fileName={PROCESS_FILE_NAME}
+            code={PROCESS_CODE}
+            playing={playing}
+            resetOnHover
+            className="w-full max-w-full"
+          />
+        </div>
       </div>
     </section>
   )

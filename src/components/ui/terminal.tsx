@@ -133,24 +133,24 @@ export function Terminal({
 
   return (
     <div
-      className={`relative ${className}`}
+      className={`relative w-full min-w-0 max-w-full ${className}`}
       onMouseEnter={() => {
         if (!resetOnHover || !revealComplete) return
         setCounter(0)
       }}
     >
       <div
-        className={`overflow-hidden rounded-2xl border bg-[#1e1e1e] shadow-2xl shadow-black/40 transition-shadow duration-700 ${
+        className={`w-full max-w-full overflow-hidden rounded-xl border bg-[#1e1e1e] shadow-2xl shadow-black/40 transition-shadow duration-700 sm:rounded-2xl ${
           revealComplete
             ? 'border-[#FF5540]/25 shadow-[0_0_50px_-12px_rgba(255,85,64,0.35)]'
             : 'border-white/10'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-white/8 bg-[#161616] px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-b border-white/8 bg-[#161616] px-3 py-2.5 sm:px-4 sm:py-3">
           <MacControls />
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#EBBBB4]/50">
-            <FileCode2 className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="font-mono">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 text-[10px] font-medium text-[#EBBBB4]/50 sm:justify-center sm:text-[11px]">
+            <FileCode2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate font-mono">
               {fileName.includes('/') ? (
                 <>
                   <span className="text-[#EBBBB4]/40">
@@ -165,30 +165,32 @@ export function Terminal({
               )}
             </span>
           </div>
-          <div className="w-12" aria-hidden="true" />
+          <div className="hidden w-12 shrink-0 sm:block" aria-hidden="true" />
         </div>
 
         <div
           ref={outputRef}
-          className="relative flex h-[15rem] gap-4 overflow-y-auto px-4 py-4 sm:h-[16rem] sm:px-5 sm:py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative h-[14rem] overflow-x-auto overflow-y-auto px-3 py-3 sm:h-[16rem] sm:px-5 sm:py-5 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.15)_transparent]"
           aria-live="polite"
           aria-label="Code sample"
         >
-          <div
-            className="select-none whitespace-pre text-right font-mono text-[13px] leading-relaxed text-white/20 sm:text-sm"
-            aria-hidden="true"
-          >
-            {lines.map((_, i) => (
-              <div key={`ln-${i}`}>{i + 1}</div>
-            ))}
-          </div>
-          <div className="whitespace-pre font-mono text-[13px] leading-relaxed text-[#D4D4D4] sm:text-sm">
-            {lines.map((line, i) => (
-              <div key={`code-${i}`}>
-                {highlightLine(line, `l${i}`)}
-                {i === lines.length - 1 ? <Cursor /> : null}
-              </div>
-            ))}
+          <div className="flex min-w-max gap-3 sm:gap-4">
+            <div
+              className="select-none whitespace-pre text-right font-mono text-[12px] leading-relaxed text-white/20 sm:text-sm"
+              aria-hidden="true"
+            >
+              {lines.map((_, i) => (
+                <div key={`ln-${i}`}>{i + 1}</div>
+              ))}
+            </div>
+            <div className="whitespace-pre font-mono text-[12px] leading-relaxed text-[#D4D4D4] sm:text-sm">
+              {lines.map((line, i) => (
+                <div key={`code-${i}`}>
+                  {highlightLine(line, `l${i}`)}
+                  {i === lines.length - 1 ? <Cursor /> : null}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

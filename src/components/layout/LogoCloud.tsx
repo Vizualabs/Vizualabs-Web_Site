@@ -67,7 +67,7 @@ const CLIENTS: ClientEntry[] = [
     kind: 'image',
     src: '/clients/learnerble-mono.png?v=3',
     tone: 'mono',
-    sizeClass: 'h-10 max-w-[160px] sm:h-11 sm:max-w-[190px]',
+    sizeClass: 'h-9 max-w-[140px] sm:h-10 sm:max-w-[160px]',
   },
   { name: 'Wenas Events', kind: 'image', src: '/clients/crest-mark.png', tone: 'mono' },
 ]

@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ScrollHeroSection } from '../components/hero/ScrollHeroSection'
+import { LogoCloud } from '../components/layout/LogoCloud'
 import { CapabilitiesSection } from '../components/layout/CapabilitiesSection'
+import { TestimonialsSection } from '../components/layout/TestimonialsSection'
 import { StrategicJourney } from '../components/layout/StrategicJourney'
 import { CtaSection } from '../components/layout/CtaSection'
 import { Footer } from '../components/layout/Footer'
@@ -19,7 +21,15 @@ function Home() {
 
       {/* Below-the-fold sections */}
       <div className="defer-paint">
+        <LogoCloud />
+      </div>
+
+      <div className="defer-paint">
         <CapabilitiesSection />
+      </div>
+
+      <div className="defer-paint">
+        <TestimonialsSection />
       </div>
 
       {/* The Strategic Journey Cyclical Step Animation Section */}

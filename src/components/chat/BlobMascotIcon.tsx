@@ -1,34 +1,79 @@
-export function BlobMascotIcon({ className = 'h-8 w-8' }: { className?: string }) {
+import type { CSSProperties } from 'react'
+import { JellyBlobMascot, type JellyBlobMascotProps } from 'feral-blob'
+import 'feral-blob/blob.css'
+
+/** Vizualabs coral skin — matches brand #FF5E4D. */
+export const BLOB_CORAL_SKIN = {
+  '--jelly-body-top': '#FFA36B',
+  '--jelly-body-mid': '#FF5E4D',
+  '--jelly-body-deep': '#E8482F',
+  '--jelly-body-rim': '#FF6B5A',
+  '--jelly-outline': '#C93A2A',
+  '--jelly-outline-light': '#E8482F',
+  '--jelly-arm-light': '#FFB088',
+  '--jelly-arm-mid': '#FF5E4D',
+  '--jelly-arm-deep': '#E8482F',
+  '--jelly-cheek-light': '#FFD9C7',
+  '--jelly-cheek': '#FF9A8A',
+  '--jelly-cheek-deep': '#F08070',
+  '--jelly-eye-light': '#3A1408',
+  '--jelly-eye': '#2A0E06',
+  '--jelly-eye-deep': '#1A0804',
+  '--jelly-belly-glow': '#FFB8A0',
+  '--jelly-eye-sparkle': '#FF7A6A',
+} as CSSProperties
+
+/** White skin for dark/red surfaces (roadmap path). */
+export const BLOB_WHITE_SKIN = {
+  '--jelly-body-top': '#FFFFFF',
+  '--jelly-body-mid': '#F7F7F8',
+  '--jelly-body-deep': '#E8E8EC',
+  '--jelly-body-rim': '#F2F2F4',
+  '--jelly-outline': '#D0D0D6',
+  '--jelly-outline-light': '#E4E4E8',
+  '--jelly-arm-light': '#FFFFFF',
+  '--jelly-arm-mid': '#F0F0F3',
+  '--jelly-arm-deep': '#DCDCE2',
+  '--jelly-cheek-light': '#FFE4EC',
+  '--jelly-cheek': '#FFC4D4',
+  '--jelly-cheek-deep': '#F0A8BC',
+  '--jelly-eye-light': '#3A1408',
+  '--jelly-eye': '#2A0E06',
+  '--jelly-eye-deep': '#1A0804',
+  '--jelly-belly-glow': '#FFFFFF',
+  '--jelly-eye-sparkle': '#B8B8C0',
+  '--jelly-shadow': '#8e88a6',
+  '--jelly-shadow-light': '#aaa4c0',
+} as CSSProperties
+
+type BlobMascotIconProps = {
+  className?: string
+  mood?: JellyBlobMascotProps['mood']
+  gaze?: JellyBlobMascotProps['gaze']
+  nod?: boolean
+  mouth?: JellyBlobMascotProps['mouth']
+  onOverpoke?: JellyBlobMascotProps['onOverpoke']
+}
+
+export function BlobMascotIcon({
+  className = 'h-8 w-8',
+  mood = 'happy',
+  gaze,
+  nod,
+  mouth,
+  onOverpoke,
+}: BlobMascotIconProps) {
   return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden="true">
-      <defs>
-        <radialGradient id="blob-body" cx="35%" cy="30%" r="80%">
-          <stop offset="0%" stopColor="#FFA36B" />
-          <stop offset="55%" stopColor="#FF5E4D" />
-          <stop offset="100%" stopColor="#E8482F" />
-        </radialGradient>
-      </defs>
-
-      {/* side bumps */}
-      <circle cx="12" cy="56" r="9" fill="url(#blob-body)" />
-      <circle cx="88" cy="56" r="9" fill="url(#blob-body)" />
-
-      {/* body */}
-      <rect x="15" y="16" width="70" height="72" rx="32" ry="34" fill="url(#blob-body)" />
-
-      {/* glossy highlight */}
-      <ellipse cx="35" cy="32" rx="14" ry="9" fill="#FFFFFF" opacity="0.5" transform="rotate(-25 35 32)" />
-
-      {/* blush */}
-      <ellipse cx="25" cy="62" rx="7" ry="4" fill="#FFD9C7" opacity="0.55" />
-      <ellipse cx="75" cy="62" rx="7" ry="4" fill="#FFD9C7" opacity="0.55" />
-
-      {/* eyes */}
-      <ellipse cx="38" cy="54" rx="4" ry="5.5" fill="#3A1408" />
-      <ellipse cx="62" cy="54" rx="4" ry="5.5" fill="#3A1408" />
-
-      {/* mouth */}
-      <ellipse cx="50" cy="66" rx="3.2" ry="2.6" fill="#7A1F12" />
-    </svg>
+    <div className={className} style={BLOB_CORAL_SKIN} aria-hidden="true">
+      <JellyBlobMascot
+        mood={mood}
+        gaze={gaze}
+        nod={nod}
+        mouth={mouth}
+        onOverpoke={onOverpoke}
+        happyEyes="star"
+        className="h-full w-full"
+      />
+    </div>
   )
 }

@@ -1,5 +1,6 @@
 import { motion, MotionConfig } from 'motion/react'
 import { Rocket, Shield } from 'lucide-react'
+import { NumberTicker } from '../ui/number-ticker'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -123,7 +124,7 @@ export function AboutPillars() {
                 {/* Stat Label */}
                 <div className="shrink-0 text-left">
                   <span className="text-xs sm:text-sm font-normal text-[#FFB4A8] leading-tight block">
-                    84% Efficiency
+                    <NumberTicker value={84} suffix="% Efficiency" delay={0.25} />
                   </span>
                   <span className="text-xs sm:text-sm font-normal text-[#FFB4A8] leading-tight block">
                     Gain

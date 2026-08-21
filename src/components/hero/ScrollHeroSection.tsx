@@ -3,6 +3,7 @@ import { BrandIntro, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
 import { keyHairBackdrop } from './keyHairBackdrop'
+import { NumberTicker } from '../ui/number-ticker'
 
 // Code-split out of the homepage bundle: this is an ~800-line WebGL engine
 // that never renders before the 'warmup' phase anyway. The prefetch effect
@@ -837,9 +838,12 @@ export function ScrollHeroSection() {
                 <div className="liquid-glass relative overflow-hidden px-3 py-3 sm:px-8 sm:py-5 flex items-center justify-between gap-2 sm:justify-start sm:gap-8 shadow-2xl">
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
                     <div className="text-center sm:text-left">
-                      <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
-                        15 +
-                      </div>
+                      <NumberTicker
+                        value={15}
+                        suffix=" +"
+                        delay={0}
+                        className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight"
+                      />
                       <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         Projects Completed
                       </div>
@@ -850,9 +854,12 @@ export function ScrollHeroSection() {
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
                     <div className="text-center sm:text-left">
-                      <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
-                        300+
-                      </div>
+                      <NumberTicker
+                        value={300}
+                        suffix="+"
+                        delay={0.15}
+                        className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight"
+                      />
                       <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         People Reached
                       </div>
@@ -863,9 +870,12 @@ export function ScrollHeroSection() {
 
                   <div className="relative flex flex-1 sm:flex-none items-center justify-center sm:justify-start group/stat cursor-default">
                     <div className="text-center sm:text-left">
-                      <div className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
-                        100%
-                      </div>
+                      <NumberTicker
+                        value={100}
+                        suffix="%"
+                        delay={0.3}
+                        className="font-sans text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight"
+                      />
                       <div className="text-[clamp(0.5rem,2.35vw,0.75rem)] sm:text-xs text-gray-300 font-normal mt-1 whitespace-nowrap">
                         Clients' Satisfaction
                       </div>

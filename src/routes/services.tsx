@@ -5,7 +5,26 @@ import { ServicesShowcase } from '../components/services/ServicesShowcase'
 import { ServicesCtaSection } from '../components/services/ServicesCtaSection'
 import { Footer } from '../components/layout/Footer'
 
-export const Route = createFileRoute('/services')({ component: ServicesPage })
+export const Route = createFileRoute('/services')({
+  component: ServicesPage,
+  head: () => ({
+    meta: [
+      { title: 'Services — Vizualabs' },
+      {
+        name: 'description',
+        content:
+          'Custom software, product development, and AI solutions — engineered with the same precision from start to launch.',
+      },
+      { property: 'og:title', content: 'Services — Vizualabs' },
+      {
+        property: 'og:description',
+        content:
+          'Custom software, product development, and AI solutions — engineered with the same precision from start to launch.',
+      },
+      { property: 'og:url', content: 'https://vizualabs.com/services' },
+    ],
+  }),
+})
 
 function ServicesPage() {
   return (

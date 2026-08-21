@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
-import { trackEvent } from '#/lib/analytics'
 
 interface NavItem {
   label: string
@@ -14,7 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
   { label: 'Process', href: '/process', isRoute: true },
-  { label: 'Case Studies', href: '/#cases' },
+  { label: 'Case Studies', href: '/case-study', isRoute: true },
 ]
 
 export function Navbar() {
@@ -164,7 +163,6 @@ export function Navbar() {
         <div className="hidden md:block">
           <a
             href="/contact#contact"
-            onClick={() => trackEvent('cta_click', { label: 'contact_us', location: 'navbar_desktop' })}
             className="nav-contact-btn"
           >
             Contact Us
@@ -233,10 +231,7 @@ export function Navbar() {
             })}
             <a
               href="/contact#contact"
-              onClick={() => {
-                trackEvent('cta_click', { label: 'contact_us', location: 'navbar_mobile' })
-                setOpen(false)
-              }}
+              onClick={() => setOpen(false)}
               className="nav-contact-btn mt-4 justify-center"
             >
               Contact Us

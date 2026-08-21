@@ -10,6 +10,23 @@ import { AboutPillars } from '#/components/about/AboutPillars'
 // already isolated to the /about chunk without any extra work.
 export const Route = createFileRoute('/about')({
   component: AboutPage,
+  head: () => ({
+    meta: [
+      { title: 'About — Vizualabs' },
+      {
+        name: 'description',
+        content:
+          'Vizualabs fuses rigorous engineering discipline with strategic foresight — meet the studio behind the builds.',
+      },
+      { property: 'og:title', content: 'About — Vizualabs' },
+      {
+        property: 'og:description',
+        content:
+          'Vizualabs fuses rigorous engineering discipline with strategic foresight — meet the studio behind the builds.',
+      },
+      { property: 'og:url', content: 'https://vizualabs.com/about' },
+    ],
+  }),
 })
 
 function AboutPage() {

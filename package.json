@@ -14,7 +14,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.116.0",
+    "@google/genai": "^2.18.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-query": "^5.101.4",
@@ -24,9 +24,9 @@
     "feral-blob": "^0.1.0",
     "lucide-react": "^1.31.0",
     "motion": "^13.1.0",
-    "posthog-js": "^1.418.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "resend": "^6.21.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

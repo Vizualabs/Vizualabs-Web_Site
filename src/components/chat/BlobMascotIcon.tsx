@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { JellyBlobMascot, type JellyBlobMascotProps } from 'feral-blob'
 import 'feral-blob/blob.css'
 
@@ -63,17 +63,30 @@ export function BlobMascotIcon({
   mouth,
   onOverpoke,
 }: BlobMascotIconProps) {
+  // JellyBlobMascot has an internal idle-jitter that seeds differently on
+  // the server vs. the client, so mounting it during SSR trips a React
+  // hydration mismatch (same issue fixed in ProcessRoadmap's traveling
+  // blob). A flat circle in the same skin covers the gap until mount —
+  // this icon is the always-visible chat launcher, so an empty flash would
+  // be more noticeable than on the roadmap.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   return (
     <div className={className} style={BLOB_CORAL_SKIN} aria-hidden="true">
-      <JellyBlobMascot
-        mood={mood}
-        gaze={gaze}
-        nod={nod}
-        mouth={mouth}
-        onOverpoke={onOverpoke}
-        happyEyes="star"
-        className="h-full w-full"
-      />
+      {mounted ? (
+        <JellyBlobMascot
+          mood={mood}
+          gaze={gaze}
+          nod={nod}
+          mouth={mouth}
+          onOverpoke={onOverpoke}
+          happyEyes="star"
+          className="h-full w-full"
+        />
+      ) : (
+        <div className="h-full w-full rounded-full" style={{ background: 'var(--jelly-body-mid)' }} />
+      )}
     </div>
   )
 }

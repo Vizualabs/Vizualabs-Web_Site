@@ -20,13 +20,36 @@ function PulseMark({ className }: { className?: string }) {
 
 type ClientEntry =
   | { name: string; kind: 'mark'; mark: typeof PulseMark }
-  | { name: string; kind: 'image'; src: string; tone: 'dark' | 'light' | 'mono' }
+  | {
+      name: string
+      kind: 'image'
+      src: string
+      tone: 'dark' | 'light' | 'mono'
+      sizeClass?: string
+    }
 
 const CLIENTS: ClientEntry[] = [
   { name: 'Meridian Health', kind: 'mark', mark: PulseMark },
-  { name: 'Neyuki Premium Cars', kind: 'image', src: '/clients/neyuki.png', tone: 'dark' },
-  { name: 'Sugar Co Bakers', kind: 'image', src: '/clients/sugar-co-bakers.png', tone: 'dark' },
-  { name: 'CLCA Associates', kind: 'image', src: '/clients/clca-associates.png', tone: 'dark' },
+  {
+    name: 'Mejestic Homes',
+    kind: 'image',
+    src: '/clients/mejestic-homes-mono.png?v=2',
+    tone: 'mono',
+  },
+  {
+    name: 'Neyuki Luxury Wedding Cars',
+    kind: 'image',
+    src: '/clients/neyuki-mono.png?v=2',
+    tone: 'mono',
+  },
+  {
+    name: 'Sugar Co Bakers',
+    kind: 'image',
+    src: '/clients/sugar-co-bakers-mono.png?v=2',
+    tone: 'mono',
+    sizeClass: 'h-16 max-w-[260px] sm:h-[4.5rem] sm:max-w-[300px]',
+  },
+  { name: 'CLCA Associates', kind: 'image', src: '/clients/clca-associates.png', tone: 'mono' },
   {
     name: 'Madara Restaurant',
     kind: 'image',
@@ -39,10 +62,17 @@ const CLIENTS: ClientEntry[] = [
     src: '/clients/sanura-cosmetics-mono.png?v=3',
     tone: 'mono',
   },
-  { name: 'Wenas Events', kind: 'image', src: '/clients/crest-mark.png', tone: 'dark' },
+  {
+    name: 'Learnerble Education',
+    kind: 'image',
+    src: '/clients/learnerble-mono.png?v=1',
+    tone: 'mono',
+    sizeClass: 'h-14 max-w-[220px] sm:h-16 sm:max-w-[260px]',
+  },
+  { name: 'Wenas Events', kind: 'image', src: '/clients/crest-mark.png', tone: 'mono' },
 ]
 
-function logoMarkClass(tone: 'dark' | 'light' | 'mono') {
+function logoMarkClass(tone: 'dark' | 'light' | 'mono', sizeClass?: string) {
   const toneClass =
     tone === 'mono'
       ? // Pre-flattened white silhouettes — inherit mute from parent text opacity.
@@ -51,7 +81,10 @@ function logoMarkClass(tone: 'dark' | 'light' | 'mono') {
         ? 'mix-blend-lighten grayscale brightness-[1.75] contrast-125'
         : 'brightness-0 invert'
 
-  return `h-12 w-auto max-w-[180px] sm:h-14 sm:max-w-[220px] object-contain object-left shrink-0 ${toneClass}`
+  const size =
+    sizeClass ?? 'h-12 max-w-[180px] sm:h-14 sm:max-w-[220px]'
+
+  return `${size} w-auto object-contain object-left shrink-0 ${toneClass}`
 }
 
 function LogoGroup({ ariaHidden }: { ariaHidden?: boolean }) {
@@ -63,13 +96,13 @@ function LogoGroup({ ariaHidden }: { ariaHidden?: boolean }) {
           className="group flex shrink-0 items-center gap-3.5 px-8 sm:gap-4 sm:px-12 text-white/40 transition-colors duration-300 hover:text-white/80 select-none whitespace-nowrap"
         >
           {client.kind === 'mark' ? (
-            <client.mark className="h-7 w-7 sm:h-8 sm:w-8 shrink-0" />
+            <client.mark className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
           ) : (
             <img
               src={client.src}
               alt=""
               aria-hidden="true"
-              className={`${logoMarkClass(client.tone)} ${
+              className={`${logoMarkClass(client.tone, client.sizeClass)} ${
                 client.tone === 'mono'
                   ? 'opacity-55 group-hover:opacity-90 transition-opacity duration-300'
                   : 'opacity-[0.95]'

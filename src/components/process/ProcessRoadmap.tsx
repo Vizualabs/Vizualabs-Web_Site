@@ -11,6 +11,7 @@ import { JellyBlobMascot } from 'feral-blob'
 import { motion, MotionConfig } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { BLOB_WHITE_SKIN } from '#/components/chat/BlobMascotIcon'
+import { ClientOnly } from '#/components/ClientOnly'
 import 'feral-blob/blob.css'
 
 const TRAVEL_DURATION_MS = 24_000
@@ -323,7 +324,9 @@ export function ProcessRoadmap() {
                       pointerEvents: 'none',
                     }}
                   >
-                    <JellyBlobMascot mood="happy" className="h-full w-full pointer-events-none" />
+                    <ClientOnly>
+                      <JellyBlobMascot mood="happy" className="h-full w-full pointer-events-none" />
+                    </ClientOnly>
                   </div>
                 </foreignObject>
               </g>

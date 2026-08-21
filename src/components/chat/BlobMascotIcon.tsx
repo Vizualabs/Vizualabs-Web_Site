@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { JellyBlobMascot, type JellyBlobMascotProps } from 'feral-blob'
+import { ClientOnly } from '#/components/ClientOnly'
 import 'feral-blob/blob.css'
 
 /** Vizualabs coral skin — matches brand #FF5E4D. */
@@ -64,16 +65,18 @@ export function BlobMascotIcon({
   onOverpoke,
 }: BlobMascotIconProps) {
   return (
-    <div className={className} style={BLOB_CORAL_SKIN} aria-hidden="true">
-      <JellyBlobMascot
-        mood={mood}
-        gaze={gaze}
-        nod={nod}
-        mouth={mouth}
-        onOverpoke={onOverpoke}
-        happyEyes="star"
-        className="h-full w-full"
-      />
-    </div>
+    <ClientOnly fallback={<div className={className} aria-hidden="true" />}>
+      <div className={className} style={BLOB_CORAL_SKIN} aria-hidden="true">
+        <JellyBlobMascot
+          mood={mood}
+          gaze={gaze}
+          nod={nod}
+          mouth={mouth}
+          onOverpoke={onOverpoke}
+          happyEyes="star"
+          className="h-full w-full"
+        />
+      </div>
+    </ClientOnly>
   )
 }

@@ -1,87 +1,119 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
-import { Sparkles, Loader2, Mail, Check, AlertCircle } from 'lucide-react'
-import { estimateProject, requestWrittenBrief } from '#/lib/assistant/estimate'
-import { trackEvent } from '#/lib/analytics'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Sparkles, Loader2, Mail, Check, AlertCircle, Clock3, ListChecks, ArrowRight } from 'lucide-react'
+import {
+  estimateProject,
+  requestWrittenBrief,
+  formatEstimateForEmail,
+  type EstimatePayload,
+} from '#/lib/assistant/estimate'
 import { BlobMascotIcon } from '#/components/chat/BlobMascotIcon'
 
 const MAX_LENGTH = 1500
 
-function renderInline(text: string): ReactNode[] {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith('**') && part.endsWith('**') ? (
-      <strong key={i} className="font-semibold text-white">
-        {part.slice(2, -2)}
-      </strong>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  )
+const COMPLEXITY_STYLES: Record<
+  Extract<EstimatePayload, { kind: 'read' }>['complexity'],
+  string
+> = {
+  Simple: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  Moderate: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+  Complex: 'bg-[#FF5E4D]/15 text-[#FF8F7A] border-[#FF5E4D]/35',
+  Enterprise: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
 }
 
-/** Claude's response uses light markdown ("- " bullets, **bold** labels) —
- *  parsed here rather than trusting dangerouslySetInnerHTML with model output. */
-function renderEstimate(text: string): ReactNode[] {
-  const lines = text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-  const blocks: ReactNode[] = []
-  let bulletBuffer: string[] = []
+function EstimateReadResult({ estimate }: { estimate: Extract<EstimatePayload, { kind: 'read' }> }) {
+  return (
+    <div className="space-y-5">
+      <div className="flex items-start gap-3">
+        <BlobMascotIcon className="h-9 w-9 shrink-0" mood="happy" />
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+              Complexity
+            </span>
+            <span
+              className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${COMPLEXITY_STYLES[estimate.complexity]}`}
+            >
+              {estimate.complexity}
+            </span>
+          </div>
+          <p className="text-sm leading-relaxed text-white/90 sm:text-base">{estimate.complexityWhy}</p>
+        </div>
+      </div>
 
-  const flushBullets = () => {
-    if (bulletBuffer.length === 0) return
-    blocks.push(
-      <ul key={`ul-${blocks.length}`} className="mt-2 space-y-1.5 pl-5">
-        {bulletBuffer.map((item, i) => (
-          <li key={i} className="list-disc marker:text-[#FF5E4D]">
-            {renderInline(item)}
-          </li>
-        ))}
-      </ul>
-    )
-    bulletBuffer = []
-  }
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+            <Clock3 className="h-3.5 w-3.5 text-[#FF5E4D]" aria-hidden="true" />
+            Rough timeline
+          </div>
+          <p className="text-base font-semibold text-white sm:text-lg">{estimate.timeline}</p>
+        </div>
 
-  for (const line of lines) {
-    if (line.startsWith('- ')) {
-      bulletBuffer.push(line.slice(2))
-    } else {
-      flushBullets()
-      blocks.push(
-        <p key={blocks.length} className="mt-3 first:mt-0">
-          {renderInline(line)}
-        </p>
-      )
-    }
-  }
-  flushBullets()
-  return blocks
+        <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+            <ArrowRight className="h-3.5 w-3.5 text-[#FF5E4D]" aria-hidden="true" />
+            Suggested first step
+          </div>
+          <p className="text-sm leading-relaxed text-white/85">{estimate.nextStep}</p>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+        <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+          <ListChecks className="h-3.5 w-3.5 text-[#FF5E4D]" aria-hidden="true" />
+          What would shape the build
+        </div>
+        <ul className="space-y-2">
+          {estimate.considerations.map((item) => (
+            <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-white/85">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF5E4D]" aria-hidden="true" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="text-xs text-white/40">
+        Instant AI read — not a formal quote. A real conversation still shapes the final plan.
+      </p>
+    </div>
+  )
 }
 
 export function ProjectEstimator() {
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
-  const [estimate, setEstimate] = useState<string | null>(null)
+  const [estimate, setEstimate] = useState<EstimatePayload | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [clarifyAnswer, setClarifyAnswer] = useState('')
+  const clarifyInputRef = useRef<HTMLTextAreaElement>(null)
 
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [briefState, setBriefState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [briefError, setBriefError] = useState<string | null>(null)
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
-    if (loading || !description.trim()) return
+  useEffect(() => {
+    if (estimate?.kind === 'clarify') {
+      clarifyInputRef.current?.focus()
+    }
+  }, [estimate])
+
+  const runEstimate = async (nextDescription: string) => {
+    const trimmed = nextDescription.trim()
+    if (loading || !trimmed) return
 
     setLoading(true)
     setError(null)
     setEstimate(null)
-    trackEvent('estimator_submit')
+    setClarifyAnswer('')
+    setBriefState('idle')
+    setBriefError(null)
 
     try {
-      const result = await estimateProject({ data: { description } })
+      const result = await estimateProject({ data: { description: trimmed } })
       if (result.ok) {
         setEstimate(result.estimate)
-        trackEvent('estimator_result_shown')
       } else {
         setError(result.error)
       }
@@ -92,19 +124,38 @@ export function ProjectEstimator() {
     }
   }
 
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    await runEstimate(description)
+  }
+
+  const handleClarify = async (event: FormEvent) => {
+    event.preventDefault()
+    const detail = clarifyAnswer.trim()
+    if (!detail || !estimate || estimate.kind !== 'clarify') return
+
+    const nextDescription = `${description.trim()}\n\nMore detail: ${detail}`.slice(0, MAX_LENGTH)
+    setDescription(nextDescription)
+    await runEstimate(nextDescription)
+  }
+
   const handleBrief = async (event: FormEvent) => {
     event.preventDefault()
-    if (briefState === 'sending') return
+    if (briefState === 'sending' || !estimate) return
 
     setBriefState('sending')
     setBriefError(null)
 
     try {
       const result = await requestWrittenBrief({
-        data: { email, description, estimate: estimate ?? '' },
+        data: {
+          name,
+          email,
+          description,
+          estimate: formatEstimateForEmail(estimate),
+        },
       })
       if (result.ok) {
-        trackEvent('estimator_email_capture')
         setBriefState('sent')
       } else {
         setBriefState('error')
@@ -125,7 +176,7 @@ export function ProjectEstimator() {
             What would your project take?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-white/60 sm:text-base">
-            Describe what you're building. Get an honest, instant read on complexity and
+            Describe what you&apos;re building. Get an honest, instant read on complexity and
             timeline — no form, no wait.
           </p>
         </div>
@@ -178,43 +229,102 @@ export function ProjectEstimator() {
 
         {estimate ? (
           <div className="mt-6 rounded-2xl border border-[#FF5E4D]/25 bg-[#FF5E4D]/[0.06] p-5 sm:p-6">
-            <div className="flex items-start gap-3">
-              <BlobMascotIcon className="h-9 w-9 shrink-0" mood="happy" />
-              <div className="min-w-0 text-sm leading-relaxed text-white/90 sm:text-base">
-                {renderEstimate(estimate)}
-              </div>
-            </div>
+            {estimate.kind === 'clarify' ? (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <BlobMascotIcon className="h-9 w-9 shrink-0" mood="hmm" />
+                  <div className="min-w-0 space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                      Need a bit more
+                    </p>
+                    <p className="text-sm leading-relaxed text-white/90 sm:text-base">
+                      {estimate.question}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="mt-5 border-t border-white/10 pt-5">
-              {briefState === 'sent' ? (
-                <p className="flex items-center gap-2 text-sm text-emerald-400">
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  Sent — check your inbox shortly.
-                </p>
-              ) : (
-                <form onSubmit={handleBrief} className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    type="email"
+                <form onSubmit={handleClarify} className="space-y-3 border-t border-white/10 pt-4">
+                  <label htmlFor="clarify-answer" className="sr-only">
+                    Your answer
+                  </label>
+                  <textarea
+                    id="clarify-answer"
+                    ref={clarifyInputRef}
+                    rows={3}
+                    value={clarifyAnswer}
+                    onChange={(event) => setClarifyAnswer(event.target.value.slice(0, 500))}
+                    placeholder="Type your answer here…"
+                    className="w-full resize-none rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#FF5E4D] focus:ring-1 focus:ring-[#FF5E4D]"
+                    disabled={loading}
                     required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@company.com"
-                    className="h-11 flex-1 rounded-xl border border-white/10 bg-black/40 px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#FF5E4D] focus:ring-1 focus:ring-[#FF5E4D]"
                   />
                   <button
                     type="submit"
-                    disabled={briefState === 'sending'}
-                    className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/15 px-5 text-sm font-semibold text-white transition-colors hover:border-[#FF5E4D] hover:text-[#FF5E4D] disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={loading || !clarifyAnswer.trim()}
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#FF5540] px-5 text-sm font-semibold text-[#5C0000] transition-all hover:-translate-y-0.5 hover:bg-[#ff422a] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 sm:w-auto sm:self-end"
                   >
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                    {briefState === 'sending' ? 'Sending…' : 'Email me this'}
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        Thinking…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" aria-hidden="true" />
+                        Continue with this detail
+                      </>
+                    )}
                   </button>
                 </form>
-              )}
-              {briefState === 'error' && briefError ? (
-                <p className="mt-2 text-xs text-red-300">{briefError}</p>
-              ) : null}
-            </div>
+              </div>
+            ) : (
+              <>
+                <EstimateReadResult estimate={estimate} />
+
+                <div className="mt-5 border-t border-white/10 pt-5">
+                  {briefState === 'sent' ? (
+                    <p className="flex items-center gap-2 text-sm text-emerald-400">
+                      <Check className="h-4 w-4" aria-hidden="true" />
+                      Got it - our team will follow up by email shortly.
+                    </p>
+                  ) : (
+                    <form onSubmit={handleBrief} className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <input
+                          type="text"
+                          required
+                          value={name}
+                          onChange={(event) => setName(event.target.value)}
+                          placeholder="Your name"
+                          autoComplete="name"
+                          className="h-11 flex-1 rounded-xl border border-white/10 bg-black/40 px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#FF5E4D] focus:ring-1 focus:ring-[#FF5E4D]"
+                        />
+                        <input
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(event) => setEmail(event.target.value)}
+                          placeholder="you@company.com"
+                          autoComplete="email"
+                          className="h-11 flex-1 rounded-xl border border-white/10 bg-black/40 px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#FF5E4D] focus:ring-1 focus:ring-[#FF5E4D]"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={briefState === 'sending'}
+                        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/15 px-5 text-sm font-semibold text-white transition-colors hover:border-[#FF5E4D] hover:text-[#FF5E4D] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:self-end"
+                      >
+                        <Mail className="h-4 w-4" aria-hidden="true" />
+                        {briefState === 'sending' ? 'Sending…' : 'Request a follow-up'}
+                      </button>
+                    </form>
+                  )}
+                  {briefState === 'error' && briefError ? (
+                    <p className="mt-2 text-xs text-red-300">{briefError}</p>
+                  ) : null}
+                </div>
+              </>
+            )}
           </div>
         ) : null}
       </div>

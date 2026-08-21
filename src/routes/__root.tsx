@@ -3,14 +3,13 @@ import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
 import { CustomCursor } from '../components/ui/CustomCursor'
-import { AnalyticsInit } from '../components/analytics/AnalyticsInit'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
 
 interface RouterContext {
   queryClient: QueryClient
 }
 
-// NOTE: the codebase uses both vizualabs.tech (ContactSection, BookingModal)
+// NOTE: the codebase uses both vizualabs.tech (ContactSection)
 // and vizualabs.com (chat system prompt, AssistantWidget) inconsistently.
 // This picks .tech since that's what's shown to visitors on the live
 // contact page — flag if that's wrong and every OG/canonical URL below
@@ -114,7 +113,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         {children}
         <CustomCursor />
-        <AnalyticsInit />
         <Scripts />
       </body>
     </html>

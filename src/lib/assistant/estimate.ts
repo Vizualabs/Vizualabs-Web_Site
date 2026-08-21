@@ -1,22 +1,110 @@
 import { createServerFn } from '@tanstack/react-start'
 
 const MAX_DESCRIPTION_LENGTH = 1500
-const MODEL = 'claude-sonnet-5'
+const MODEL = 'gemini-3.6-flash'
 
-const ESTIMATE_SYSTEM_PROMPT = `You are Vizualabs' project scope assistant — a public tool that gives website visitors an instant, honest read on a software project idea, live, to demonstrate the studio's AI and engineering competence.
+export type EstimateRead = {
+  kind: 'read'
+  complexity: 'Simple' | 'Moderate' | 'Complex' | 'Enterprise'
+  complexityWhy: string
+  timeline: string
+  considerations: string[]
+  nextStep: string
+}
 
-Given a short project description, respond with a compact, well-formatted read covering:
-1. **Complexity** — Simple / Moderate / Complex / Enterprise, with one sentence on why.
-2. **Rough timeline** — a realistic range (e.g. "6-10 weeks"), never a single exact number.
-3. **Key technical considerations** — 2-4 short bullet points on what would actually shape the build (integrations, data, scale, compliance, etc.).
-4. **Suggested first step** — one concrete, small next action.
+export type EstimateClarify = {
+  kind: 'clarify'
+  question: string
+}
+
+export type EstimatePayload = EstimateRead | EstimateClarify
+
+const ESTIMATE_SYSTEM_PROMPT = `You are Vizualabs' project scope assistant. Visitors describe a software idea; you return a useful instant scope read.
+
+Respond with ONLY valid JSON (no markdown fences, no preamble). Use one of these shapes:
+
+When the description has enough detail:
+{
+  "kind": "read",
+  "complexity": "Simple" | "Moderate" | "Complex" | "Enterprise",
+  "complexityWhy": "one clear sentence referencing what they described",
+  "timeline": "realistic range like 6-10 weeks — never a single exact number",
+  "considerations": ["2 to 4 short bullets on what would actually shape the build"],
+  "nextStep": "one concrete small next action"
+}
+
+When the description is too vague to scope:
+{
+  "kind": "clarify",
+  "question": "ONE specific clarifying question"
+}
 
 Rules:
-- Never quote an exact price or dollar figure — costs depend on a real conversation, say so briefly if asked.
-- Be specific to what they described, not generic boilerplate — reference details they actually gave you.
-- Keep the whole response under 180 words. No preamble, no "Here's your estimate" framing — start directly with the complexity line.
-- If the description is too vague to say anything useful, ask ONE specific clarifying question instead of guessing.
-- Plain text with markdown-style **bold** for labels and "- " bullets only. No headers, no code blocks.`
+- Never quote an exact price or dollar figure.
+- Be specific to what they described — no generic boilerplate.
+- complexityWhy, timeline, considerations, and nextStep must all feel complete and useful on their own.
+- Prefer "read" whenever they named a product type plus at least one real feature or constraint.`
+
+function parseEstimatePayload(raw: string): EstimatePayload | null {
+  const trimmed = raw.trim()
+  const jsonText = trimmed.startsWith('```')
+    ? trimmed.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    : trimmed
+
+  try {
+    const data = JSON.parse(jsonText) as Record<string, unknown>
+    if (data.kind === 'clarify' && typeof data.question === 'string' && data.question.trim()) {
+      return { kind: 'clarify', question: data.question.trim() }
+    }
+
+    if (data.kind === 'read') {
+      const complexity = data.complexity
+      const levels = ['Simple', 'Moderate', 'Complex', 'Enterprise'] as const
+      if (!levels.includes(complexity as (typeof levels)[number])) return null
+
+      const considerations = Array.isArray(data.considerations)
+        ? data.considerations
+            .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+            .map((item) => item.trim())
+            .slice(0, 4)
+        : []
+
+      const complexityWhy = typeof data.complexityWhy === 'string' ? data.complexityWhy.trim() : ''
+      const timeline = typeof data.timeline === 'string' ? data.timeline.trim() : ''
+      const nextStep = typeof data.nextStep === 'string' ? data.nextStep.trim() : ''
+
+      if (!complexityWhy || !timeline || !nextStep || considerations.length < 2) return null
+
+      return {
+        kind: 'read',
+        complexity: complexity as EstimateRead['complexity'],
+        complexityWhy,
+        timeline,
+        considerations,
+        nextStep,
+      }
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+/** Plain-text version for lead emails / follow-up payloads. */
+export function formatEstimateForEmail(estimate: EstimatePayload): string {
+  if (estimate.kind === 'clarify') {
+    return `Clarifying question: ${estimate.question}`
+  }
+
+  return [
+    `Complexity: ${estimate.complexity} — ${estimate.complexityWhy}`,
+    `Timeline: ${estimate.timeline}`,
+    'Key considerations:',
+    ...estimate.considerations.map((item) => `- ${item}`),
+    `Suggested first step: ${estimate.nextStep}`,
+  ].join('\n')
+}
 
 export const estimateProject = createServerFn({ method: 'POST' })
   .validator((data: { description: string }) => data)
@@ -26,7 +114,7 @@ export const estimateProject = createServerFn({ method: 'POST' })
       return { ok: false as const, error: 'Describe your project first.' }
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       return {
         ok: false as const,
@@ -35,39 +123,60 @@ export const estimateProject = createServerFn({ method: 'POST' })
       }
     }
 
-    const { default: Anthropic } = await import('@anthropic-ai/sdk')
-    const client = new Anthropic({ apiKey })
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 400,
-      system: ESTIMATE_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: description }],
-    })
+    const { GoogleGenAI, ThinkingLevel } = await import('@google/genai')
+    const ai = new GoogleGenAI({ apiKey })
 
-    const text = response.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
-      .trim()
+    try {
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: description,
+        config: {
+          systemInstruction: ESTIMATE_SYSTEM_PROMPT,
+          // Gemini 3 thinking can eat the output budget and leave a truncated
+          // reply — keep thinking minimal and give the JSON enough room.
+          maxOutputTokens: 1024,
+          thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+          responseMimeType: 'application/json',
+        },
+      })
 
-    if (!text) {
-      return { ok: false as const, error: 'Something went wrong generating that read. Please try again.' }
+      const text = response.text?.trim()
+      if (!text) {
+        return { ok: false as const, error: 'Something went wrong generating that read. Please try again.' }
+      }
+
+      const estimate = parseEstimatePayload(text)
+      if (!estimate) {
+        console.error('[assistant/estimate] Unexpected Gemini payload:', text.slice(0, 500))
+        return { ok: false as const, error: 'Something went wrong generating that read. Please try again.' }
+      }
+
+      return { ok: true as const, estimate }
+    } catch (error) {
+      console.error('[assistant/estimate] Gemini request failed:', error)
+      return {
+        ok: false as const,
+        error: 'Something went wrong generating that read. Please try again.',
+      }
     }
-
-    return { ok: true as const, estimate: text }
   })
 
 export const requestWrittenBrief = createServerFn({ method: 'POST' })
-  .validator((data: { email: string; description: string; estimate: string }) => data)
+  .validator((data: { name: string; email: string; description: string; estimate: string }) => data)
   .handler(async ({ data }) => {
+    const name = data.name?.trim()
     const email = data.email?.trim()
+
+    if (!name) {
+      return { ok: false as const, error: 'Please add your name.' }
+    }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false as const, error: "That email address doesn't look right." }
     }
 
     const { sendLeadEmail } = await import('../leads')
     const result = await sendLeadEmail({
-      name: email.split('@')[0],
+      name: name.slice(0, 200),
       email,
       subject: 'Instant estimate follow-up',
       message: data.description?.slice(0, 1500) || '',

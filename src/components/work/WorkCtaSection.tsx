@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { ShimmerButton } from '#/components/ui/shimmer-button'
-import { BookingModal } from '#/components/ui/BookingModal'
 
 export function WorkCtaSection() {
-  const [modalOpen, setModalOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <section className="relative z-20 w-full bg-black px-5 pb-20 sm:px-8 sm:pb-28 lg:px-12">
@@ -15,12 +14,12 @@ export function WorkCtaSection() {
               Have a project like this?
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-[#EBBBB4] sm:text-base">
-              Book a session and leave with a clear, engineered plan for what's next.
+              Book a session and leave with a clear, engineered plan for what&apos;s next.
             </p>
             <div className="mt-8 flex justify-center">
               <ShimmerButton
                 type="button"
-                onClick={() => setModalOpen(true)}
+                onClick={() => navigate({ to: '/book' })}
                 background="#FF5540"
                 hoverBackground="#EE2E10"
                 shimmerColor="#FFD700"
@@ -35,14 +34,6 @@ export function WorkCtaSection() {
           </div>
         </div>
       </div>
-
-      <BookingModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title="Book a Strategy Session"
-        subtitle="1-on-1 discovery with Vizualabs engineering leads"
-        source="work_cta_section"
-      />
     </section>
   )
 }

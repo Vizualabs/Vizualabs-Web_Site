@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check, AlertCircle } from 'lucide-react'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
-import { trackEvent } from '#/lib/analytics'
 import { submitLead } from '#/lib/submitLead'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
@@ -107,20 +106,16 @@ export function ContactSection() {
 
     setSubmitting(true)
     setError(null)
-    trackEvent('contact_form_submit', { subject: formData.subject })
 
     try {
       const result = await submitLead({ data: formData })
       if (result.ok) {
-        trackEvent('contact_form_success', { subject: formData.subject })
         setSubmitted(true)
         setFormData(initialFormData)
       } else {
-        trackEvent('contact_form_error', { subject: formData.subject, reason: result.error })
         setError(result.error)
       }
     } catch {
-      trackEvent('contact_form_error', { subject: formData.subject, reason: 'network' })
       setError('Something went wrong sending your message. Please try emailing us directly instead.')
     } finally {
       setSubmitting(false)

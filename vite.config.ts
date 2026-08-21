@@ -19,7 +19,7 @@ const config = defineConfig({
   // modules. Excluding them stops Vite's client optimizer from trying (and
   // failing) to pre-bundle Node packages for the browser.
   optimizeDeps: {
-    exclude: ['resend', '@anthropic-ai/sdk'],
+    exclude: ['resend', '@google/genai'],
     // Avoid racing concurrent pre-bundles that surface as
     // "error while updating dependencies: undefined".
     holdUntilCrawlEnd: true,

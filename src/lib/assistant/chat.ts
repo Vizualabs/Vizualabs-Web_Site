@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import type { MessageParam, Tool, ToolResultBlockParam } from '@anthropic-ai/sdk/resources/messages'
+import type { Content, FunctionDeclaration, Part } from '@google/genai'
 import { VIZUALABS_SYSTEM_PROMPT } from './system-prompt'
 
 export type ChatMessage = {
@@ -9,26 +9,38 @@ export type ChatMessage = {
 
 const MAX_HISTORY = 20
 const MAX_MESSAGE_LENGTH = 2000
-const MODEL = 'claude-sonnet-5'
-const MAX_TOKENS = 512
+const MODEL = 'gemini-3.6-flash'
+const MAX_OUTPUT_TOKENS = 512
 
 function sanitizeHistory(messages: ChatMessage[]): ChatMessage[] {
   return messages
-    .filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0)
+    .filter(
+      (m) =>
+        (m.role === 'user' || m.role === 'assistant') &&
+        typeof m.content === 'string' &&
+        m.content.trim().length > 0,
+    )
     .slice(-MAX_HISTORY)
     .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_LENGTH) }))
 }
 
+function toGeminiContents(messages: ChatMessage[]): Content[] {
+  return messages.map((m) => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }))
+}
+
 // Two tools: one closes the loop on lead capture (the system prompt already
-// tells Claude to ask for name and email; this gives it somewhere real to put
-// the answer), the other lets it hand over the actual booking link instead
-// of the visitor hunting for the CTA themselves.
-const TOOLS: Tool[] = [
+// asks for name and email; this gives the model somewhere real to put the
+// answer), the other hands over the booking link instead of making the
+// visitor hunt for the CTA themselves.
+const FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
   {
     name: 'capture_lead',
     description:
       "Record a visitor's contact details once you have both their name and email, so the Vizualabs team can follow up. Call this as soon as you have both — don't wait for the rest of the conversation to finish. Safe to call more than once if new details come up later.",
-    input_schema: {
+    parametersJsonSchema: {
       type: 'object',
       properties: {
         name: { type: 'string', description: "Visitor's name" },
@@ -53,7 +65,10 @@ const TOOLS: Tool[] = [
     name: 'offer_booking_link',
     description:
       'Get the real scheduling link to share with the visitor when they want to book a call or strategy session, or when their intent to move forward seems high.',
-    input_schema: { type: 'object', properties: {} },
+    parametersJsonSchema: {
+      type: 'object',
+      properties: {},
+    },
   },
 ]
 
@@ -91,10 +106,9 @@ async function runCaptureLead(input: unknown): Promise<string> {
 }
 
 function runOfferBookingLink(): string {
-  const calLink = process.env.VITE_CAL_LINK
-  return calLink
-    ? `Booking link: https://cal.com/${calLink} — share this with the visitor so they can pick a time directly.`
-    : 'No booking link is configured yet — suggest the contact form or email instead, do not invent a link.'
+  // Prefer the on-site /book page (nav + footer, mobile-friendly) over a
+  // raw cal.com URL so the visitor stays in the Vizualabs experience.
+  return 'Booking link: /book (full URL: https://vizualabs.com/book) — share this with the visitor so they can pick a time on our scheduling page.'
 }
 
 async function runTool(name: string, input: unknown): Promise<string> {
@@ -106,7 +120,7 @@ async function runTool(name: string, input: unknown): Promise<string> {
 export const sendChatMessage = createServerFn({ method: 'POST' })
   .validator((data: { messages: ChatMessage[] }) => data)
   .handler(async ({ data }) => {
-    const apiKey = process.env.ANTHROPIC_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       return {
         reply:
@@ -119,57 +133,65 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
       return { reply: 'How can I help you today?' }
     }
 
-    const { default: Anthropic } = await import('@anthropic-ai/sdk')
-    const client = new Anthropic({ apiKey })
-    let convo: MessageParam[] = messages
+    const { GoogleGenAI } = await import('@google/genai')
+    const ai = new GoogleGenAI({ apiKey })
+    const contents = toGeminiContents(messages)
 
-    let response = await client.messages.create({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      system: VIZUALABS_SYSTEM_PROMPT,
-      tools: TOOLS,
-      messages: convo,
-    })
+    const generate = (nextContents: Content[]) =>
+      ai.models.generateContent({
+        model: MODEL,
+        contents: nextContents,
+        config: {
+          systemInstruction: VIZUALABS_SYSTEM_PROMPT,
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          tools: [{ functionDeclarations: FUNCTION_DECLARATIONS }],
+          // Handle tools ourselves so we keep the one-round cap (same behavior
+          // as the previous Anthropic loop — no open-ended AFC).
+          automaticFunctionCalling: { disable: true },
+        },
+      })
 
-    // Tool-use loop, capped at one extra round-trip: run whatever Claude
-    // asked for, hand the results back, and let it turn those into a
-    // natural reply. A single round is enough for "capture the lead, then
-    // say thanks" — no risk of an open-ended loop.
-    if (response.stop_reason === 'tool_use') {
-      const toolResults: ToolResultBlockParam[] = []
+    try {
+      let response = await generate(contents)
 
-      for (const block of response.content) {
-        if (block.type !== 'tool_use') continue
-        const result = await runTool(block.name, block.input)
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: block.id,
-          content: result,
-        })
+      const functionCalls = response.functionCalls
+      if (functionCalls?.length) {
+        const modelContent = response.candidates?.[0]?.content
+        const functionResponseParts: Part[] = []
+
+        for (const call of functionCalls) {
+          if (!call.name) continue
+          const result = await runTool(call.name, call.args ?? {})
+          functionResponseParts.push({
+            functionResponse: {
+              id: call.id,
+              name: call.name,
+              response: { result },
+            },
+          })
+        }
+
+        if (modelContent && functionResponseParts.length > 0) {
+          response = await generate([
+            ...contents,
+            modelContent,
+            { role: 'user', parts: functionResponseParts },
+          ])
+        }
       }
 
-      convo = [
-        ...convo,
-        { role: 'assistant', content: response.content },
-        { role: 'user', content: toolResults },
-      ]
+      const reply = response.text?.trim()
 
-      response = await client.messages.create({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: VIZUALABS_SYSTEM_PROMPT,
-        tools: TOOLS,
-        messages: convo,
-      })
-    }
-
-    const reply = response.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
-      .trim()
-
-    return {
-      reply: reply || "I'm not sure how to answer that — please email us at info@vizualabs.com and we'll follow up.",
+      return {
+        reply:
+          reply ||
+          "I'm not sure how to answer that — please email us at info@vizualabs.com and we'll follow up.",
+      }
+    } catch (error) {
+      console.error('[assistant/chat] Gemini request failed:', error)
+      return {
+        reply:
+          "Something went wrong reaching the assistant. Please try again, or email us at info@vizualabs.com.",
+      }
     }
   })

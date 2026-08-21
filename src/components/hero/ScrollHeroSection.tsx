@@ -1,5 +1,5 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
-import { BrandIntro, type IntroPhase } from './BrandIntro'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { BrandIntro, BRAND_INTRO_CHOREOGRAPHY_MS, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
 import { keyHairBackdrop } from './keyHairBackdrop'
@@ -42,6 +42,30 @@ const MOBILE_SMOOTH_SEC = 0.08
 
 const isMobileView = (width: number) => width < MOBILE_MAX_WIDTH
 
+/**
+ * Touch phone, not just a narrow desktop window — width alone would
+ * misclassify a resized desktop browser as mobile and needlessly downgrade
+ * its (perfectly capable) GPU.
+ */
+const isPhoneDevice = () =>
+  typeof window !== 'undefined' &&
+  window.innerWidth < MOBILE_MAX_WIDTH &&
+  window.matchMedia('(pointer: coarse)').matches
+
+const prefersReducedData = () => {
+  if (typeof navigator === 'undefined') return false
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string }
+  }
+  const conn = nav.connection
+  return Boolean(
+    conn?.saveData ||
+      conn?.effectiveType === 'slow-2g' ||
+      conn?.effectiveType === '2g' ||
+      conn?.effectiveType === '3g'
+  )
+}
+
 // The frames needed for the reveal load at full speed behind the intro.
 const LOAD_CONCURRENCY = 8
 
@@ -58,12 +82,15 @@ const REVEAL_THRESHOLD = 24
 
 // The branded intro runs for at least this long so it reads as an intentional
 // animation rather than a flash. Frame decoding happens underneath it, so on
-// a warm cache this is the only thing gating the reveal.
-const MIN_INTRO_MS = 1150
+// a warm cache this is the only thing gating the reveal. Floored to the
+// wordmark's own choreography length (plus a small settle beat) so the phase
+// change can never fire before the last letter finishes fading in — that
+// mismatch used to cut the trailing letters off mid-animation.
+const MIN_INTRO_MS = BRAND_INTRO_CHOREOGRAPHY_MS + 100
 
 // A visitor who has already seen the full intro once this session gets this
-// instead — just enough for a clean fade, not the whole choreography.
-const RETURN_INTRO_MS = 250
+// instead — just enough for a clean branded fade, not the whole choreography.
+const RETURN_INTRO_MS = 480
 
 const INTRO_SEEN_KEY = 'vlabs_intro_seen'
 
@@ -72,8 +99,12 @@ const INTRO_SEEN_KEY = 'vlabs_intro_seen'
 // here — while the plane is still fully opaque — keeps it off the first scroll.
 const WARMUP_MS = 240
 
-// Must match the iris animation duration in styles.css.
+// Must match the wipe animation duration in styles.css.
 const REVEAL_MS = 900
+
+// Never leave users on a black plane if decode stalls — force the reveal path
+// after choreography + this grace window.
+const MAX_FRAME_WAIT_MS = 3500
 
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -84,9 +115,9 @@ export function ScrollHeroSection() {
   // Pre-cropped, pre-scaled GPU bitmaps — the ONLY thing kept in memory.
   const bitmapsRef = useRef<(ImageBitmap | undefined)[]>([])
 
-  // 'intro'     — opaque plane, mark drawing, fire not yet mounted, scroll locked
+  // 'intro'     — opaque plane, core + wordmark, fire not yet mounted, scroll locked
   // 'warmup'    — still opaque, fire mounting behind it, scroll locked
-  // 'revealing' — iris opening, scroll unlocked
+  // 'revealing' — panel wipe opening, scroll unlocked
   // 'done'      — overlay unmounted
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
   const [framesReady, setFramesReady] = useState(false)
@@ -104,14 +135,41 @@ export function ScrollHeroSection() {
   // Scroll stays locked while the plane is still opaque.
   const isLoading = phase === 'intro' || phase === 'warmup'
 
+  // Phones get a lighter fire shader (fewer particle layers, capped device
+  // pixel ratio) — the per-pixel noise loops in Blaze are the single most
+  // expensive thing on this page, and small mobile GPUs pay for every layer
+  // at full DPR. On a phone that has *also* asked for reduced data (Save-Data
+  // or a slow connection), the fire is skipped entirely: the scroll-driven
+  // hero still renders in full, just without the WebGL layer on top.
+  const [lowPowerFire, setLowPowerFire] = useState(false)
+  const [skipFire, setSkipFire] = useState(false)
+  useEffect(() => {
+    const phone = isPhoneDevice()
+    setLowPowerFire(phone)
+    setSkipFire(phone && prefersReducedData())
+  }, [])
+
   // Start fetching the Blaze chunk immediately, in parallel with the frame
   // decode pipeline, so the lazy import resolves well before 'warmup' asks
-  // for it.
+  // for it. Skipped on phone + reduced-data: that visitor will never mount
+  // Blaze, so prefetching it would only waste their bandwidth.
   useEffect(() => {
+    if (isPhoneDevice() && prefersReducedData()) return
     void import('../canvasui/Blaze')
   }, [])
 
-  // Communicate loading state so the navbar is completely hidden during intro loading
+  // Communicate loading state so the navbar is completely hidden during intro.
+  // useLayoutEffect so data-intro-loading is set before paint — avoids the
+  // navbar's 150ms "assume done" race on cold mount.
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-intro-loading', 'true')
+    window.dispatchEvent(new CustomEvent('intro-loading-state', { detail: { loading: true } }))
+    return () => {
+      document.documentElement.removeAttribute('data-intro-loading')
+      window.dispatchEvent(new CustomEvent('intro-loading-state', { detail: { loading: false } }))
+    }
+  }, [])
+
   useEffect(() => {
     if (isLoading) {
       document.documentElement.setAttribute('data-intro-loading', 'true')
@@ -363,16 +421,7 @@ export function ScrollHeroSection() {
     // density. findReadyFrame() already falls back to the nearest decoded
     // neighbour for any frame that isn't ready, so the skipped slots are
     // simply never filled rather than treated as failures.
-    const nav = navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string }
-    }
-    const conn = nav.connection
-    const reduceData = Boolean(
-      conn?.saveData ||
-        conn?.effectiveType === 'slow-2g' ||
-        conn?.effectiveType === '2g' ||
-        conn?.effectiveType === '3g'
-    )
+    const reduceData = prefersReducedData()
 
     const phase1Indices = Array.from(
       { length: REVEAL_THRESHOLD },
@@ -542,7 +591,7 @@ export function ScrollHeroSection() {
    * 'intro' holds until BOTH the minimum animation beat has played and enough
    * frames are decoded. Then the fire mounts behind the still-opaque plane
    * ('warmup') so its shader compile cannot land on the user's first scroll,
-   * and only then does the iris open ('revealing').
+   * and only then does the panel wipe open ('revealing').
    */
   /*
    * One effect per hop, each owning exactly one timer.
@@ -565,6 +614,15 @@ export function ScrollHeroSection() {
     return () => window.clearTimeout(timer)
   }, [phase, framesReady, fastIntro])
 
+  // If frame decode stalls, still open the site after a grace window so the
+  // branded plane never feels permanently stuck.
+  useEffect(() => {
+    if (phase !== 'intro' || framesReady) return
+    const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
+    const timer = window.setTimeout(() => setFramesReady(true), minMs + MAX_FRAME_WAIT_MS)
+    return () => window.clearTimeout(timer)
+  }, [phase, framesReady, fastIntro])
+
   // warmup -> revealing, giving the fire a beat to compile behind the plane.
   useEffect(() => {
     if (phase !== 'warmup') return
@@ -572,7 +630,7 @@ export function ScrollHeroSection() {
     return () => window.clearTimeout(timer)
   }, [phase])
 
-  // revealing -> done, unmounting the overlay after the iris finishes.
+  // revealing -> done, unmounting the overlay after the wipe finishes.
   useEffect(() => {
     if (phase !== 'revealing') return
     const timer = window.setTimeout(() => setPhase('done'), REVEAL_MS)
@@ -626,7 +684,7 @@ export function ScrollHeroSection() {
 
   // The hero canvas only exists once Blaze mounts, so paint the current frame
   // as soon as it does — during 'warmup', while the plane is still opaque —
-  // guaranteeing a fully drawn hero the instant the iris opens.
+  // guaranteeing a fully drawn hero the instant the wipe opens.
   useEffect(() => {
     if (!fireMounted) return
     const raf = requestAnimationFrame(() => {
@@ -751,42 +809,10 @@ export function ScrollHeroSection() {
     }
   }, [])
 
-  return (
-    <div
-      ref={containerRef}
-      data-testid="hero-scroll-container"
-      className="relative w-full bg-black h-[220dvh] md:h-[105dvh]"
-    >
-      {/* Sticky Hero Container pinned during scroll sequence */}
-      <div
-        className="sticky top-0 left-0 w-full h-screen h-dvh overflow-hidden bg-black flex items-center justify-center select-none"
-        style={{ willChange: 'transform' }}
-      >
-
-        {/* Blaze fire — only on the hero, burning from the bottom to the
-            middle of the screen (height = 0.5 of the viewport). Mounts at the
-            'warmup' beat: late enough that its WebGL setup never competes with
-            decoding the first frames, early enough that the shader compile is
-            paid behind the still-opaque intro plane rather than on the user's
-            first scroll. */}
-        {fireMounted && (
-          <ErrorBoundary fallback={null}>
-          <Suspense fallback={null}>
-          <Blaze
-            height={0.5}
-            distortion={0.6}
-            distortionScale={0.5}
-            speed={1}
-            sparks={1.7}
-            sparkDensity={1.8}
-            sparkSize={1}
-            layers={4}
-            smoke={1.3}
-            glow={3.2}
-            sparkColor={[1, 0, 0]}
-            smokeColor={[0.6, 0, 0]}
-            style={{ position: 'absolute', inset: 0 }}
-          >
+  // Pulled out so it can render either wrapped in the WebGL fire (desktop /
+  // capable mobile) or bare (phone + reduced-data, where Blaze is skipped
+  // entirely) without duplicating the ~100 lines of hero overlay markup.
+  const heroOverlayContent = (
             <div className="relative w-full h-full">
 
               {/* Heading, layered UNDER the canvas so the silhouette-masked subject
@@ -887,9 +913,59 @@ export function ScrollHeroSection() {
               </div>
 
             </div>
+  )
+
+  return (
+    <div
+      ref={containerRef}
+      data-testid="hero-scroll-container"
+      className="relative w-full bg-black h-[220dvh] md:h-[105dvh]"
+    >
+      {/* Sticky Hero Container pinned during scroll sequence */}
+      <div
+        className="sticky top-0 left-0 w-full h-screen h-dvh overflow-hidden bg-black flex items-center justify-center select-none"
+        style={{ willChange: 'transform' }}
+      >
+
+        {/* Blaze fire — only on the hero, burning from the bottom to the
+            middle of the screen (height = 0.5 of the viewport). Mounts at the
+            'warmup' beat: late enough that its WebGL setup never competes with
+            decoding the first frames, early enough that the shader compile is
+            paid behind the still-opaque intro plane rather than on the user's
+            first scroll.
+
+            Phones get a lighter config (fewer particle layers, capped device
+            pixel ratio) since the shader's per-pixel noise loops are the
+            single biggest GPU/battery cost on this page. Phones that have
+            also asked for reduced data skip the WebGL layer entirely — the
+            scroll-driven hero still renders in full underneath. */}
+        {fireMounted && (
+          skipFire ? (
+            heroOverlayContent
+          ) : (
+          <ErrorBoundary fallback={null}>
+          <Suspense fallback={null}>
+          <Blaze
+            height={0.5}
+            distortion={0.6}
+            distortionScale={0.5}
+            speed={1}
+            sparks={lowPowerFire ? 1 : 1.7}
+            sparkDensity={lowPowerFire ? 1.2 : 1.8}
+            sparkSize={1}
+            layers={lowPowerFire ? 2 : 4}
+            smoke={lowPowerFire ? 0.8 : 1.3}
+            glow={lowPowerFire ? 2.2 : 3.2}
+            maxDpr={lowPowerFire ? 1 : 2}
+            sparkColor={[1, 0, 0]}
+            smokeColor={[0.6, 0, 0]}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            {heroOverlayContent}
           </Blaze>
           </Suspense>
           </ErrorBoundary>
+          )
         )}
 
         {/* Branded intro — rendered outside Blaze so the plane stays a clean

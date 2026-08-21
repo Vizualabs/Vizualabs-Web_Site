@@ -134,7 +134,7 @@ export function CapabilitiesSection() {
           {/* Action Header Link — font-normal (non-bold) */}
           <button
             onClick={handleNextCardClick}
-            className="inline-flex items-center gap-2 text-sm sm:text-base font-normal tracking-wider text-[#FF5E4D] uppercase transition-all duration-300 hover:gap-3 hover:text-[#ff4634] shrink-0 self-start md:self-end group cursor-pointer"
+            className="group inline-flex shrink-0 items-center gap-2 self-start p-2 -m-2 text-sm font-normal uppercase tracking-wider text-[#FF5E4D] transition-all duration-300 hover:gap-3 hover:text-[#ff4634] cursor-pointer md:self-end sm:text-base"
           >
             <span>VIEW ALL SERVICES</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

@@ -1,6 +1,8 @@
+import '../ensureServerFnEnv'
 import { createServerFn } from '@tanstack/react-start'
 import type { Content, FunctionDeclaration, Part } from '@google/genai'
 import { VIZUALABS_SYSTEM_PROMPT } from './system-prompt'
+import { toPlainReply } from './plainText'
 
 export type ChatMessage = {
   role: 'user' | 'assistant'
@@ -180,7 +182,7 @@ export const sendChatMessage = createServerFn({ method: 'POST' })
         }
       }
 
-      const reply = response.text?.trim()
+      const reply = toPlainReply(response.text ?? '')
 
       return {
         reply:

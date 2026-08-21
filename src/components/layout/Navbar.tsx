@@ -28,32 +28,23 @@ export function Navbar() {
 
   // Listen to branded intro loading state
   useEffect(() => {
-    // If not on home page, no intro loading exists
     if (currentPath !== '/' && currentPath !== '') {
       setIntroLoading(false)
       return
     }
 
-    const handleIntroState = (e: any) => {
-      setIntroLoading(Boolean(e.detail?.loading))
+    // Home always starts hidden until ScrollHeroSection clears the flag.
+    setIntroLoading(true)
+
+    const handleIntroState = (e: Event) => {
+      const detail = (e as CustomEvent<{ loading?: boolean }>).detail
+      setIntroLoading(Boolean(detail?.loading))
     }
 
     window.addEventListener('intro-loading-state', handleIntroState)
 
-    // Check if initial document attribute is set
-    if (typeof document !== 'undefined') {
-      if (!document.documentElement.hasAttribute('data-intro-loading')) {
-        // If attribute not set, assume loading is done
-        const timer = setTimeout(() => {
-          if (!document.documentElement.hasAttribute('data-intro-loading')) {
-            setIntroLoading(false)
-          }
-        }, 150)
-        return () => {
-          clearTimeout(timer)
-          window.removeEventListener('intro-loading-state', handleIntroState)
-        }
-      }
+    if (document.documentElement.hasAttribute('data-intro-loading')) {
+      setIntroLoading(true)
     }
 
     return () => {
@@ -169,11 +160,12 @@ export function Navbar() {
           </a>
         </div>
 
-        {/* Mobile menu toggle */}
+        {/* Mobile menu toggle — min-h/w-11 (44px) meets the iOS/Android
+            minimum tap-target size; the icon alone with p-2 was ~40px. */}
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="flex md:hidden items-center justify-center rounded-lg p-2 text-[#E5E2E1] transition-colors hover:text-[#FF553E]"
+          className="flex md:hidden min-h-11 min-w-11 items-center justify-center rounded-lg text-[#E5E2E1] transition-colors hover:text-[#FF553E] active:text-[#FF553E]"
           aria-label="Toggle navigation menu"
           aria-expanded={open}
         >

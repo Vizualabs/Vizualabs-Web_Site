@@ -33,6 +33,10 @@ export interface BlazeOptions {
   sparkColor?: [number, number, number];
   /** Smoke and glow color as [r, g, b] in 0-1 range. */
   smokeColor?: [number, number, number];
+  /** Device pixel ratio cap for the output canvas. Lower this on constrained
+   *  GPUs (phones) — the fragment shader's per-pixel cost scales with the
+   *  square of this value, so capping at 1 instead of 2 quarters the work. */
+  maxDpr?: number;
 }
 
 export interface BlazeElements {
@@ -66,6 +70,7 @@ const DEFAULTS: Required<BlazeOptions> = {
   glow: 1.5,
   sparkColor: [1, 0.4, 0.05],
   smokeColor: [1, 0.43, 0.1],
+  maxDpr: 2,
 };
 
 type PaintableCanvas = HTMLCanvasElement & {
@@ -496,7 +501,7 @@ export function createBlaze(
   }
 
   function syncCanvasSize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, config.maxDpr);
     const width = Math.max(1, Math.round(output.clientWidth * dpr));
     const height = Math.max(1, Math.round(output.clientHeight * dpr));
     if (output.width !== width || output.height !== height) {

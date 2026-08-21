@@ -388,13 +388,20 @@ export function StrategicJourney() {
                     key={step.id}
                     type="button"
                     onClick={() => snapToStep(idx)}
-                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer shrink-0 ${
-                      isActive
-                        ? 'w-7 sm:w-9 bg-[#FF553E] shadow-[0_0_12px_#FF553E]'
-                        : 'w-2 bg-white/20 hover:bg-white/40'
-                    }`}
+                    // p-3 -m-3: pads the tap target out to a comfortable size
+                    // without growing the visible strip — the negative margin
+                    // cancels the padding's layout footprint.
+                    className="shrink-0 cursor-pointer p-3 -m-3"
                     aria-label={`Go to step ${step.title}`}
-                  />
+                  >
+                    <span
+                      className={`block h-2 rounded-full transition-all duration-500 ${
+                        isActive
+                          ? 'w-7 sm:w-9 bg-[#FF553E] shadow-[0_0_12px_#FF553E]'
+                          : 'w-2 bg-white/20 hover:bg-white/40'
+                      }`}
+                    />
+                  </button>
                 )
               })}
             </div>

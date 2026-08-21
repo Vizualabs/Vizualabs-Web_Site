@@ -260,11 +260,11 @@ export function ProcessRoadmap() {
                   </feMerge>
                 </filter>
                 <linearGradient id="processRoadGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#4a0000" />
-                  <stop offset="25%" stopColor="#990000" />
-                  <stop offset="50%" stopColor="#ff0000" />
-                  <stop offset="75%" stopColor="#990000" />
-                  <stop offset="100%" stopColor="#4a0000" />
+                  <stop offset="0%" stopColor="#4a1510" />
+                  <stop offset="25%" stopColor="#B83A2E" />
+                  <stop offset="50%" stopColor="#FF5540" />
+                  <stop offset="75%" stopColor="#B83A2E" />
+                  <stop offset="100%" stopColor="#4a1510" />
                 </linearGradient>
                 <filter id="processGlow">
                   <feGaussianBlur stdDeviation="4" result="coloredBlur" />
@@ -278,7 +278,7 @@ export function ProcessRoadmap() {
 
               <motion.path
                 d={ROAD_PATH}
-                stroke="#FF0000"
+                stroke="#FF5540"
                 strokeWidth="70"
                 strokeLinecap="round"
                 className="blur-3xl opacity-10"
@@ -384,12 +384,12 @@ export function ProcessRoadmap() {
                           onMouseLeave={() => setManualHoveredStep(null)}
                           className={`relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 bg-white shadow-2xl transition-[border-color,box-shadow] duration-300 ease-out ${
                             isActive
-                              ? 'border-[#FF0000] shadow-[0_0_14px_rgba(255,0,0,0.3)]'
-                              : 'border-[#FF0000]/80 shadow-2xl'
+                              ? 'border-[#FF5540] shadow-[0_0_14px_rgba(255,85,64,0.35)]'
+                              : 'border-[#FF5540]/80 shadow-2xl'
                           }`}
                         >
                           <div
-                            className={`absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 transition-opacity duration-300 ease-out ${
+                            className={`absolute inset-0 bg-gradient-to-br from-[#FF5540] to-[#EE2E10] transition-opacity duration-300 ease-out ${
                               isActive ? 'opacity-30' : 'opacity-0'
                             }`}
                           />
@@ -420,7 +420,7 @@ export function ProcessRoadmap() {
                         <motion.h3
                           className="mb-2 font-hanken text-xs font-bold uppercase tracking-wide text-white md:text-sm"
                           animate={{
-                            color: isActive ? '#ef4444' : '#ffffff',
+                            color: isActive ? '#FF5540' : '#ffffff',
                             scale: isActive ? 1.06 : 1,
                           }}
                           transition={isActive ? LABEL_EASE_IN : LABEL_EASE_OUT}
@@ -446,45 +446,77 @@ export function ProcessRoadmap() {
             </svg>
           </div>
 
-          <div className="relative w-full px-5 pb-0 md:hidden">
-            <div className="pointer-events-none absolute top-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-red-600/10 blur-[100px]" />
+          <div className="relative w-full px-5 pb-2 md:hidden">
+            <div className="pointer-events-none absolute top-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#FF5540]/10 blur-[100px]" />
 
-            <ol className="relative z-10 space-y-8">
-              {ROADMAP_STEPS.map((step, index) => (
-                <motion.li
-                  key={step.id}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1, type: 'spring', stiffness: 100 }}
-                  className="relative"
-                >
-                  <div className="flex items-start gap-4">
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-red-500 bg-white shadow-xl"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 opacity-0 transition-opacity duration-500" />
-                      <step.icon
-                        className="relative z-10 h-7 w-7 text-gray-700"
-                        strokeWidth={2.5}
-                        aria-hidden="true"
-                      />
-                    </motion.div>
+            <ol className="relative z-10 mx-auto max-w-md space-y-0 pl-1">
+              {/* Continuous coral spine — each step draws its segment on scroll */}
+              {ROADMAP_STEPS.map((step, index) => {
+                const isLast = index === ROADMAP_STEPS.length - 1
+                return (
+                  <motion.li
+                    key={step.id}
+                    initial={{ opacity: 0, y: 28 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.35, margin: '0px 0px -8% 0px' }}
+                    transition={{
+                      duration: 0.45,
+                      delay: 0.04,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className="relative flex gap-4 pb-10 last:pb-2"
+                  >
+                    <div className="relative flex w-16 shrink-0 flex-col items-center">
+                      <motion.div
+                        initial={{ scale: 0.72, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 260,
+                          damping: 22,
+                          delay: 0.06,
+                        }}
+                        className="relative z-10 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-4 border-[#FF5540] bg-white shadow-[0_0_24px_rgba(255,85,64,0.25)]"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#FF5540]/25 to-[#EE2E10]/10" />
+                        <step.icon
+                          className="relative z-10 h-7 w-7 text-gray-800"
+                          strokeWidth={2.5}
+                          aria-hidden="true"
+                        />
+                      </motion.div>
 
-                    <div className="flex-1 pt-1">
-                      <h3 className="mb-1 font-hanken text-base font-bold uppercase tracking-wide text-white">
+                      {!isLast ? (
+                        <motion.div
+                          initial={{ scaleY: 0 }}
+                          whileInView={{ scaleY: 1 }}
+                          viewport={{ once: true, amount: 0.2 }}
+                          transition={{ duration: 0.55, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                          className="mt-3 h-10 w-0.5 origin-top rounded-full bg-gradient-to-b from-[#FF5540] to-[#FF5540]/15"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                    </div>
+
+                    <div className="min-w-0 flex-1 pt-2">
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.12, duration: 0.35 }}
+                        className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#FF5540]"
+                      >
+                        Stage {String(index + 1).padStart(2, '0')}
+                      </motion.p>
+                      <h3 className="mb-1.5 font-hanken text-base font-bold uppercase tracking-wide text-white">
                         {step.title}
                       </h3>
                       <p className="text-sm leading-relaxed text-white/60">{step.description}</p>
                     </div>
-                  </div>
-
-                  {index < ROADMAP_STEPS.length - 1 ? (
-                    <div className="ml-8 mt-4 mb-4 h-8 w-0.5 bg-gradient-to-b from-red-500 to-red-500/20" />
-                  ) : null}
-                </motion.li>
-              ))}
+                  </motion.li>
+                )
+              })}
             </ol>
           </div>
         </div>

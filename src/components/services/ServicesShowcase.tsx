@@ -309,7 +309,9 @@ export function ServicesShowcase() {
               type="button"
               aria-label={`Go to ${service.title}`}
               onClick={() => scrollToDot(dotIdx)}
-              className="p-1.5 sm:p-1 cursor-pointer focus:outline-none"
+              // Negative margin cancels the padding's layout footprint, so the
+              // visible strip stays the same size while the tap target grows.
+              className="cursor-pointer p-3 -m-3 focus:outline-none sm:p-1.5 sm:-m-1.5"
             >
               <span
                 className={`block h-1.5 rounded-full transition-all duration-500 ${

@@ -15,6 +15,15 @@ const config = defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // Server-only SDKs get pulled into the client graph via createServerFn
+  // modules. Excluding them stops Vite's client optimizer from trying (and
+  // failing) to pre-bundle Node packages for the browser.
+  optimizeDeps: {
+    exclude: ['resend', '@anthropic-ai/sdk'],
+    // Avoid racing concurrent pre-bundles that surface as
+    // "error while updating dependencies: undefined".
+    holdUntilCrawlEnd: true,
+  },
   plugins: [
     devtools(),
     tailwindcss(),

@@ -4,6 +4,7 @@ import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
 import { keyHairBackdrop } from './keyHairBackdrop'
 import { NumberTicker } from '../ui/number-ticker'
+import { ErrorBoundary } from '../ErrorBoundary'
 
 // Code-split out of the homepage bundle: this is an ~800-line WebGL engine
 // that never renders before the 'warmup' phase anyway. The prefetch effect
@@ -769,6 +770,7 @@ export function ScrollHeroSection() {
             paid behind the still-opaque intro plane rather than on the user's
             first scroll. */}
         {fireMounted && (
+          <ErrorBoundary fallback={null}>
           <Suspense fallback={null}>
           <Blaze
             height={0.5}
@@ -887,6 +889,7 @@ export function ScrollHeroSection() {
             </div>
           </Blaze>
           </Suspense>
+          </ErrorBoundary>
         )}
 
         {/* Branded intro — rendered outside Blaze so the plane stays a clean

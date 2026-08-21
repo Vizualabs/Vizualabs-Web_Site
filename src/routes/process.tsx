@@ -14,7 +14,21 @@ import { ProcessCtaSection } from '#/components/process/ProcessCtaSection'
 export const Route = createFileRoute('/process')({
   component: ProcessPage,
   head: () => ({
-    meta: [{ title: 'Process — Vizualabs' }],
+    meta: [
+      { title: 'Process — Vizualabs' },
+      {
+        name: 'description',
+        content:
+          'A disciplined process from first idea to launch and beyond — see how Vizualabs engineers momentum at every stage.',
+      },
+      { property: 'og:title', content: 'Process — Vizualabs' },
+      {
+        property: 'og:description',
+        content:
+          'A disciplined process from first idea to launch and beyond — see how Vizualabs engineers momentum at every stage.',
+      },
+      { property: 'og:url', content: 'https://vizualabs.com/process' },
+    ],
   }),
 })
 

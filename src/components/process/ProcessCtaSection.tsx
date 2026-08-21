@@ -36,7 +36,7 @@ export function ProcessCtaSection() {
               </ShimmerButton>
 
               <a
-                href="/#cases"
+                href="/case-study"
                 className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-white transition-all duration-200 hover:border-white/50 hover:bg-white/[0.06] hover:-translate-y-0.5 active:translate-y-0"
               >
                 View Our Work

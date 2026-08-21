@@ -9,6 +9,21 @@ import { Navbar } from '#/components/layout/Navbar'
 // already isolated to the /contact chunk without any extra work.
 export const Route = createFileRoute('/contact')({
   component: ContactPage,
+  head: () => ({
+    meta: [
+      { title: 'Contact — Vizualabs' },
+      {
+        name: 'description',
+        content: 'Tell us what you\'re building — a founder reads every message personally.',
+      },
+      { property: 'og:title', content: 'Contact — Vizualabs' },
+      {
+        property: 'og:description',
+        content: 'Tell us what you\'re building — a founder reads every message personally.',
+      },
+      { property: 'og:url', content: 'https://vizualabs.com/contact' },
+    ],
+  }),
 })
 
 function ContactPage() {

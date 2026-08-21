@@ -14,7 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
   { label: 'Process', href: '/process', isRoute: true },
-  { label: 'Case Studies', href: '/#cases' },
+  { label: 'Case Studies', href: '/case-study', isRoute: true },
 ]
 
 export function Navbar() {

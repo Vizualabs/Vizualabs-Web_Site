@@ -42,9 +42,8 @@ export function ServicesCtaSection() {
                 <span>Let's Build</span>
               </ShimmerButton>
 
-              {/* View Case Studies Button: bg #FFFFFF 10%, text #E5E2E1 */}
               <a
-                href="/#cases"
+                href="/case-study"
                 className="inline-flex items-center justify-center rounded-full bg-white/10 px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-[#E5E2E1] backdrop-blur-sm transition-all duration-200 hover:bg-white/15 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 View Case Studies

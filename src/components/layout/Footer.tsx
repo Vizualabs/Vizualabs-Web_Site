@@ -1,9 +1,42 @@
-import { useState } from 'react'
-import {
-  MessageSquare,
-  Mail,
-} from 'lucide-react'
-import { AssistantWidget } from '#/components/chat/AssistantWidget'
+import { lazy, Suspense, useEffect, useState } from 'react'
+const LazyAssistantWidget = lazy(() =>
+  import('#/components/chat/AssistantWidget').then((module) => ({
+    default: module.AssistantWidget,
+  })),
+)
+
+function DeferredAssistantWidget({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const load = () => setReady(true)
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number
+      cancelIdleCallback?: (id: number) => void
+    }
+    const idle = idleWindow.requestIdleCallback?.(load, { timeout: 1200 })
+    const timeout = idle === undefined ? window.setTimeout(load, 800) : undefined
+
+    return () => {
+      if (idle !== undefined) idleWindow.cancelIdleCallback?.(idle)
+      if (timeout !== undefined) window.clearTimeout(timeout)
+    }
+  }, [])
+
+  if (!ready) return null
+
+  return (
+    <Suspense fallback={null}>
+      <LazyAssistantWidget open={open} onOpenChange={onOpenChange} />
+    </Suspense>
+  )
+}
 
 function GithubIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -133,7 +166,7 @@ export function Footer() {
         </div>
       </div>
 
-      <AssistantWidget open={chatOpen} onOpenChange={setChatOpen} />
+      <DeferredAssistantWidget open={chatOpen} onOpenChange={setChatOpen} />
     </footer>
   )
 }

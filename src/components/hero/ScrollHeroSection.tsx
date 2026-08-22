@@ -66,19 +66,20 @@ const prefersReducedData = () => {
   )
 }
 
-// The frames needed for the reveal load at full speed behind the intro.
-const LOAD_CONCURRENCY = 8
+// Keep the reveal work below the main-thread budget on slower devices.
+const LOAD_CONCURRENCY = 4
 
 // Frames streaming in after the reveal. Decoding is off the main thread now
 // (fetch -> Blob -> createImageBitmap), so this no longer competes with the
 // user's first scroll and can run wider than the old serialized pipeline.
-const STREAM_CONCURRENCY = 6
+const STREAM_CONCURRENCY = 2
 
-// How many frames must be decoded before the intro is allowed to lift. This
-// buys roughly the first fifth of the scroll distance as pre-buffered frames,
-// so the sequence tracks the very first scroll instead of freezing on the last
-// decoded frame — the main cause of the "lag" on initial load.
-const REVEAL_THRESHOLD = 24
+// Only gate the intro on the first few frames. The rest can stream while the
+// visitor is already on the page; findReadyFrame() supplies a nearby fallback.
+const REVEAL_THRESHOLD = 4
+
+// Let the first-paint path settle before decoding the rest of the sequence.
+const TAIL_START_DELAY_MS = 2500
 
 // The branded intro runs for at least this long so it reads as an intentional
 // animation rather than a flash. Frame decoding happens underneath it, so on
@@ -102,10 +103,6 @@ const WARMUP_MS = 240
 // Must match the wipe animation duration in styles.css.
 const REVEAL_MS = 900
 
-// Never leave users on a black plane if decode stalls — force the reveal path
-// after choreography + this grace window.
-const MAX_FRAME_WAIT_MS = 3500
-
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -120,7 +117,6 @@ export function ScrollHeroSection() {
   // 'revealing' — panel wipe opening, scroll unlocked
   // 'done'      — overlay unmounted
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
-  const [framesReady, setFramesReady] = useState(false)
 
   // Starts false to match SSR; flipped in an effect (client-only) so a
   // returning visitor never renders a mismatched first frame during
@@ -135,26 +131,22 @@ export function ScrollHeroSection() {
   // Scroll stays locked while the plane is still opaque.
   const isLoading = phase === 'intro' || phase === 'warmup'
 
-  // Phones get a lighter fire shader (fewer particle layers, capped device
-  // pixel ratio) — the per-pixel noise loops in Blaze are the single most
-  // expensive thing on this page, and small mobile GPUs pay for every layer
-  // at full DPR. On a phone that has *also* asked for reduced data (Save-Data
-  // or a slow connection), the fire is skipped entirely: the scroll-driven
-  // hero still renders in full, just without the WebGL layer on top.
+  // The per-pixel noise loops in Blaze are the single most expensive thing on
+  // this page. Phones keep the scroll-driven hero but skip the decorative
+  // WebGL layer entirely so the image sequence remains responsive.
   const [lowPowerFire, setLowPowerFire] = useState(false)
   const [skipFire, setSkipFire] = useState(false)
   useEffect(() => {
     const phone = isPhoneDevice()
     setLowPowerFire(phone)
-    setSkipFire(phone && prefersReducedData())
+    setSkipFire(phone)
   }, [])
 
   // Start fetching the Blaze chunk immediately, in parallel with the frame
   // decode pipeline, so the lazy import resolves well before 'warmup' asks
-  // for it. Skipped on phone + reduced-data: that visitor will never mount
-  // Blaze, so prefetching it would only waste their bandwidth.
+  // for it. Phones never mount Blaze, so prefetching it would waste bandwidth.
   useEffect(() => {
-    if (isPhoneDevice() && prefersReducedData()) return
+    if (isPhoneDevice()) return
     void import('../canvasui/Blaze')
   }, [])
 
@@ -199,11 +191,6 @@ export function ScrollHeroSection() {
 
   // Cached container geometry so scroll handler never forces layout.
   const geometryRef = useRef({ top: 0, height: 0 })
-
-  // Wall-clock mount time, used to give the intro animation its minimum beat.
-  const mountedAtRef = useRef(
-    typeof performance !== 'undefined' ? performance.now() : 0
-  )
 
   // RAF id for coalescing scroll updates to one calculation + draw per frame.
   const scrollRafRef = useRef<number | null>(null)
@@ -403,17 +390,16 @@ export function ScrollHeroSection() {
    * PRELOAD PIPELINE
    * Each frame is decoded exactly ONCE, cropped to the subject area and
    * downscaled to display resolution via createImageBitmap (runs off the main
-   * thread in modern browsers). Frames load in order 1..121, so the preloader
-   * lifts after the first REVEAL_THRESHOLD frames and the rest streams in
-   * while the user is already watching the hero.
+   * thread in modern browsers). The first few frames start immediately; the
+   * remaining sequence streams in after the intro so startup stays responsive.
    */
   useEffect(() => {
     let cancelled = false
-    let revealed = false
     const { width: bmpW, height: bmpH } = getBitmapSize()
     const bitmaps: (ImageBitmap | undefined)[] = new Array(TOTAL_FRAMES)
     bitmapsRef.current = bitmaps
     let completed = 0
+    let tailTimer: number | undefined
 
     // On a slow or data-saver connection, the reveal-gating frames still
     // load in full (the sequence can't unlock without them), but the long
@@ -421,7 +407,7 @@ export function ScrollHeroSection() {
     // density. findReadyFrame() already falls back to the nearest decoded
     // neighbour for any frame that isn't ready, so the skipped slots are
     // simply never filled rather than treated as failures.
-    const reduceData = prefersReducedData()
+    const reduceData = prefersReducedData() || isPhoneDevice()
 
     const phase1Indices = Array.from(
       { length: REVEAL_THRESHOLD },
@@ -475,13 +461,6 @@ export function ScrollHeroSection() {
       }
     }
 
-    // Count frames 1..n that are decoded and ready, in scroll order.
-    const countConsecutiveReady = () => {
-      let n = 0
-      while (n < TOTAL_FRAMES && bitmaps[n]) n++
-      return n
-    }
-
     const prepareFrame = async (frameIndex: number) => {
       try {
         const bitmap = await decodeFrame(frameIndex)
@@ -508,16 +487,6 @@ export function ScrollHeroSection() {
       // steal main-thread time from the scroll handler.
       if (frameIndex === 1) {
         requestAnimationFrame(() => drawFrame(1))
-      }
-
-      // Exactly one state update during the whole load — re-rendering while
-      // frames stream in would steal main-thread time from the canvas draws.
-      if (!revealed) {
-        const consecutive = countConsecutiveReady()
-        if (consecutive >= REVEAL_THRESHOLD || allDone) {
-          revealed = true
-          setFramesReady(true)
-        }
       }
 
       if (allDone) {
@@ -573,11 +542,15 @@ export function ScrollHeroSection() {
     // gets a turn between frames.
     void (async () => {
       await runPhase(phase1Indices, LOAD_CONCURRENCY, false)
-      await runPhase(tailIndices, STREAM_CONCURRENCY, true)
+      if (cancelled) return
+      tailTimer = window.setTimeout(() => {
+        if (!cancelled) void runPhase(tailIndices, STREAM_CONCURRENCY, true)
+      }, TAIL_START_DELAY_MS)
     })()
 
     return () => {
       cancelled = true
+      if (tailTimer !== undefined) window.clearTimeout(tailTimer)
       // Release GPU textures on unmount.
       for (const bitmap of bitmaps) bitmap?.close()
       bitmapsRef.current = []
@@ -588,10 +561,8 @@ export function ScrollHeroSection() {
   /**
    * Intro choreography.
    *
-   * 'intro' holds until BOTH the minimum animation beat has played and enough
-   * frames are decoded. Then the fire mounts behind the still-opaque plane
-   * ('warmup') so its shader compile cannot land on the user's first scroll,
-   * and only then does the panel wipe open ('revealing').
+   * The intro has a fixed visual duration. Frame decoding continues in the
+   * background and paints the first available frame as soon as the hero mounts.
    */
   /*
    * One effect per hop, each owning exactly one timer.
@@ -601,27 +572,16 @@ export function ScrollHeroSection() {
    * just scheduled in the same closure.
    */
 
-  // intro -> warmup, once frames are decoded AND the animation beat has played.
+  // intro -> warmup after the branded animation beat has played.
   useEffect(() => {
-    if (phase !== 'intro' || !framesReady) return
-    const elapsed = performance.now() - mountedAtRef.current
+    if (phase !== 'intro') return
     const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
-    const remaining = Math.max(0, minMs - elapsed)
     const timer = window.setTimeout(() => {
       sessionStorage.setItem(INTRO_SEEN_KEY, '1')
       setPhase('warmup')
-    }, remaining)
+    }, minMs)
     return () => window.clearTimeout(timer)
-  }, [phase, framesReady, fastIntro])
-
-  // If frame decode stalls, still open the site after a grace window so the
-  // branded plane never feels permanently stuck.
-  useEffect(() => {
-    if (phase !== 'intro' || framesReady) return
-    const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
-    const timer = window.setTimeout(() => setFramesReady(true), minMs + MAX_FRAME_WAIT_MS)
-    return () => window.clearTimeout(timer)
-  }, [phase, framesReady, fastIntro])
+  }, [phase, fastIntro])
 
   // warmup -> revealing, giving the fire a beat to compile behind the plane.
   useEffect(() => {
@@ -934,11 +894,9 @@ export function ScrollHeroSection() {
             paid behind the still-opaque intro plane rather than on the user's
             first scroll.
 
-            Phones get a lighter config (fewer particle layers, capped device
-            pixel ratio) since the shader's per-pixel noise loops are the
-            single biggest GPU/battery cost on this page. Phones that have
-            also asked for reduced data skip the WebGL layer entirely — the
-            scroll-driven hero still renders in full underneath. */}
+             Desktop gets the full fire treatment. Phones skip the shader's
+             per-pixel noise work entirely — the scroll-driven hero still
+             renders in full underneath. */}
         {fireMounted && (
           skipFire ? (
             heroOverlayContent

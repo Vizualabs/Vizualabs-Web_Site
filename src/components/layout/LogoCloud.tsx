@@ -131,6 +131,8 @@ function ClientLogo({ client }: { client: ClientEntry }) {
           src={client.src}
           alt=""
           aria-hidden="true"
+          loading="lazy"
+          decoding="async"
           className={`${logoMarkClass(client.tone, client.sizeClass)} ${
             client.tone === 'mono'
               ? 'opacity-55 group-hover:opacity-90 transition-opacity duration-300'

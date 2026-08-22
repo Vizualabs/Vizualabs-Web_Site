@@ -9,6 +9,8 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 const config = defineConfig({
+  // Keep dependency optimization isolated from stale pre-patch dev caches.
+  cacheDir: 'node_modules/.vite-vizualabs',
   resolve: {
     tsconfigPaths: true,
     alias: {

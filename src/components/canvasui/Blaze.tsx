@@ -604,6 +604,7 @@ export function createBlaze(
 
   let raf = 0;
   let lastTime = performance.now();
+  const MIN_FRAME_INTERVAL_MS = 1000 / 30;
   let destroyed = false;
   let running = false;
   let visible = true;
@@ -615,6 +616,10 @@ export function createBlaze(
     if (destroyed) return;
     if (!visible) {
       running = false;
+      return;
+    }
+    if (now - lastTime < MIN_FRAME_INTERVAL_MS) {
+      raf = requestAnimationFrame(frame);
       return;
     }
     const delta = Math.min((now - lastTime) / 1000, 1 / 30);

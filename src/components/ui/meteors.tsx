@@ -12,6 +12,11 @@ type MeteorsProps = {
   className?: string
 }
 
+function seededRandom(seed: number) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453
+  return value - Math.floor(value)
+}
+
 /**
  * Magic UI Meteors — sparse coral streaks for dark section atmospheres.
  * Do not use on ScrollHeroSection (GPU budget).
@@ -29,10 +34,10 @@ export function Meteors({
     () =>
       Array.from({ length: number }, (_, i) => ({
         id: i,
-        top: -5 + Math.random() * 30,
-        left: Math.random() * 100,
-        delay: minDelay + Math.random() * (maxDelay - minDelay),
-        duration: minDuration + Math.random() * (maxDuration - minDuration),
+        top: -5 + seededRandom(i * 4 + 1) * 30,
+        left: seededRandom(i * 4 + 2) * 100,
+        delay: minDelay + seededRandom(i * 4 + 3) * (maxDelay - minDelay),
+        duration: minDuration + seededRandom(i * 4 + 4) * (maxDuration - minDuration),
       })),
     [number, minDelay, maxDelay, minDuration, maxDuration],
   )

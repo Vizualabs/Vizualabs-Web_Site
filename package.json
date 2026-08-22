@@ -44,6 +44,9 @@
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
   },
+  "patchedDependencies": {
+    "feral-blob@0.1.0": "patches/feral-blob@0.1.0.patch"
+  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",

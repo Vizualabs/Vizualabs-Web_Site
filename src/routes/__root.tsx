@@ -94,8 +94,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       // evaluation instead of queueing behind it.
       ...HERO_PRELOAD_FRAMES.map((frame) => ({
         rel: 'preload' as const,
-        as: 'image' as const,
+        as: 'fetch' as const,
         type: 'image/webp',
+        crossOrigin: 'anonymous' as const,
         href: heroFrameUrl(frame),
         fetchPriority: 'high' as const,
       })),

@@ -1,0 +1,14 @@
+--- a/dist/feral-blob.js
++++ b/dist/feral-blob.js
+@@ -107,1 +107,1 @@
+-    transition: { type: "spring", stiffness: 220, damping: 9, mass: 0.7 }
++    transition: { type: "keyframes", duration: 0.8, ease: "easeInOut" }
+@@ -142,1 +142,1 @@
+-    transition: { delay: 0.05, type: "spring", stiffness: 220, damping: 9, mass: 0.7 }
++    transition: { delay: 0.05, type: "keyframes", duration: 0.8, ease: "easeInOut" }
+@@ -174,1 +174,1 @@
+-    transition: { delay: 0.1, type: "spring", stiffness: 210, damping: 11, mass: 0.8 }
++    transition: { delay: 0.1, type: "keyframes", duration: 0.8, ease: "easeInOut" }
+@@ -202,1 +202,1 @@
+-    transition: { delay: 0.12, type: "spring", stiffness: 210, damping: 11, mass: 0.8 }
++    transition: { delay: 0.12, type: "keyframes", duration: 0.8, ease: "easeInOut" }

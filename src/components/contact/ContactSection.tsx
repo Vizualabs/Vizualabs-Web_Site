@@ -166,10 +166,10 @@ export function ContactSection() {
                 <div className="pt-0.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFB4A8]">Communications</p>
                   <div className="mt-1.5 flex flex-col text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
-                    <a className="break-all sm:break-normal transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:strategy@vizualabs.tech">
+                    <a className="inline-block break-all py-2 -my-2 transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] sm:break-normal" href="mailto:strategy@vizualabs.tech">
                       strategy@vizualabs.tech
                     </a>
-                    <a className="break-all sm:break-normal transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]" href="mailto:press@vizualabs.tech">
+                    <a className="inline-block break-all py-2 -my-2 transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] sm:break-normal" href="mailto:press@vizualabs.tech">
                       press@vizualabs.tech
                     </a>
                   </div>
@@ -307,7 +307,7 @@ export function ContactSection() {
                                 handleFieldChange('subject', option)
                                 setDropdownOpen(false)
                               }}
-                              className={`flex w-full items-center justify-between rounded-lg px-3.5 py-2.5 text-left text-sm transition-colors duration-150 ${
+                              className={`flex min-h-11 w-full items-center justify-between rounded-lg px-3.5 py-3 text-left text-sm transition-colors duration-150 ${
                                 isSelected
                                   ? 'bg-[#FF5540]/15 font-medium text-[#FFB4A8]'
                                   : 'text-[#E5E2E1]/85 hover:bg-white/5 hover:text-[#E5E2E1]'

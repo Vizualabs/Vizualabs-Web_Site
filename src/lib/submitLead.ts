@@ -1,3 +1,4 @@
+import './ensureServerFnEnv'
 import { createServerFn } from '@tanstack/react-start'
 
 const MAX_FIELD_LENGTH = 200

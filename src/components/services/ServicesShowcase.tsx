@@ -10,6 +10,7 @@ import {
   Share2,
   ArrowRight,
 } from 'lucide-react'
+import { Safari } from '#/components/ui/safari'
 
 interface ServiceData {
   id: string
@@ -23,7 +24,7 @@ interface ServiceData {
     description: string
     image: string
     imageAlt: string
-    aspectRatio?: string
+    url: string
     imagePosition?: string
     graphicType?: 'image' | 'architecture' | 'ai-brain'
   }
@@ -58,6 +59,7 @@ const servicesData: ServiceData[] = [
         'We handle the entire lifecycle, from rapid prototyping to GTM strategies that ensure your product captures market share instantly.',
       image: '/service/image1.webp',
       imageAlt: 'Market acceleration product design across desktop, tablet, and mobile devices',
+      url: 'product.vizualabs.com',
       imagePosition: 'object-center',
       graphicType: 'image',
     },
@@ -90,6 +92,7 @@ const servicesData: ServiceData[] = [
         'Building scalable, secure, and performant backends that handle the most demanding enterprise workloads.',
       image: '/service/image2.webp',
       imageAlt: 'High-concurrency microservices systems architecture mockup',
+      url: 'platform.vizualabs.com',
       imagePosition: 'object-center',
       graphicType: 'image',
     },
@@ -123,6 +126,7 @@ const servicesData: ServiceData[] = [
         'Private, secure, and fine-tuned language models specialized for your domain data and production-grade requirements.',
       image: '/service/image3.webp',
       imageAlt: 'Custom LLM deployment and AI neural systems interface',
+      url: 'ai.vizualabs.com',
       imagePosition: 'object-center',
       graphicType: 'image',
     },
@@ -309,7 +313,9 @@ export function ServicesShowcase() {
               type="button"
               aria-label={`Go to ${service.title}`}
               onClick={() => scrollToDot(dotIdx)}
-              className="p-1.5 sm:p-1 cursor-pointer focus:outline-none"
+              // Negative margin cancels the padding's layout footprint, so the
+              // visible strip stays the same size while the tap target grows.
+              className="cursor-pointer p-3 -m-3 focus:outline-none sm:p-1.5 sm:-m-1.5"
             >
               <span
                 className={`block h-1.5 rounded-full transition-all duration-500 ${
@@ -335,7 +341,7 @@ export function ServicesShowcase() {
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {extendedServices.map((service, index) => {
+          {extendedServices.map((service) => {
             const PrimaryIcon = service.primaryCard.icon
             const BottomMiddleIcon = service.bottomMiddleCard.icon
             const TopRightIcon = service.topRightCard.icon
@@ -380,20 +386,43 @@ export function ServicesShowcase() {
                       </p>
                     </div>
 
-                    {/* Bottom Image Container */}
-                    <div className="mt-3.5 sm:mt-4 relative aspect-[16/9] sm:aspect-[16/8.4] w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#141416] border border-white/[0.06] shadow-inner flex items-center justify-center">
-                      <div className="relative w-full h-full">
-                        <img
-                          src={service.primaryCard.image}
-                          alt={service.primaryCard.imageAlt}
-                          loading={index === 3 ? 'eager' : 'lazy'}
-                          decoding="async"
-                          className={`h-full w-full object-cover ${
-                            service.primaryCard.imagePosition || 'object-center'
-                          } transition-transform duration-700 ease-out hover:scale-[1.03]`}
-                        />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#141416]/40 via-transparent to-transparent" />
-                      </div>
+                    {/* Bottom — product shot in Safari chrome */}
+                    <div className="mt-3.5 sm:mt-4 w-full">
+                      <Safari
+                        url={service.primaryCard.url}
+                        imageSrc={service.primaryCard.image}
+                        imageAlt={service.primaryCard.imageAlt}
+                        className="transition-transform duration-700 ease-out hover:scale-[1.01]"
+                      >
+                        <div className="absolute inset-0 flex flex-col gap-2 p-3 sm:p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="h-2.5 w-28 rounded-full bg-white/12" />
+                            <div className="h-2.5 w-12 rounded-full bg-[#FF5E4D]/45" />
+                          </div>
+                          <div className="grid flex-1 grid-cols-2 gap-2">
+                            <div className="rounded-lg border border-white/8 bg-[#161618] p-2.5">
+                              <div className="h-2 w-16 rounded bg-white/10" />
+                              <div className="mt-3 space-y-1.5">
+                                <div className="h-1.5 w-full rounded bg-white/8" />
+                                <div className="h-1.5 w-[80%] rounded bg-white/6" />
+                                <div className="h-1.5 w-[60%] rounded bg-[#FF5E4D]/35" />
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-white/8 bg-[#161618] p-2.5">
+                              <div className="h-2 w-14 rounded bg-white/10" />
+                              <div className="mt-3 flex h-[70%] items-end gap-1">
+                                {[45, 70, 55, 90, 60].map((h, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex-1 rounded-t-sm bg-[#FF5E4D]/40"
+                                    style={{ height: `${h}%` }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Safari>
                     </div>
                   </div>
 

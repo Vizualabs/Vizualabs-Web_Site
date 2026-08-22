@@ -1,4 +1,6 @@
+import '../ensureServerFnEnv'
 import { createServerFn } from '@tanstack/react-start'
+import { toPlainReply } from './plainText'
 
 const MAX_DESCRIPTION_LENGTH = 1500
 const MODEL = 'gemini-3.6-flash'
@@ -43,7 +45,8 @@ Rules:
 - Never quote an exact price or dollar figure.
 - Be specific to what they described — no generic boilerplate.
 - complexityWhy, timeline, considerations, and nextStep must all feel complete and useful on their own.
-- Prefer "read" whenever they named a product type plus at least one real feature or constraint.`
+- Prefer "read" whenever they named a product type plus at least one real feature or constraint.
+- All string values must be plain text only — no markdown, no **, __, *, _, #, backticks, emoji, or star/sparkle characters.`
 
 function parseEstimatePayload(raw: string): EstimatePayload | null {
   const trimmed = raw.trim()
@@ -54,7 +57,7 @@ function parseEstimatePayload(raw: string): EstimatePayload | null {
   try {
     const data = JSON.parse(jsonText) as Record<string, unknown>
     if (data.kind === 'clarify' && typeof data.question === 'string' && data.question.trim()) {
-      return { kind: 'clarify', question: data.question.trim() }
+      return { kind: 'clarify', question: toPlainReply(data.question) }
     }
 
     if (data.kind === 'read') {
@@ -65,13 +68,15 @@ function parseEstimatePayload(raw: string): EstimatePayload | null {
       const considerations = Array.isArray(data.considerations)
         ? data.considerations
             .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
-            .map((item) => item.trim())
+            .map((item) => toPlainReply(item))
+            .filter(Boolean)
             .slice(0, 4)
         : []
 
-      const complexityWhy = typeof data.complexityWhy === 'string' ? data.complexityWhy.trim() : ''
-      const timeline = typeof data.timeline === 'string' ? data.timeline.trim() : ''
-      const nextStep = typeof data.nextStep === 'string' ? data.nextStep.trim() : ''
+      const complexityWhy =
+        typeof data.complexityWhy === 'string' ? toPlainReply(data.complexityWhy) : ''
+      const timeline = typeof data.timeline === 'string' ? toPlainReply(data.timeline) : ''
+      const nextStep = typeof data.nextStep === 'string' ? toPlainReply(data.nextStep) : ''
 
       if (!complexityWhy || !timeline || !nextStep || considerations.length < 2) return null
 

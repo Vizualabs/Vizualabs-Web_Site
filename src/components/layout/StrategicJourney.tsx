@@ -10,6 +10,9 @@ import {
   Database,
   Sparkles,
 } from 'lucide-react'
+import { BlurFade } from '#/components/ui/blur-fade'
+import { OrbitingCircles } from '#/components/ui/orbiting-circles'
+import { JourneySystemsDiagram } from '#/components/layout/JourneySystemsDiagram'
 
 interface JourneyStep {
   id: number
@@ -256,7 +259,7 @@ export function StrategicJourney() {
 
       <div className="relative mx-auto max-w-4xl">
         {/* Section Heading: completely solid and anchored */}
-        <div className="space-y-2 sm:space-y-3 mb-10 sm:mb-14 md:mb-16">
+        <BlurFade inView delay={0.05} direction="up" className="space-y-2 sm:space-y-3 mb-8 sm:mb-10 md:mb-12">
           <span className="text-[11px] sm:text-xs md:text-sm font-normal tracking-[0.2em] text-[#FF5E4D] uppercase block">
             THE STRATEGIC JOURNEY
           </span>
@@ -266,7 +269,9 @@ export function StrategicJourney() {
               Mastered.
             </span>
           </h2>
-        </div>
+        </BlurFade>
+
+        <JourneySystemsDiagram activeIndex={activeIndex} />
 
         {/* Magnetic Rotary Wheel Viewport: Infinite unbroken reel */}
         <div className="relative">
@@ -322,10 +327,23 @@ export function StrategicJourney() {
                     {/* Left Column: Round Icon Badge + Vertical Connecting Line */}
                     <div className="relative flex flex-col items-center shrink-0">
                       {/* Icon Circle */}
-                      <div className="relative flex items-center justify-center">
+                      <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center">
                         {/* Magnetic Glow Bloom when active */}
                         {isTopActive && (
                           <div className="pointer-events-none absolute -inset-2 rounded-full bg-[#FF553E] opacity-70 blur-lg transition-opacity duration-500 animate-pulse" />
+                        )}
+                        {isTopActive && (
+                          <OrbitingCircles
+                            className="border-none bg-[#FF5E4D]/90"
+                            radius={38}
+                            duration={14}
+                            iconSize={8}
+                            path={false}
+                          >
+                            <span className="size-1.5 rounded-full bg-[#FF8A6B]" />
+                            <span className="size-1 rounded-full bg-white/80" />
+                            <span className="size-1.5 rounded-full bg-[#FF5E4D]" />
+                          </OrbitingCircles>
                         )}
                         <div
                           className={`relative z-10 flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 items-center justify-center rounded-full transition-all duration-400 ${
@@ -344,14 +362,21 @@ export function StrategicJourney() {
                         </div>
                       </div>
 
-                      {/* Connecting Line between badges */}
+                      {/* Connecting Line between badges — traveling beam when active */}
                       <div
-                        className={`w-[1.5px] h-14 sm:h-16 md:h-18 my-1 transition-colors duration-400 ${
+                        className={`relative w-[1.5px] h-14 sm:h-16 md:h-18 my-1 overflow-hidden transition-colors duration-400 ${
                           isTopActive
-                            ? 'bg-gradient-to-b from-[#FF553E]/80 via-white/20 to-white/10'
+                            ? 'bg-gradient-to-b from-[#FF553E]/40 via-white/10 to-white/5'
                             : 'bg-gradient-to-b from-white/10 to-transparent'
                         }`}
-                      />
+                      >
+                        {isTopActive ? (
+                          <span
+                            aria-hidden
+                            className="journey-line-beam absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-transparent via-[#FF8A6B] to-transparent opacity-90 motion-reduce:hidden"
+                          />
+                        ) : null}
+                      </div>
                     </div>
 
                     {/* Right Column: Title & Description */}
@@ -388,13 +413,20 @@ export function StrategicJourney() {
                     key={step.id}
                     type="button"
                     onClick={() => snapToStep(idx)}
-                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer shrink-0 ${
-                      isActive
-                        ? 'w-7 sm:w-9 bg-[#FF553E] shadow-[0_0_12px_#FF553E]'
-                        : 'w-2 bg-white/20 hover:bg-white/40'
-                    }`}
+                    // p-3 -m-3: pads the tap target out to a comfortable size
+                    // without growing the visible strip — the negative margin
+                    // cancels the padding's layout footprint.
+                    className="shrink-0 cursor-pointer p-3 -m-3"
                     aria-label={`Go to step ${step.title}`}
-                  />
+                  >
+                    <span
+                      className={`block h-2 rounded-full transition-all duration-500 ${
+                        isActive
+                          ? 'w-7 sm:w-9 bg-[#FF553E] shadow-[0_0_12px_#FF553E]'
+                          : 'w-2 bg-white/20 hover:bg-white/40'
+                      }`}
+                    />
+                  </button>
                 )
               })}
             </div>

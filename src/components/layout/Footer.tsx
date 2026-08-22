@@ -64,6 +64,11 @@ export function Footer() {
             </h3>
             <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
               <li>
+                <a href="/products" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Products
+                </a>
+              </li>
+              <li>
                 <a href="/services" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Custom Software
                 </a>
@@ -90,6 +95,11 @@ export function Footer() {
               <li>
                 <a href="/about" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   About Us
+                </a>
+              </li>
+              <li>
+                <a href="/products" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Products
                 </a>
               </li>
               <li>
@@ -127,4 +137,3 @@ export function Footer() {
     </footer>
   )
 }
-

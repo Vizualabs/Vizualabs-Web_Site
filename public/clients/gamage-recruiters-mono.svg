@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" aria-hidden="true">
+  <!-- Globe behind people -->
+  <g stroke="#FFFFFF" stroke-linecap="round" fill="none">
+    <circle cx="64" cy="46" r="36" stroke-width="4"/>
+    <ellipse cx="64" cy="46" rx="17" ry="36" stroke-width="3"/>
+    <path d="M28 46h72" stroke-width="3"/>
+    <path d="M32 28c10 6 22 9 32 9s22-3 32-9" stroke-width="2.5"/>
+    <path d="M32 64c10-6 22-9 32-9s22 3 32 9" stroke-width="2.5"/>
+  </g>
+  <!-- Side people (rear) -->
+  <g fill="#FFFFFF">
+    <circle cx="40" cy="82" r="9.5"/>
+    <path d="M22 112c1.5-13 9.5-21 18-21s16.5 8 18 21z"/>
+    <circle cx="88" cy="82" r="9.5"/>
+    <path d="M70 112c1.5-13 9.5-21 18-21s16.5 8 18 21z"/>
+  </g>
+  <!-- Center person (front, larger) -->
+  <g fill="#FFFFFF">
+    <circle cx="64" cy="78" r="12"/>
+    <path d="M40 118c2-16 12-26 24-26s22 10 24 26z"/>
+  </g>
+</svg>

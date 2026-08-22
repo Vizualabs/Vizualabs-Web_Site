@@ -1,3 +1,4 @@
+import './lib/ensureServerFnEnv'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'

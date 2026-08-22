@@ -44,7 +44,7 @@ export function BookingSection() {
               </p>
               <a
                 href="mailto:strategy@vizualabs.tech"
-                className="font-semibold text-[#FF5540] underline-offset-4 hover:underline"
+                className="inline-block py-2 -my-2 font-semibold text-[#FF5540] underline-offset-4 hover:underline"
               >
                 strategy@vizualabs.tech
               </a>

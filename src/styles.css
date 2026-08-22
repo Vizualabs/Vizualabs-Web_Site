@@ -457,235 +457,312 @@
 }
 
 /* ==========================================================================
-   Branded intro overlay (X-style "logo opens into the app" reveal)
-   No percentage, no progress bar — the mark draws, then an iris keyed to its
-   centre opens the landing page behind it.
+   Brand intro — abstract coral core + panel wipe (no letter-mark / V-stroke)
    ========================================================================== */
 
-/* Animatable length powers the iris hole. Registered so it interpolates
-   instead of snapping; browsers without @property fall back to the opacity
-   fade baked into the same keyframes. */
-@property --iris {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
+.brand-intro-wash {
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 48%, rgba(255, 94, 77, 0.22), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 110%, rgba(255, 85, 64, 0.1), transparent 55%);
+  animation: brand-intro-wash 2.4s ease-in-out infinite alternate;
 }
 
-/* --- Mark draw-in --------------------------------------------------------- */
-@keyframes brand-v-draw {
+@keyframes brand-intro-wash {
   from {
-    stroke-dashoffset: 112;
-  }
-
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.brand-intro-v {
-  stroke-dasharray: 112;
-  stroke-dashoffset: 112;
-  filter: drop-shadow(0 0 14px rgba(255, 94, 77, 0.55));
-  animation: brand-v-draw 900ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-
-/* --- Wordmark ------------------------------------------------------------- */
-@keyframes brand-intro-letter {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-    filter: blur(8px);
+    opacity: 0.75;
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
   }
 }
 
-@keyframes brand-intro-shimmer {
+.brand-intro-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 20%, transparent 75%);
+  opacity: 0;
+  animation: brand-intro-fade-in 0.9s ease 0.15s forwards;
+}
+
+.brand-intro-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: overlay;
+}
+
+@keyframes brand-intro-fade-in {
   from {
-    background-position: 200% 0;
+    opacity: 0;
   }
 
   to {
-    background-position: -200% 0;
+    opacity: 1;
   }
 }
 
-.brand-intro-letter {
+/* --- Core orb ------------------------------------------------------------- */
+.brand-intro-core {
   opacity: 0;
-  background-image: linear-gradient(110deg, #ffffff 35%, #FF5E4D 50%, #ffffff 65%);
-  background-size: 250% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation:
-    brand-intro-letter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    brand-intro-shimmer 2.8s linear infinite;
+  transform: scale(0.72);
+  animation: brand-intro-core-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
 }
 
-@keyframes brand-intro-dot {
-  from {
-    opacity: 0;
-    transform: scale(0);
-  }
-
+@keyframes brand-intro-core-in {
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-.brand-intro-dot {
-  opacity: 0;
-  box-shadow: 0 0 12px #FF5E4D;
-  animation: brand-intro-dot 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1080ms forwards;
+.brand-intro-core-glow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 94, 77, 0.45), transparent 68%);
+  filter: blur(18px);
+  animation: brand-intro-glow-breathe 2.2s ease-in-out infinite;
 }
 
-@keyframes brand-intro-tagline {
-  from {
-    opacity: 0;
-    letter-spacing: 0.6em;
+@keyframes brand-intro-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
   }
 
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.brand-intro-core-orb {
+  position: relative;
+  z-index: 2;
+  height: 42%;
+  width: 42%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, #ffffff 0%, #FF8A6B 28%, #FF5E4D 62%, #B83A2E 100%);
+  box-shadow:
+    0 0 28px rgba(255, 94, 77, 0.55),
+    inset 0 0 12px rgba(255, 255, 255, 0.35);
+}
+
+.brand-intro-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  border-top-color: rgba(255, 94, 77, 0.85);
+  border-right-color: rgba(255, 138, 107, 0.25);
+}
+
+.brand-intro-orbit-a {
+  animation: brand-intro-spin 2.8s linear infinite;
+}
+
+.brand-intro-orbit-b {
+  inset: 12%;
+  border-top-color: rgba(255, 255, 255, 0.55);
+  border-right-color: transparent;
+  border-bottom-color: rgba(255, 94, 77, 0.35);
+  animation: brand-intro-spin 1.9s linear infinite reverse;
+}
+
+@keyframes brand-intro-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Copy ----------------------------------------------------------------- */
+.brand-intro-wordmark {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(16px);
+  animation: brand-intro-wordmark 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+  background-image: linear-gradient(110deg, #ffffff 30%, #FF8A6B 50%, #ffffff 70%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+@keyframes brand-intro-wordmark {
   to {
     opacity: 1;
-    letter-spacing: 0.42em;
+    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
 .brand-intro-tagline {
   opacity: 0;
-  animation: brand-intro-tagline 0.8s ease-out 1180ms forwards;
+  animation: brand-intro-fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
 }
 
-/* --- Reveal --------------------------------------------------------------- */
-/* The iris: a full-bleed black plane whose radial mask hole opens from the
-   centre of the mark. Layer stays viewport-sized (unlike a scaled box-shadow),
-   so this composites cheaply. */
-@keyframes brand-iris-open {
-  0% {
-    --iris: 46px;
-    opacity: 1;
-  }
-
-  72% {
-    opacity: 1;
-  }
-
-  100% {
-    --iris: 170vmax;
-    opacity: 0;
-  }
-}
-
-.brand-intro-iris {
-  position: absolute;
-  inset: 0;
-  background: #000000;
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris), #000 calc(var(--iris) + 2px));
-  mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris), #000 calc(var(--iris) + 2px));
-  animation: brand-iris-open 900ms cubic-bezier(0.66, 0, 0.24, 1) forwards;
-}
-
-/* The mark rushes toward the viewer as the iris opens out of it. */
-@keyframes brand-intro-mark-exit {
+@keyframes brand-intro-fade-up {
   from {
-    opacity: 1;
-    transform: scale(1);
+    opacity: 0;
+    transform: translateY(10px);
   }
 
   to {
-    opacity: 0;
-    transform: scale(8);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.brand-intro-mark-exit {
-  animation: brand-intro-mark-exit 760ms cubic-bezier(0.66, 0, 0.24, 1) forwards;
+.brand-intro-bar {
+  opacity: 0;
+  animation: brand-intro-fade-up 0.5s ease 0.95s forwards;
 }
 
-@keyframes brand-intro-text-exit {
+.brand-intro-bar-fill {
+  transform: scaleX(0);
+  animation: brand-intro-bar 1.35s cubic-bezier(0.65, 0, 0.35, 1) 1s infinite;
+}
+
+@keyframes brand-intro-bar {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  45% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  46% {
+    transform-origin: right center;
+  }
+
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+/* --- Exit ----------------------------------------------------------------- */
+.brand-intro-revealing .brand-intro-base,
+.brand-intro-revealing .brand-intro-wash,
+.brand-intro-revealing .brand-intro-grid,
+.brand-intro-revealing .brand-intro-grain {
+  opacity: 0;
+  transition: none;
+}
+
+.brand-intro-stage-exit {
+  animation: brand-intro-stage-exit 420ms cubic-bezier(0.66, 0, 0.24, 1) forwards;
+}
+
+@keyframes brand-intro-stage-exit {
+  to {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(8px);
+  }
+}
+
+.brand-intro-wipe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 52%;
+  background: #0a0a0a;
+  z-index: 5;
+}
+
+.brand-intro-wipe-top {
+  top: 0;
+  animation: brand-intro-wipe-up 880ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.brand-intro-wipe-bottom {
+  bottom: 0;
+  animation: brand-intro-wipe-down 880ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+@keyframes brand-intro-wipe-up {
   from {
-    opacity: 1;
     transform: translateY(0);
   }
 
   to {
-    opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(-105%);
   }
 }
 
-.brand-intro-text-exit {
-  animation: brand-intro-text-exit 260ms ease-in forwards;
-}
-
-@keyframes brand-intro-glow-exit {
+@keyframes brand-intro-wipe-down {
   from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translateY(0);
   }
 
   to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2.4);
+    transform: translateY(105%);
   }
 }
 
-.brand-intro-glow-exit {
-  animation: brand-intro-glow-exit 700ms ease-out forwards;
-}
-
-/* Honour reduced-motion: keep the brand beat, drop the movement. */
 @media (prefers-reduced-motion: reduce) {
-
-  .brand-intro-v,
-  .brand-intro-letter,
-  .brand-intro-dot,
-  .brand-intro-tagline {
-    animation: none;
-    opacity: 1;
-    stroke-dashoffset: 0;
+  .brand-intro-wash,
+  .brand-intro-grid,
+  .brand-intro-core,
+  .brand-intro-core-glow,
+  .brand-intro-orbit,
+  .brand-intro-wordmark,
+  .brand-intro-tagline,
+  .brand-intro-bar,
+  .brand-intro-bar-fill {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
 
-  .brand-intro-iris {
-    -webkit-mask-image: none;
-    mask-image: none;
-    animation: brand-intro-text-exit 300ms ease-out forwards;
+  .brand-intro-stage-exit {
+    animation: brand-intro-fade-out 280ms ease forwards;
   }
 
-  .brand-intro-mark-exit,
-  .brand-intro-glow-exit {
-    animation: brand-intro-text-exit 300ms ease-out forwards;
+  .brand-intro-wipe-top,
+  .brand-intro-wipe-bottom {
+    animation: brand-intro-fade-out 280ms ease forwards;
   }
 }
 
-/* Returning-session fast path: the same simplified appearance as
-   prefers-reduced-motion above, applied by session state (see
-   ScrollHeroSection) instead of user preference — a repeat visit within the
-   same session gets a quick fade instead of the full first-visit reveal. */
-.brand-intro-fast .brand-intro-v,
-.brand-intro-fast .brand-intro-letter,
-.brand-intro-fast .brand-intro-dot,
-.brand-intro-fast .brand-intro-tagline {
+@keyframes brand-intro-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.brand-intro-fast .brand-intro-wash,
+.brand-intro-fast .brand-intro-grid,
+.brand-intro-fast .brand-intro-core,
+.brand-intro-fast .brand-intro-wordmark,
+.brand-intro-fast .brand-intro-tagline,
+.brand-intro-fast .brand-intro-bar {
   animation: none;
   opacity: 1;
-  stroke-dashoffset: 0;
+  transform: none;
+  filter: none;
 }
 
-.brand-intro-fast .brand-intro-iris {
-  -webkit-mask-image: none;
-  mask-image: none;
-  animation: brand-intro-text-exit 300ms ease-out forwards;
+.brand-intro-fast .brand-intro-orbit,
+.brand-intro-fast .brand-intro-core-glow,
+.brand-intro-fast .brand-intro-bar-fill {
+  animation-duration: 0.01ms;
+  animation-iteration-count: 1;
 }
 
-.brand-intro-fast .brand-intro-mark-exit,
-.brand-intro-fast .brand-intro-glow-exit {
-  animation: brand-intro-text-exit 300ms ease-out forwards;
+.brand-intro-fast.brand-intro-revealing .brand-intro-wipe-top,
+.brand-intro-fast.brand-intro-revealing .brand-intro-wipe-bottom {
+  animation-duration: 360ms;
 }
 
 /* ==========================================================================
@@ -743,12 +820,14 @@ header span {
 
 .nav-link:hover,
 .nav-link:focus-visible,
+.nav-link:active,
 .nav-link.active {
   color: #FF553E;
 }
 
 .nav-link:hover::after,
 .nav-link:focus-visible::after,
+.nav-link:active::after,
 .nav-link.active::after {
   transform: scaleX(1);
 }
@@ -787,7 +866,7 @@ header span {
 }
 
 .nav-contact-btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.96);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -829,6 +908,31 @@ header span {
   animation: shimmer-slide var(--speed, 3s) ease-in-out infinite alternate;
 }
 
+/* Eldora-style Live Button — soft expanding ripple */
+@keyframes live-button-ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 85, 64, 0.45);
+  }
+
+  70% {
+    box-shadow: 0 0 0 14px rgba(255, 85, 64, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 85, 64, 0);
+  }
+}
+
+.live-button-ripple {
+  animation: live-button-ripple 2.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-button-ripple {
+    animation: none;
+  }
+}
+
 .animate-spin-around {
   animation: spin-around calc(var(--speed, 3s) * 2) infinite linear;
 }
@@ -844,47 +948,141 @@ header span {
 }
 
 /* ==========================================================================
-   Logo cloud — trusted-by marquee. Same technique as .hero-marquee-track:
-   two duplicated groups translated by -50%, GPU-composited, no JS per frame.
+   Magic UI–style marquee (LogoCloud + Testimonials)
    ========================================================================== */
-.logo-marquee-track {
-  display: flex;
-  width: max-content;
-  will-change: transform;
-  animation: logo-marquee-scroll var(--logo-marquee-duration, 32s) linear infinite;
-}
-
-.logo-marquee-track:hover {
-  animation-play-state: paused;
-}
-
-.logo-marquee-group {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-}
-
-@keyframes logo-marquee-scroll {
-  to {
-    transform: translateX(-50%);
+@keyframes marquee {
+  from {
+    transform: translateX(0);
   }
+
+  to {
+    transform: translateX(calc(-100% - var(--gap, 1rem)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(calc(-100% - var(--gap, 1rem)));
+  }
+}
+
+.animate-marquee {
+  animation: marquee var(--duration, 40s) linear infinite;
+}
+
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration, 40s) linear infinite;
+}
+
+/* Magic UI Orbiting Circles */
+@keyframes orbit {
+  0% {
+    transform: rotate(calc(var(--angle) * 1deg))
+      translateY(calc(var(--radius) * -1px))
+      rotate(calc(var(--angle) * -1deg));
+  }
+
+  100% {
+    transform: rotate(calc(var(--angle) * 1deg + 360deg))
+      translateY(calc(var(--radius) * -1px))
+      rotate(calc((var(--angle) * -1deg) - 360deg));
+  }
+}
+
+.animate-orbit {
+  animation: orbit calc(var(--duration, 20) * 1s) linear infinite;
+}
+
+@keyframes journey-line-beam {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(220%);
+    opacity: 0;
+  }
+}
+
+.journey-line-beam {
+  animation: journey-line-beam 1.6s ease-in-out infinite;
+}
+
+/* Magic UI–style meteors (CTA atmosphere — keep sparse) */
+@keyframes meteor-fall {
+  0% {
+    transform: rotate(var(--meteor-angle, 215deg)) translateX(0);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotate(var(--meteor-angle, 215deg)) translateX(-520px);
+    opacity: 0;
+  }
+}
+
+.meteor {
+  animation: meteor-fall var(--meteor-duration, 5s) linear var(--meteor-delay, 0s) infinite;
+}
+
+.meteor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 138, 107, 0.75), transparent);
+}
+
+/* Magic UI–style perspective grid drift */
+@keyframes retro-grid {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(56px);
+  }
+}
+
+.animate-retro-grid {
+  animation: retro-grid 18s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logo-marquee-track {
-    animation: none;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .logo-marquee-group+.logo-marquee-group {
-    display: none;
+  .animate-marquee,
+  .animate-marquee-vertical,
+  .animate-orbit,
+  .meteor,
+  .animate-retro-grid {
+    animation: none !important;
   }
 }
 
 /* ==========================================================================
-   Testimonials — same duplicated-group marquee technique, wider cards.
+   Testimonials — original duplicated-group marquee
    ========================================================================== */
 .testimonial-marquee-track {
   display: flex;
@@ -916,7 +1114,7 @@ header span {
     justify-content: center;
   }
 
-  .testimonial-marquee-group+.testimonial-marquee-group {
+  .testimonial-marquee-group + .testimonial-marquee-group {
     display: none;
   }
 }

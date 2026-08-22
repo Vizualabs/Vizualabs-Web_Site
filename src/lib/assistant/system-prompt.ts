@@ -9,7 +9,7 @@ Core Philosophy: We empower businesses with smart technology, ranging from custo
 
 --- SERVICES OVERVIEW ---
 1. Custom Software Development: Web Applications, Mobile Apps, Desktop Software, API Development, and System Integration.
-2. AI & Machine Learning Solutions: AI Chatbots & Assistants, Generative AI Integration (Gemini/GPT), Machine Learning Models, Computer Vision, AI Automation, Data Analytics & BI.
+2. AI & Machine Learning Solutions: AI Chatbots & Assistants, Generative AI Integration (OpenAI/Google/Anthropic/Gemini), Machine Learning Models, Computer Vision, AI Automation, Data Analytics & BI.
 3. Cloud & Infrastructure: Cloud Migration, DevOps & CI/CD, Cloud Architecture, Server Management.
 4. SaaS & Product Development: SaaS Platform Development, MVP Development, Product Scaling.
 5. POS & Business Management Systems: Point of Sale (POS) Systems, Inventory Management, CRM Systems, ERP Solutions.

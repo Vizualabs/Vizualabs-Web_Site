@@ -7,6 +7,8 @@ import {
   type EstimatePayload,
 } from '#/lib/assistant/estimate'
 import { BlobMascotIcon } from '#/components/chat/BlobMascotIcon'
+import { BorderBeam } from '#/components/ui/border-beam'
+import { BlurFade } from '#/components/ui/blur-fade'
 
 const MAX_LENGTH = 1500
 
@@ -170,7 +172,7 @@ export function ProjectEstimator() {
   return (
     <section className="relative w-full border-t border-white/10 bg-[#0d0d0d] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-10 text-center">
+        <BlurFade inView delay={0.05} direction="up" className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#FF5E4D]">Live AI read</p>
           <h2 className="mt-3 font-hanken text-3xl font-bold text-white sm:text-4xl">
             What would your project take?
@@ -179,7 +181,7 @@ export function ProjectEstimator() {
             Describe what you&apos;re building. Get an honest, instant read on complexity and
             timeline — no form, no wait.
           </p>
-        </div>
+        </BlurFade>
 
         <form
           onSubmit={handleSubmit}
@@ -228,7 +230,15 @@ export function ProjectEstimator() {
         ) : null}
 
         {estimate ? (
-          <div className="mt-6 rounded-2xl border border-[#FF5E4D]/25 bg-[#FF5E4D]/[0.06] p-5 sm:p-6">
+          <div className="relative mt-6 overflow-hidden rounded-2xl border border-[#FF5E4D]/25 bg-[#FF5E4D]/[0.06] p-5 sm:p-6">
+            <BorderBeam
+              size={90}
+              duration={10}
+              colorFrom="#FF5E4D"
+              colorTo="#FF8A6B"
+              borderWidth={1.5}
+              className="opacity-70"
+            />
             {estimate.kind === 'clarify' ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-3">

@@ -15,6 +15,7 @@ import { Route as BookRouteImport } from './routes/book'
 import { Route as CaseStudyRouteImport } from './routes/case-study'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ProcessRouteImport } from './routes/process'
+import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ServicesRouteImport } from './routes/services'
 
@@ -48,6 +49,11 @@ const ProcessRoute = ProcessRouteImport.update({
   path: '/process',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServiceRoute = ServiceRouteImport.update({
   id: '/service',
   path: '/service',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/case-study': typeof CaseStudyRoute
   '/contact': typeof ContactRoute
   '/process': typeof ProcessRoute
+  '/products': typeof ProductsRoute
   '/service': typeof ServiceRoute
   '/services': typeof ServicesRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/case-study': typeof CaseStudyRoute
   '/contact': typeof ContactRoute
   '/process': typeof ProcessRoute
+  '/products': typeof ProductsRoute
   '/service': typeof ServiceRoute
   '/services': typeof ServicesRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/case-study': typeof CaseStudyRoute
   '/contact': typeof ContactRoute
   '/process': typeof ProcessRoute
+  '/products': typeof ProductsRoute
   '/service': typeof ServiceRoute
   '/services': typeof ServicesRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/case-study'
     | '/contact'
     | '/process'
+    | '/products'
     | '/service'
     | '/services'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/case-study'
     | '/contact'
     | '/process'
+    | '/products'
     | '/service'
     | '/services'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/case-study'
     | '/contact'
     | '/process'
+    | '/products'
     | '/service'
     | '/services'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   CaseStudyRoute: typeof CaseStudyRoute
   ContactRoute: typeof ContactRoute
   ProcessRoute: typeof ProcessRoute
+  ProductsRoute: typeof ProductsRoute
   ServiceRoute: typeof ServiceRoute
   ServicesRoute: typeof ServicesRoute
 }
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/service': {
       id: '/service'
       path: '/service'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaseStudyRoute: CaseStudyRoute,
   ContactRoute: ContactRoute,
   ProcessRoute: ProcessRoute,
+  ProductsRoute: ProductsRoute,
   ServiceRoute: ServiceRoute,
   ServicesRoute: ServicesRoute,
 }

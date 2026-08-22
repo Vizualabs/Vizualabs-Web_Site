@@ -10,6 +10,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { label: 'Products', href: '/products', isRoute: true },
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
   { label: 'Process', href: '/process', isRoute: true },
@@ -121,6 +122,7 @@ export function Navbar() {
 
             const isActive = item.isRoute
               ? currentPath === item.href ||
+              (item.href === '/products' && currentPath.startsWith('/product')) ||
               (item.href === '/services' && currentPath.startsWith('/service')) ||
               (item.href === '/about' && currentPath.startsWith('/about')) ||
               (item.href === '/process' && currentPath.startsWith('/process'))
@@ -192,6 +194,7 @@ export function Navbar() {
 
               const isActive = item.isRoute
                 ? currentPath === item.href ||
+                (item.href === '/products' && currentPath.startsWith('/product')) ||
                 (item.href === '/services' && currentPath.startsWith('/service')) ||
                 (item.href === '/about' && currentPath.startsWith('/about')) ||
                 (item.href === '/process' && currentPath.startsWith('/process'))

@@ -7,7 +7,9 @@ export { escapeHtml, type LeadSource, type LeadDetails, type SendLeadResult } fr
 
 // Not a secret — shown on the contact page itself. Kept as an env var so it
 // can be changed without a code deploy.
-const DEFAULT_TO_EMAIL = 'info.vizualabs@gmail.com'
+// Inbox for lead notifications. With Resend sandbox (no domain verified),
+// this MUST be the Resend account email. After domain verify, any inbox works.
+const DEFAULT_TO_EMAIL = 'info@vizualabs.com'
 
 // Resend's sandbox sender works immediately with just an API key — no
 // domain verification needed. Swap for a verified-domain address once one
@@ -42,6 +44,7 @@ export async function sendLeadEmail(lead: LeadDetails): Promise<SendLeadResult> 
   })
 
   if (error) {
+    console.error('[Resend] sendLeadEmail failed:', error)
     return { ok: false, reason: 'send_failed' }
   }
   return { ok: true }

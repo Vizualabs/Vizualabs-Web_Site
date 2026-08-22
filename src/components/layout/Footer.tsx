@@ -40,7 +40,7 @@ export function Footer() {
 
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 pb-14 border-b border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 pb-14 border-b border-white/10">
           
           {/* Column 1: Brand & Tagline */}
           <div className="lg:col-span-2 space-y-6">
@@ -103,32 +103,13 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/#cases" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                <a href="/case-study" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Case Studies
                 </a>
               </li>
               <li>
                   <a href="/contact#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Contact
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 4: LEGAL */}
-          <div className="space-y-4">
-            <h3 className="text-xs sm:text-sm font-normal font-geist tracking-wider text-[#FF5540] uppercase">
-              LEGAL
-            </h3>
-            <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
-              <li>
-                <a href="/#privacy" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a href="/#terms" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
-                  Terms of Service
                 </a>
               </li>
             </ul>

@@ -4,6 +4,7 @@ import { LogoCloud } from '../components/layout/LogoCloud'
 import { CapabilitiesSection } from '../components/layout/CapabilitiesSection'
 import { TestimonialsSection } from '../components/layout/TestimonialsSection'
 import { StrategicJourney } from '../components/layout/StrategicJourney'
+import { ProjectEstimator } from '../components/estimator/ProjectEstimator'
 import { CtaSection } from '../components/layout/CtaSection'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
@@ -35,6 +36,10 @@ function Home() {
       {/* The Strategic Journey Cyclical Step Animation Section */}
       <div className="defer-paint">
         <StrategicJourney />
+      </div>
+
+      <div className="defer-paint">
+        <ProjectEstimator />
       </div>
 
       <div className="defer-paint">

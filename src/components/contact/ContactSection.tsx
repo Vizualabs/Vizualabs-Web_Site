@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
-import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check } from 'lucide-react'
+import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check, AlertCircle } from 'lucide-react'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
-import { trackEvent } from '#/lib/analytics'
+import { submitLead } from '#/lib/submitLead'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 const fadeUp = {
   initial: { opacity: 0, y: 12 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
+  animate: { opacity: 1, y: 0 },
 }
 
 const SUBJECT_OPTIONS = [
@@ -66,6 +65,8 @@ const socialLinks = [
 export function ContactSection() {
   const [formData, setFormData] = useState(initialFormData)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -95,13 +96,30 @@ export function ContactSection() {
 
   const handleFieldChange = (field: keyof ContactFormData, value: string) => {
     setSubmitted(false)
+    setError(null)
     setFormData((current) => ({ ...current, [field]: value }))
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    trackEvent('contact_form_submit', { subject: formData.subject })
-    setSubmitted(true)
+    if (submitting) return
+
+    setSubmitting(true)
+    setError(null)
+
+    try {
+      const result = await submitLead({ data: formData })
+      if (result.ok) {
+        setSubmitted(true)
+        setFormData(initialFormData)
+      } else {
+        setError(result.error)
+      }
+    } catch {
+      setError('Something went wrong sending your message. Please try emailing us directly instead.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -180,8 +198,7 @@ export function ContactSection() {
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
             className="w-full max-w-[560px] justify-self-end rounded-[20px] border border-[#2A2826] bg-[#171615] p-5 sm:p-7 lg:p-8 shadow-[0_24px_64px_rgba(0,0,0,0.34),0_8px_24px_rgba(0,0,0,0.2)]"
           >
@@ -324,11 +341,22 @@ export function ContactSection() {
                   />
                 </div>
 
+                {error ? (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                  >
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>{error}</span>
+                  </div>
+                ) : null}
+
                 <button
                   type="submit"
-                  className="group mt-2 flex min-h-13 w-full items-center justify-center gap-2.5 rounded-full bg-[#FF5540] px-5 py-3 text-sm sm:text-base font-bold text-[#5C0000] shadow-[0_8px_24px_rgba(255,85,64,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ff422a] hover:shadow-[0_12px_30px_rgba(255,85,64,0.28)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB4A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615]"
+                  disabled={submitting}
+                  className="group mt-2 flex min-h-13 w-full items-center justify-center gap-2.5 rounded-full bg-[#FF5540] px-5 py-3 text-sm sm:text-base font-bold text-[#5C0000] shadow-[0_8px_24px_rgba(255,85,64,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ff422a] hover:shadow-[0_12px_30px_rgba(255,85,64,0.28)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB4A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171615] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
-                  Send Transmission
+                  {submitting ? 'Sending…' : 'Send Transmission'}
                   <SendHorizontal className="h-4.5 w-4.5 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={2.2} aria-hidden="true" />
                 </button>
               </form>

@@ -11,7 +11,7 @@ import { JellyBlobMascot } from 'feral-blob'
 import { motion, MotionConfig } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { BLOB_WHITE_SKIN } from '#/components/chat/BlobMascotIcon'
-import { ClientOnly } from '#/components/ClientOnly'
+import { ErrorBoundary } from '#/components/ErrorBoundary'
 import 'feral-blob/blob.css'
 
 const TRAVEL_DURATION_MS = 24_000
@@ -324,9 +324,16 @@ export function ProcessRoadmap() {
                       pointerEvents: 'none',
                     }}
                   >
-                    <ClientOnly>
+                    <ErrorBoundary
+                      fallback={
+                        <div
+                          className="h-full w-full rounded-full"
+                          style={{ background: 'var(--jelly-body-mid, #F7F7F8)' }}
+                        />
+                      }
+                    >
                       <JellyBlobMascot mood="happy" className="h-full w-full pointer-events-none" />
-                    </ClientOnly>
+                    </ErrorBoundary>
                   </div>
                 </foreignObject>
               </g>
@@ -359,13 +366,12 @@ export function ProcessRoadmap() {
                       height="60"
                       className="overflow-visible"
                     >
-                      {/* Reveal-on-scroll owns outer scale. Hover lives on the nested node
-                          so whileInView cannot permanently mask interaction springs. */}
+                      {/* Avoid scale-from-0 inside SVG foreignObject — browsers
+                          often clip/paint that transform as invisible. */}
                       <motion.div
-                        initial={{ scale: 0, rotate: -10 }}
-                        whileInView={{ scale: 1, rotate: 0 }}
-                        transition={{ type: 'spring', stiffness: 260, damping: 22, delay: index * 0.1 }}
-                        viewport={{ once: true, margin: '-50px' }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.35, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                         className="h-full w-full"
                       >
                         <motion.div
@@ -407,9 +413,8 @@ export function ProcessRoadmap() {
                     >
                       <motion.div
                         initial={{ opacity: 0, y: step.position === 'top' ? 20 : -20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.12 + 0.4 }}
-                        viewport={{ once: true }}
                         className="text-center"
                       >
                         <motion.h3
@@ -449,8 +454,7 @@ export function ProcessRoadmap() {
                 <motion.li
                   key={step.id}
                   initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1, type: 'spring', stiffness: 100 }}
                   className="relative"
                 >

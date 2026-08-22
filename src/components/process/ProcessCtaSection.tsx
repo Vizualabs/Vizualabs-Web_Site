@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { ShimmerButton } from '../ui/shimmer-button'
-import { BookingModal } from '../ui/BookingModal'
 
 export function ProcessCtaSection() {
-  const [modalOpen, setModalOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <section className="relative z-20 w-full bg-[#131313] pt-0 pb-16 sm:pb-20 px-5 sm:px-8 lg:px-12 selection:bg-[#EE2E10] selection:text-white">
@@ -23,7 +22,7 @@ export function ProcessCtaSection() {
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
               <ShimmerButton
                 type="button"
-                onClick={() => setModalOpen(true)}
+                onClick={() => navigate({ to: '/book' })}
                 background="#FF5540"
                 hoverBackground="#EE2E10"
                 shimmerColor="#FFD700"
@@ -36,7 +35,7 @@ export function ProcessCtaSection() {
               </ShimmerButton>
 
               <a
-                href="/#cases"
+                href="/case-study"
                 className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-white transition-all duration-200 hover:border-white/50 hover:bg-white/[0.06] hover:-translate-y-0.5 active:translate-y-0"
               >
                 View Our Work
@@ -45,15 +44,6 @@ export function ProcessCtaSection() {
           </div>
         </div>
       </div>
-
-      <BookingModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title="Free Consultation"
-        subtitle="Direct architecture consultation with Vizualabs leads"
-        source="process_cta_section"
-        accentColor="#EE2E10"
-      />
     </section>
   )
 }

@@ -36,19 +36,20 @@ test.describe('branded loading screen', () => {
     const intro = page.getByTestId('brand-intro')
     await expect(intro).toBeVisible()
 
-    // Branded: the coral core orb and the wordmark are both on screen.
+    // Branded: the black hole stage and the wordmark are both on screen.
     await expect(intro.locator('.brand-intro-core')).toBeAttached()
     await expect(intro.locator('.brand-intro-wordmark')).toHaveText('VIZUALABS')
 
-    // It animates rather than sitting static — the accretion rings spin continuously.
-    const rotateEarly = await intro
-      .locator('.brand-intro-ring-1')
-      .evaluate((el) => getComputedStyle(el).transform)
+    // It animates rather than sitting static — the WebGL loop keeps
+    // rendering new frames of the accretion disk.
+    const framesEarly = await page.evaluate(
+      () => window.__blackHoleFrames ?? 0
+    )
     await page.waitForTimeout(400)
-    const rotateLater = await intro
-      .locator('.brand-intro-ring-1')
-      .evaluate((el) => getComputedStyle(el).transform)
-    expect(rotateEarly).not.toBe(rotateLater)
+    const framesLater = await page.evaluate(
+      () => window.__blackHoleFrames ?? 0
+    )
+    expect(framesLater).toBeGreaterThan(framesEarly)
 
     await waitForIntroComplete(page)
 

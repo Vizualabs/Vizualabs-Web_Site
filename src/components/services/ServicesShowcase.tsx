@@ -334,7 +334,13 @@ export function ServicesShowcase() {
           tabIndex={0}
           role="region"
           aria-label="Services carousel"
-          className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 sm:gap-6 md:gap-8 pb-3 sm:pb-4 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-2xl touch-pan-x"
+          // `relative` makes this element the offsetParent for its slide
+          // children — without it, offsetParent resolves to the ancestor
+          // <section> (which is position:relative for its own glow blobs),
+          // so child.offsetLeft picks up the section's px-3/6/8 padding and
+          // every scrollTo() below lands short by that padding, leaving
+          // slides permanently un-snapped with neighboring slides bleeding in.
+          className="relative flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 sm:gap-6 md:gap-8 pb-3 sm:pb-4 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-2xl touch-pan-x"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',

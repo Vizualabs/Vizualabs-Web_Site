@@ -430,10 +430,6 @@ export function StrategicJourney() {
                 )
               })}
             </div>
-
-            <span className="text-[11px] sm:text-xs text-gray-500 font-medium">
-              Rotary wheel • Swipe or scroll
-            </span>
           </div>
 
         </div>

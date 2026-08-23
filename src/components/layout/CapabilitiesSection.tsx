@@ -120,11 +120,9 @@ const capabilities: CapabilityCard[] = [
 
 function CapabilityCardFace({
   item,
-  index,
   className,
 }: {
   item: CapabilityCard
-  index: number
   className?: string
 }) {
   const IconComp = item.icon
@@ -132,10 +130,7 @@ function CapabilityCardFace({
   return (
     <div
       data-capability-card
-      className={cn(
-        'group relative h-full overflow-hidden rounded-2xl',
-        className,
-      )}
+      className={cn('group relative h-full overflow-hidden rounded-2xl', className)}
     >
       <MagicCard
         className="h-full rounded-2xl bg-[#121212] transition-transform duration-300 group-hover:-translate-y-0.5"
@@ -145,8 +140,10 @@ function CapabilityCardFace({
       >
         <div
           className={cn(
-            'relative flex h-full flex-col justify-between p-6 sm:p-7 md:p-8',
-            item.featured ? 'min-h-[300px] lg:min-h-[320px]' : 'min-h-[280px] lg:min-h-[300px]',
+            'relative flex h-full flex-col justify-between p-5 sm:p-7 md:p-8',
+            item.featured
+              ? 'min-h-[280px] sm:min-h-[300px] lg:min-h-[320px]'
+              : 'min-h-[260px] sm:min-h-[280px] lg:min-h-[300px]',
           )}
         >
           <div>
@@ -176,14 +173,13 @@ function CapabilityCardFace({
             </p>
           </div>
 
-          <div className="pt-5 border-t border-white/10 flex items-center gap-2 mt-6">
+          <div className="mt-6 flex items-center gap-2 border-t border-white/10 pt-5">
             <span className="text-xs sm:text-sm font-normal tracking-wide text-[#FF5E4D]">
               {item.number} — {item.category}
             </span>
           </div>
         </div>
       </MagicCard>
-
     </div>
   )
 }
@@ -197,20 +193,21 @@ export function CapabilitiesSection() {
     if (!container) return
 
     const firstCard = container.querySelector<HTMLElement>('[data-capability-card]')
-    const step = firstCard ? firstCard.offsetWidth + 24 : 400
+    const step = firstCard?.offsetWidth ?? container.clientWidth
     const maxScroll = container.scrollWidth - container.clientWidth
+    const nextLeft = Math.min(container.scrollLeft + step, maxScroll)
 
-    if (container.scrollLeft >= maxScroll - 20) {
+    if (container.scrollLeft >= maxScroll - 8) {
       container.scrollTo({ left: 0, behavior: 'smooth' })
     } else {
-      container.scrollBy({ left: step, behavior: 'smooth' })
+      container.scrollTo({ left: nextLeft, behavior: 'smooth' })
     }
   }
 
   return (
     <section
       id="solutions"
-      className="relative z-30 w-full bg-[#080808] py-16 sm:py-20 md:py-24 px-5 sm:px-8 md:px-12 text-white border-t border-white/10 selection:bg-[#FF5E4D] selection:text-white overflow-hidden"
+      className="relative z-30 w-full bg-[#080808] py-16 sm:py-20 md:py-24 px-5 sm:px-8 md:px-12 text-white border-t border-white/10 selection:bg-[#FF5E4D] selection:text-white overflow-x-clip"
     >
       <div className="pointer-events-none absolute top-1/2 right-0 h-64 w-64 sm:h-96 sm:w-96 rounded-full bg-[#FF5E4D]/5 blur-[140px]" />
 
@@ -227,11 +224,10 @@ export function CapabilitiesSection() {
           </BlurFade>
 
           <BlurFade inView delay={0.12} direction="up">
-            {/* Mobile: advance snap carousel · Desktop: full services page */}
             <button
               type="button"
               onClick={handleNextCardClick}
-              className="group inline-flex shrink-0 items-center gap-2 self-start p-2 -m-2 text-sm font-normal uppercase tracking-wider text-[#FF5E4D] transition-all duration-300 hover:gap-3 hover:text-[#ff4634] cursor-pointer md:self-end sm:text-base lg:hidden"
+              className="group inline-flex min-h-11 shrink-0 items-center gap-2 self-start p-2 -m-2 text-sm font-normal uppercase tracking-wider text-[#FF5E4D] transition-all duration-300 hover:gap-3 hover:text-[#ff4634] cursor-pointer md:self-end sm:text-base lg:hidden"
             >
               <span>VIEW ALL SERVICES</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -246,30 +242,30 @@ export function CapabilitiesSection() {
           </BlurFade>
         </div>
 
-        {/* Mobile / tablet — horizontal snap */}
+        {/* Mobile / tablet — one card at a time, snap slide */}
         <div
           ref={scrollContainerRef}
-          className="-mx-5 sm:-mx-8 lg:hidden flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth px-5 sm:px-8 pb-8 pt-2 snap-x snap-mandatory focus:outline-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className={cn(
+            'lg:hidden flex gap-0 overflow-x-auto overscroll-x-contain scroll-smooth',
+            'snap-x snap-mandatory touch-pan-x',
+            'pb-2 pt-1',
+            '[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
+          )}
+          aria-label="Capabilities carousel"
         >
-          {capabilities.map((item, index) => (
+          {capabilities.map((item) => (
             <CapabilityCardFace
               key={item.id}
               item={item}
-              index={index}
-              className="w-[min(85vw,320px)] sm:w-[360px] shrink-0 snap-start"
+              className="w-full min-w-full shrink-0 snap-center snap-always"
             />
           ))}
         </div>
 
         {/* Desktop — asymmetric bento */}
         <BentoGrid className="hidden lg:grid">
-          {capabilities.map((item, index) => (
-            <CapabilityCardFace
-              key={item.id}
-              item={item}
-              index={index}
-              className={item.bentoClass}
-            />
+          {capabilities.map((item) => (
+            <CapabilityCardFace key={item.id} item={item} className={item.bentoClass} />
           ))}
         </BentoGrid>
       </div>

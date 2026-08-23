@@ -457,19 +457,20 @@
 }
 
 /* ==========================================================================
-   Brand intro — abstract coral core + panel wipe (no letter-mark / V-stroke)
+   Brand intro — red singularity / black hole vortex + panel wipe
    ========================================================================== */
 
 .brand-intro-wash {
   background:
-    radial-gradient(ellipse 55% 45% at 50% 48%, rgba(255, 94, 77, 0.22), transparent 70%),
-    radial-gradient(ellipse 80% 50% at 50% 110%, rgba(255, 85, 64, 0.1), transparent 55%);
-  animation: brand-intro-wash 2.4s ease-in-out infinite alternate;
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(255, 94, 77, 0.28), transparent 72%),
+    radial-gradient(ellipse 70% 45% at 50% 115%, rgba(184, 58, 46, 0.14), transparent 60%),
+    radial-gradient(ellipse 35% 30% at 50% 48%, rgba(255, 138, 107, 0.12), transparent 65%);
+  animation: brand-intro-wash 2.6s ease-in-out infinite alternate;
 }
 
 @keyframes brand-intro-wash {
   from {
-    opacity: 0.75;
+    opacity: 0.7;
   }
 
   to {
@@ -479,16 +480,16 @@
 
 .brand-intro-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 20%, transparent 75%);
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 55% 50% at 50% 50%, #000 18%, transparent 78%);
   opacity: 0;
-  animation: brand-intro-fade-in 0.9s ease 0.15s forwards;
+  animation: brand-intro-fade-in 1s ease 0.1s forwards;
 }
 
 .brand-intro-grain {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   mix-blend-mode: overlay;
 }
@@ -503,74 +504,83 @@
   }
 }
 
-/* --- Core orb ------------------------------------------------------------- */
-.brand-intro-core {
+/* --- Vortex entrance ------------------------------------------------------ */
+.brand-intro-core,
+.brand-intro-vortex {
   opacity: 0;
-  transform: scale(0.72);
-  animation: brand-intro-core-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+  transform: scale(0.55);
+  animation: brand-intro-vortex-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
 }
 
-@keyframes brand-intro-core-in {
+@keyframes brand-intro-vortex-in {
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-.brand-intro-core-glow {
+/* --- Accretion rings ------------------------------------------------------ */
+.brand-intro-ring {
   position: absolute;
-  inset: -18%;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(255, 94, 77, 0.45), transparent 68%);
-  filter: blur(18px);
-  animation: brand-intro-glow-breathe 2.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes brand-intro-glow-breathe {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scale(0.94);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
+.brand-intro-ring-1 {
+  inset: -14%;
+  background: conic-gradient(from 0deg,
+      transparent 0%,
+      rgba(255, 94, 77, 0.75) 12%,
+      rgba(255, 138, 107, 0.45) 30%,
+      transparent 48%,
+      transparent 52%,
+      rgba(255, 94, 77, 0.35) 65%,
+      rgba(184, 58, 46, 0.55) 80%,
+      transparent 100%);
+  mask: radial-gradient(circle, transparent 58%, black 59%, black 61%, transparent 62%);
+  animation: brand-intro-spin 3.2s linear infinite;
 }
 
-.brand-intro-core-orb {
-  position: relative;
-  z-index: 2;
-  height: 42%;
-  width: 42%;
-  border-radius: 9999px;
-  background:
-    radial-gradient(circle at 32% 28%, #ffffff 0%, #FF8A6B 28%, #FF5E4D 62%, #B83A2E 100%);
-  box-shadow:
-    0 0 28px rgba(255, 94, 77, 0.55),
-    inset 0 0 12px rgba(255, 255, 255, 0.35);
+.brand-intro-ring-2 {
+  inset: -4%;
+  background: conic-gradient(from 120deg,
+      transparent 0%,
+      rgba(255, 94, 77, 0.6) 18%,
+      rgba(255, 138, 107, 0.3) 38%,
+      transparent 55%,
+      transparent 60%,
+      rgba(255, 94, 77, 0.25) 75%,
+      transparent 100%);
+  mask: radial-gradient(circle, transparent 63%, black 64%, black 66%, transparent 67%);
+  animation: brand-intro-spin 2.2s linear infinite reverse;
 }
 
-.brand-intro-orbit {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  border: 1px solid transparent;
-  border-top-color: rgba(255, 94, 77, 0.85);
-  border-right-color: rgba(255, 138, 107, 0.25);
+.brand-intro-ring-3 {
+  inset: 8%;
+  background: conic-gradient(from 240deg,
+      transparent 0%,
+      rgba(255, 138, 107, 0.5) 15%,
+      rgba(255, 94, 77, 0.4) 35%,
+      transparent 50%,
+      transparent 58%,
+      rgba(184, 58, 46, 0.45) 72%,
+      transparent 100%);
+  mask: radial-gradient(circle, transparent 68%, black 69%, black 71%, transparent 72%);
+  animation: brand-intro-spin 1.6s linear infinite;
 }
 
-.brand-intro-orbit-a {
-  animation: brand-intro-spin 2.8s linear infinite;
-}
-
-.brand-intro-orbit-b {
-  inset: 12%;
-  border-top-color: rgba(255, 255, 255, 0.55);
-  border-right-color: transparent;
-  border-bottom-color: rgba(255, 94, 77, 0.35);
-  animation: brand-intro-spin 1.9s linear infinite reverse;
+.brand-intro-ring-4 {
+  inset: 22%;
+  background: conic-gradient(from 60deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.35) 10%,
+      rgba(255, 94, 77, 0.5) 28%,
+      transparent 45%,
+      transparent 55%,
+      rgba(255, 138, 107, 0.3) 70%,
+      transparent 100%);
+  mask: radial-gradient(circle, transparent 73%, black 74%, black 76%, transparent 77%);
+  animation: brand-intro-spin 1.1s linear infinite reverse;
 }
 
 @keyframes brand-intro-spin {
@@ -579,14 +589,167 @@
   }
 }
 
+/* --- Spiral arms ---------------------------------------------------------- */
+.brand-intro-arm {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5px;
+  height: 58%;
+  transform-origin: top center;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+      rgba(255, 94, 77, 0.55) 0%,
+      rgba(255, 138, 107, 0.2) 45%,
+      transparent 100%);
+  border-radius: 999px;
+}
+
+.brand-intro-arm-1 {
+  transform: rotate(0deg) translateY(-8%);
+  animation: brand-intro-arm-drift 4s ease-in-out infinite alternate;
+}
+
+.brand-intro-arm-2 {
+  transform: rotate(90deg) translateY(-8%);
+  animation: brand-intro-arm-drift 4s ease-in-out 1.3s infinite alternate;
+}
+
+.brand-intro-arm-3 {
+  transform: rotate(180deg) translateY(-8%);
+  animation: brand-intro-arm-drift 4s ease-in-out 2.6s infinite alternate;
+}
+
+.brand-intro-arm-4 {
+  transform: rotate(270deg) translateY(-8%);
+  animation: brand-intro-arm-drift 4s ease-in-out 0.7s infinite alternate;
+}
+
+@keyframes brand-intro-arm-drift {
+  from {
+    opacity: 0.5;
+    transform: rotate(var(--arm-angle, 0deg)) translateY(-8%) scaleY(0.92);
+  }
+
+  to {
+    opacity: 0.9;
+    transform: rotate(var(--arm-angle, 0deg)) translateY(-8%) scaleY(1.08);
+  }
+}
+
+/* --- Singularity glow layers ---------------------------------------------- */
+.brand-intro-singularity-glow-outer {
+  position: absolute;
+  inset: -28%;
+  border-radius: 9999px;
+  background: radial-gradient(circle,
+      rgba(255, 94, 77, 0.35) 0%,
+      rgba(184, 58, 46, 0.15) 35%,
+      transparent 70%);
+  filter: blur(24px);
+  animation: brand-intro-glow-breathe-outer 2.8s ease-in-out infinite;
+}
+
+@keyframes brand-intro-glow-breathe-outer {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+.brand-intro-singularity-glow-mid {
+  position: absolute;
+  inset: -10%;
+  border-radius: 9999px;
+  background: radial-gradient(circle,
+      rgba(255, 138, 107, 0.45) 0%,
+      rgba(255, 94, 77, 0.2) 40%,
+      transparent 65%);
+  filter: blur(14px);
+  animation: brand-intro-glow-breathe-mid 2s ease-in-out infinite reverse;
+}
+
+@keyframes brand-intro-glow-breathe-mid {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.brand-intro-singularity-glow-inner {
+  position: absolute;
+  inset: 18%;
+  border-radius: 9999px;
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 138, 107, 0.6) 25%,
+      rgba(255, 94, 77, 0.3) 55%,
+      transparent 75%);
+  filter: blur(8px);
+  animation: brand-intro-glow-breathe-inner 1.4s ease-in-out infinite;
+}
+
+@keyframes brand-intro-glow-breathe-inner {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* --- The core — white-hot singularity ------------------------------------- */
+.brand-intro-singularity-core {
+  position: relative;
+  z-index: 3;
+  width: 16%;
+  height: 16%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 35% 30%, #ffffff 0%, #FFDDD6 25%, #FF8A6B 55%, #FF5E4D 85%, #B83A2E 100%);
+  box-shadow:
+    0 0 16px rgba(255, 94, 77, 0.7),
+    0 0 36px rgba(255, 138, 107, 0.4),
+    inset 0 0 8px rgba(255, 255, 255, 0.5);
+  animation: brand-intro-core-flicker 0.15s ease-in-out infinite alternate;
+}
+
+@keyframes brand-intro-core-flicker {
+  from {
+    opacity: 0.92;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
 /* --- Copy ----------------------------------------------------------------- */
 .brand-intro-wordmark {
   opacity: 0;
   filter: blur(10px);
-  transform: translateY(16px);
-  animation: brand-intro-wordmark 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
-  background-image: linear-gradient(110deg, #ffffff 30%, #FF8A6B 50%, #ffffff 70%);
-  background-size: 220% 100%;
+  transform: translateY(18px);
+  animation: brand-intro-wordmark 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+  background-image: linear-gradient(110deg, #ffffff 25%, #FF8A6B 48%, #FF5E4D 55%, #ffffff 75%);
+  background-size: 240% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -603,7 +766,7 @@
 
 .brand-intro-tagline {
   opacity: 0;
-  animation: brand-intro-fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
+  animation: brand-intro-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
 }
 
 @keyframes brand-intro-fade-up {
@@ -620,12 +783,12 @@
 
 .brand-intro-bar {
   opacity: 0;
-  animation: brand-intro-fade-up 0.5s ease 0.95s forwards;
+  animation: brand-intro-fade-up 0.5s ease 1s forwards;
 }
 
 .brand-intro-bar-fill {
   transform: scaleX(0);
-  animation: brand-intro-bar 1.35s cubic-bezier(0.65, 0, 0.35, 1) 1s infinite;
+  animation: brand-intro-bar 1.5s cubic-bezier(0.65, 0, 0.35, 1) 1.1s infinite;
 }
 
 @keyframes brand-intro-bar {
@@ -675,7 +838,7 @@
   left: 0;
   right: 0;
   height: 52%;
-  background: #0a0a0a;
+  background: #050505;
   z-index: 5;
 }
 
@@ -710,11 +873,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .brand-intro-wash,
   .brand-intro-grid,
   .brand-intro-core,
-  .brand-intro-core-glow,
-  .brand-intro-orbit,
+  .brand-intro-vortex,
+  .brand-intro-ring,
+  .brand-intro-arm,
+  .brand-intro-singularity-glow-outer,
+  .brand-intro-singularity-glow-mid,
+  .brand-intro-singularity-glow-inner,
+  .brand-intro-singularity-core,
   .brand-intro-wordmark,
   .brand-intro-tagline,
   .brand-intro-bar,
@@ -744,6 +913,7 @@
 .brand-intro-fast .brand-intro-wash,
 .brand-intro-fast .brand-intro-grid,
 .brand-intro-fast .brand-intro-core,
+.brand-intro-fast .brand-intro-vortex,
 .brand-intro-fast .brand-intro-wordmark,
 .brand-intro-fast .brand-intro-tagline,
 .brand-intro-fast .brand-intro-bar {
@@ -753,8 +923,12 @@
   filter: none;
 }
 
-.brand-intro-fast .brand-intro-orbit,
-.brand-intro-fast .brand-intro-core-glow,
+.brand-intro-fast .brand-intro-ring,
+.brand-intro-fast .brand-intro-arm,
+.brand-intro-fast .brand-intro-singularity-glow-outer,
+.brand-intro-fast .brand-intro-singularity-glow-mid,
+.brand-intro-fast .brand-intro-singularity-glow-inner,
+.brand-intro-fast .brand-intro-singularity-core,
 .brand-intro-fast .brand-intro-bar-fill {
   animation-duration: 0.01ms;
   animation-iteration-count: 1;

@@ -40,13 +40,13 @@ test.describe('branded loading screen', () => {
     await expect(intro.locator('.brand-intro-core')).toBeAttached()
     await expect(intro.locator('.brand-intro-wordmark')).toHaveText('VIZUALABS')
 
-    // It animates rather than sitting static — the orbit rings spin continuously.
+    // It animates rather than sitting static — the accretion rings spin continuously.
     const rotateEarly = await intro
-      .locator('.brand-intro-orbit-a')
+      .locator('.brand-intro-ring-1')
       .evaluate((el) => getComputedStyle(el).transform)
     await page.waitForTimeout(400)
     const rotateLater = await intro
-      .locator('.brand-intro-orbit-a')
+      .locator('.brand-intro-ring-1')
       .evaluate((el) => getComputedStyle(el).transform)
     expect(rotateEarly).not.toBe(rotateLater)
 

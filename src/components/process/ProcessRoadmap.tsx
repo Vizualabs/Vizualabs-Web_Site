@@ -161,6 +161,14 @@ export function ProcessRoadmap() {
 
   const [travelHoveredStep, setTravelHoveredStep] = useState<number | null>(null)
   const [manualHoveredStep, setManualHoveredStep] = useState<number | null>(null)
+  // JellyBlobMascot's internal idle-jitter seeds differently on the server
+  // vs. the client, which trips a React hydration mismatch (see
+  // BlobMascotIcon's mounted-gate for the same fix). Mount it client-only.
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const path = pathRef.current
@@ -260,11 +268,11 @@ export function ProcessRoadmap() {
                   </feMerge>
                 </filter>
                 <linearGradient id="processRoadGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#4a1510" />
-                  <stop offset="25%" stopColor="#B83A2E" />
-                  <stop offset="50%" stopColor="#FF5540" />
-                  <stop offset="75%" stopColor="#B83A2E" />
-                  <stop offset="100%" stopColor="#4a1510" />
+                  <stop offset="0%" stopColor="#4A0000" />
+                  <stop offset="25%" stopColor="#C40000" />
+                  <stop offset="50%" stopColor="#FF0000" />
+                  <stop offset="75%" stopColor="#C40000" />
+                  <stop offset="100%" stopColor="#4A0000" />
                 </linearGradient>
                 <filter id="processGlow">
                   <feGaussianBlur stdDeviation="4" result="coloredBlur" />
@@ -278,7 +286,7 @@ export function ProcessRoadmap() {
 
               <motion.path
                 d={ROAD_PATH}
-                stroke="#FF5540"
+                stroke="#FF0000"
                 strokeWidth="70"
                 strokeLinecap="round"
                 className="blur-3xl opacity-10"
@@ -332,7 +340,14 @@ export function ProcessRoadmap() {
                         />
                       }
                     >
-                      <JellyBlobMascot mood="happy" className="h-full w-full pointer-events-none" />
+                      {mounted ? (
+                        <JellyBlobMascot mood="happy" className="h-full w-full pointer-events-none" />
+                      ) : (
+                        <div
+                          className="h-full w-full rounded-full"
+                          style={{ background: 'var(--jelly-body-mid, #F7F7F8)' }}
+                        />
+                      )}
                     </ErrorBoundary>
                   </div>
                 </foreignObject>
@@ -384,12 +399,12 @@ export function ProcessRoadmap() {
                           onMouseLeave={() => setManualHoveredStep(null)}
                           className={`relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 bg-white shadow-2xl transition-[border-color,box-shadow] duration-300 ease-out ${
                             isActive
-                              ? 'border-[#FF5540] shadow-[0_0_14px_rgba(255,85,64,0.35)]'
-                              : 'border-[#FF5540]/80 shadow-2xl'
+                              ? 'border-[#FF0000] shadow-[0_0_14px_rgba(255,0,0,0.35)]'
+                              : 'border-[#FF0000] shadow-2xl'
                           }`}
                         >
                           <div
-                            className={`absolute inset-0 bg-gradient-to-br from-[#FF5540] to-[#EE2E10] transition-opacity duration-300 ease-out ${
+                            className={`absolute inset-0 bg-gradient-to-br from-[#FF0000] to-[#C40000] transition-opacity duration-300 ease-out ${
                               isActive ? 'opacity-30' : 'opacity-0'
                             }`}
                           />
@@ -420,7 +435,7 @@ export function ProcessRoadmap() {
                         <motion.h3
                           className="mb-2 font-hanken text-xs font-bold uppercase tracking-wide text-white md:text-sm"
                           animate={{
-                            color: isActive ? '#FF5540' : '#ffffff',
+                            color: isActive ? '#FF0000' : '#ffffff',
                             scale: isActive ? 1.06 : 1,
                           }}
                           transition={isActive ? LABEL_EASE_IN : LABEL_EASE_OUT}
@@ -447,7 +462,7 @@ export function ProcessRoadmap() {
           </div>
 
           <div className="relative w-full px-5 pb-2 md:hidden">
-            <div className="pointer-events-none absolute top-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#FF5540]/10 blur-[100px]" />
+            <div className="pointer-events-none absolute top-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#FF0000]/10 blur-[100px]" />
 
             <ol className="relative z-10 mx-auto max-w-md space-y-0 pl-1">
               {/* Continuous coral spine — each step draws its segment on scroll */}
@@ -477,9 +492,9 @@ export function ProcessRoadmap() {
                           damping: 22,
                           delay: 0.06,
                         }}
-                        className="relative z-10 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-4 border-[#FF5540] bg-white shadow-[0_0_24px_rgba(255,85,64,0.25)]"
+                        className="relative z-10 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-4 border-[#FF0000] bg-white shadow-[0_0_24px_rgba(255,0,0,0.25)]"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#FF5540]/25 to-[#EE2E10]/10" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#FF0000]/25 to-[#C40000]/10" />
                         <step.icon
                           className="relative z-10 h-7 w-7 text-gray-800"
                           strokeWidth={2.5}
@@ -493,7 +508,7 @@ export function ProcessRoadmap() {
                           whileInView={{ scaleY: 1 }}
                           viewport={{ once: true, amount: 0.2 }}
                           transition={{ duration: 0.55, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                          className="mt-3 h-10 w-0.5 origin-top rounded-full bg-gradient-to-b from-[#FF5540] to-[#FF5540]/15"
+                          className="mt-3 h-10 w-0.5 origin-top rounded-full bg-gradient-to-b from-[#FF0000] to-[#FF0000]/15"
                           aria-hidden="true"
                         />
                       ) : null}
@@ -505,7 +520,7 @@ export function ProcessRoadmap() {
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.12, duration: 0.35 }}
-                        className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#FF5540]"
+                        className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#FF0000]"
                       >
                         Stage {String(index + 1).padStart(2, '0')}
                       </motion.p>

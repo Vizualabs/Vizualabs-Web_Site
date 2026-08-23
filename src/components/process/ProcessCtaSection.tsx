@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
-import { ShimmerButton } from '../ui/shimmer-button'
+import { LiveButton } from '../ui/live-button'
+import { Meteors } from '#/components/ui/meteors'
 
 export function ProcessCtaSection() {
   const navigate = useNavigate()
@@ -8,6 +9,7 @@ export function ProcessCtaSection() {
     <section className="relative z-20 w-full bg-[#131313] pt-0 pb-16 sm:pb-20 px-5 sm:px-8 lg:px-12 selection:bg-[#EE2E10] selection:text-white">
       <div className="mx-auto w-full max-w-7xl">
         <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3rem] bg-[#222222] px-6 py-16 sm:px-12 sm:py-20 md:px-16 md:py-24 text-center shadow-2xl">
+          <Meteors number={10} className="opacity-80" />
           <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-white/[0.03] blur-[80px]" />
 
           <div className="relative mx-auto max-w-3xl">
@@ -20,19 +22,9 @@ export function ProcessCtaSection() {
             </p>
 
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
-              <ShimmerButton
-                type="button"
-                onClick={() => navigate({ to: '/book' })}
-                background="#FF5540"
-                hoverBackground="#EE2E10"
-                shimmerColor="#FFD700"
-                textColor="text-zinc-950"
-                shimmerSize="0.15em"
-                shimmerDuration="2.5s"
-                className="px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-bold shadow-md shadow-[#FF5540]/20 hover:shadow-[#EE2E10]/30 transition-all duration-300"
-              >
-                <span>Get a Free Consultation</span>
-              </ShimmerButton>
+              <LiveButton type="button" onClick={() => navigate({ to: '/book' })}>
+                Get a Free Consultation
+              </LiveButton>
 
               <a
                 href="/case-study"

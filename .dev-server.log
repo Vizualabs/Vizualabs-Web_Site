@@ -1,0 +1,9 @@
+[2m11:39:29 AM[22m [36m[1m[vite][22m[39m ⬥ Netlify Environment loaded
+[2m11:39:29 AM[22m [36m[1m[vite][22m[39m ⬥ Netlify Middleware loaded. Emulating features: aiGateway, blobs, database, edgeFunctions, environmentVariables, functions, geolocation, headers, images, redirects, static.
+[2m11:39:29 AM[22m [36m[1m[vite][22m[39m ⬥ Netlify 💭 Linking this project to a Netlify site lets you deploy your site, use any environment variables defined on your team and site and much more. Run npx netlify init to get started.
+[2m11:39:30 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+
+  [32m[1mVITE[22m v8.2.1[39m  [2mready in [0m[1m7264[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m

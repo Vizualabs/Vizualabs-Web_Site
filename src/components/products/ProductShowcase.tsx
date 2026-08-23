@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { MagicCard } from '#/components/ui/magic-card'
-import { BorderBeam } from '#/components/ui/border-beam'
 import { BlurFade } from '#/components/ui/blur-fade'
 import { BentoGrid } from '#/components/ui/bento-grid'
 import { AnimatedBeam } from '#/components/ui/animated-beam'
@@ -266,13 +265,6 @@ function ProductSection({ product, index }: { product: Product; index: number })
                         <ProductVisual product={product} />
                       </div>
                     </Safari>
-                    <BorderBeam
-                      size={80}
-                      duration={9}
-                      delay={index * 0.6}
-                      colorFrom={product.accent}
-                      colorTo="#FF8A6B"
-                    />
                   </div>
                 </MagicCard>
               </div>

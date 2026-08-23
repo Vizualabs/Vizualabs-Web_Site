@@ -7,7 +7,6 @@ import {
   type EstimatePayload,
 } from '#/lib/assistant/estimate'
 import { BlobMascotIcon } from '#/components/chat/BlobMascotIcon'
-import { BorderBeam } from '#/components/ui/border-beam'
 import { BlurFade } from '#/components/ui/blur-fade'
 
 const MAX_LENGTH = 1500
@@ -231,14 +230,6 @@ export function ProjectEstimator() {
 
         {estimate ? (
           <div className="relative mt-6 overflow-hidden rounded-2xl border border-[#FF5E4D]/25 bg-[#FF5E4D]/[0.06] p-5 sm:p-6">
-            <BorderBeam
-              size={90}
-              duration={10}
-              colorFrom="#FF5E4D"
-              colorTo="#FF8A6B"
-              borderWidth={1.5}
-              className="opacity-70"
-            />
             {estimate.kind === 'clarify' ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-3">

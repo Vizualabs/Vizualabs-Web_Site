@@ -1,8 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
-import { BorderBeam } from '#/components/ui/border-beam'
-import { Meteors } from '#/components/ui/meteors'
-import { ShimmerButton } from '#/components/ui/shimmer-button'
+import { LiveButton } from '#/components/ui/live-button'
 import { BlurFade } from '#/components/ui/blur-fade'
+import { Meteors } from '#/components/ui/meteors'
 
 export function ProductsCta() {
   const navigate = useNavigate()
@@ -12,9 +11,7 @@ export function ProductsCta() {
       <div className="mx-auto w-full max-w-7xl">
         <BlurFade>
           <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3rem] bg-[#181818] px-6 py-16 sm:px-12 sm:py-20 md:px-16 md:py-24 text-center shadow-2xl border border-white/8">
-            <div className="pointer-events-none absolute inset-0 motion-reduce:hidden opacity-80">
-              <Meteors number={9} />
-            </div>
+            <Meteors number={10} className="opacity-80" />
             <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[36rem] rounded-full bg-[#FF5E4D]/10 blur-[90px]" />
 
             <div className="relative mx-auto max-w-3xl">
@@ -27,19 +24,12 @@ export function ProductsCta() {
               </p>
 
               <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
-                <ShimmerButton
+                <LiveButton
                   type="button"
                   onClick={() => navigate({ to: '/contact', hash: 'contact' })}
-                  background="#FF5540"
-                  hoverBackground="#EE2E10"
-                  shimmerColor="#FFD700"
-                  textColor="text-zinc-950"
-                  shimmerSize="0.15em"
-                  shimmerDuration="2.5s"
-                  className="px-6.5 sm:px-7.5 py-3 sm:py-3.5 text-sm sm:text-base font-bold shadow-md shadow-[#FF5540]/20 hover:shadow-[#EE2E10]/30 transition-all duration-300"
                 >
-                  <span>Book a product demo</span>
-                </ShimmerButton>
+                  Book a product demo
+                </LiveButton>
 
                 <a
                   href="/services"
@@ -49,8 +39,6 @@ export function ProductsCta() {
                 </a>
               </div>
             </div>
-
-            <BorderBeam size={100} duration={10} colorFrom="#FF5E4D" colorTo="#FF8A6B" />
           </div>
         </BlurFade>
       </div>

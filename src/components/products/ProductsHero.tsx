@@ -1,7 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { RetroGrid } from '#/components/ui/retro-grid'
-import { Meteors } from '#/components/ui/meteors'
 import { LiveButton } from '#/components/ui/live-button'
 import { TextReveal, FadeLine } from '#/components/ui/text-reveal'
 import { PRODUCTS } from '#/lib/products'
@@ -10,9 +9,6 @@ export function ProductsHero() {
   return (
     <section className="relative z-10 w-full min-h-[calc(100vh-5rem)] flex flex-col justify-center overflow-hidden bg-black text-white pt-36 sm:pt-40 md:pt-48 pb-16 sm:pb-24 px-5 sm:px-8 lg:px-12">
       <RetroGrid className="opacity-70" />
-      <div className="pointer-events-none absolute inset-0 motion-reduce:hidden">
-        <Meteors number={10} />
-      </div>
       <div
         aria-hidden
         className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 h-[28rem] w-[40rem] rounded-full bg-[#FF5E4D]/10 blur-[120px]"

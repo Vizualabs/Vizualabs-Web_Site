@@ -104,7 +104,12 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
             )}
 
             <form onSubmit={handleSendMessage} className="space-y-3">
+              <label htmlFor="assistant-message" className="sr-only">
+                Your message
+              </label>
               <textarea
+                id="assistant-message"
+                name="message"
                 rows={3}
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}

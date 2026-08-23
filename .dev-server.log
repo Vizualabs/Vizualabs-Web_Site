@@ -7,3 +7,5 @@
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
 [2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m12:25:31 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[Client] [vite] server connection lost. Polling for restart...

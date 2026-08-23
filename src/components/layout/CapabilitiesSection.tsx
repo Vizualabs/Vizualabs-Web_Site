@@ -12,7 +12,6 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { MagicCard } from '#/components/ui/magic-card'
-import { BorderBeam } from '#/components/ui/border-beam'
 import { BlurFade } from '#/components/ui/blur-fade'
 import { BentoGrid } from '#/components/ui/bento-grid'
 import { cn } from '#/lib/cn'
@@ -185,15 +184,6 @@ function CapabilityCardFace({
         </div>
       </MagicCard>
 
-      <BorderBeam
-        size={index % 2 === 0 ? 70 : 90}
-        duration={index % 2 === 0 ? 9 : 11}
-        delay={index * 0.35}
-        colorFrom="#FF5E4D"
-        colorTo="#FF8A6B"
-        borderWidth={1.5}
-        className="opacity-80 max-sm:opacity-60"
-      />
     </div>
   )
 }

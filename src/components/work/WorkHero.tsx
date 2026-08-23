@@ -1,7 +1,10 @@
 export function WorkHero() {
   return (
     <section className="relative w-full overflow-hidden bg-black px-5 pb-16 pt-32 sm:px-8 sm:pb-20 sm:pt-40 lg:px-12">
-      <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-[#FF5E4D]/[0.06] blur-[120px]" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 h-[28rem] w-[40rem] rounded-full bg-[#FF5E4D]/10 blur-[120px]"
+      />
       <div className="relative mx-auto max-w-4xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#FF5E4D]">Selected work</p>
         <h1 className="mt-4 font-hanken text-4xl font-bold tracking-tight text-[#E5E2E1] sm:text-5xl lg:text-6xl">

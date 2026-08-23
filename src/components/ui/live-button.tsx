@@ -10,7 +10,7 @@ type LiveButtonProps = {
 
 /**
  * Eldora-style live CTA — ripple ring + coral fill.
- * Primary booking actions; keep ShimmerButton for secondary CTAs.
+ * Primary booking / CTA actions across the site.
  */
 export function LiveButton({
   children,

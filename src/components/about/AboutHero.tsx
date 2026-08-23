@@ -1,9 +1,10 @@
 export function AboutHero() {
   return (
     <section className="relative w-full bg-[#0a0a0a] pt-32 pb-20 sm:pt-40 sm:pb-28 md:pt-48 md:pb-36 px-6 sm:px-10 lg:px-16 overflow-hidden selection:bg-[#FF5540] selection:text-white">
-      {/* Subtle ambient lighting */}
-      <div className="pointer-events-none absolute top-1/4 left-1/12 h-96 w-96 rounded-full bg-[#FF5540]/5 blur-[140px]" />
-      <div className="pointer-events-none absolute bottom-1/3 right-1/12 h-80 w-80 rounded-full bg-[#FF5540]/4 blur-[120px]" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 h-[28rem] w-[40rem] rounded-full bg-[#FF5E4D]/10 blur-[120px]"
+      />
 
       <div className="relative mx-auto max-w-7xl">
         {/* 'Our DNA' Badge */}

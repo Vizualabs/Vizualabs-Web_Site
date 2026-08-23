@@ -7,7 +7,6 @@ import {
   type EstimatePayload,
 } from '#/lib/assistant/estimate'
 import { BlobMascotIcon } from '#/components/chat/BlobMascotIcon'
-import { BorderBeam } from '#/components/ui/border-beam'
 import { BlurFade } from '#/components/ui/blur-fade'
 
 const MAX_LENGTH = 1500
@@ -187,7 +186,12 @@ export function ProjectEstimator() {
           onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 bg-[#141414] p-5 shadow-xl sm:p-6"
         >
+          <label htmlFor="estimate-description" className="sr-only">
+            Project description
+          </label>
           <textarea
+            id="estimate-description"
+            name="description"
             rows={4}
             value={description}
             onChange={(event) => setDescription(event.target.value.slice(0, MAX_LENGTH))}
@@ -231,14 +235,6 @@ export function ProjectEstimator() {
 
         {estimate ? (
           <div className="relative mt-6 overflow-hidden rounded-2xl border border-[#FF5E4D]/25 bg-[#FF5E4D]/[0.06] p-5 sm:p-6">
-            <BorderBeam
-              size={90}
-              duration={10}
-              colorFrom="#FF5E4D"
-              colorTo="#FF8A6B"
-              borderWidth={1.5}
-              className="opacity-70"
-            />
             {estimate.kind === 'clarify' ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -259,6 +255,7 @@ export function ProjectEstimator() {
                   </label>
                   <textarea
                     id="clarify-answer"
+                    name="clarifyAnswer"
                     ref={clarifyInputRef}
                     rows={3}
                     value={clarifyAnswer}
@@ -300,7 +297,12 @@ export function ProjectEstimator() {
                   ) : (
                     <form onSubmit={handleBrief} className="flex flex-col gap-2">
                       <div className="flex flex-col gap-2 sm:flex-row">
+                        <label htmlFor="estimate-name" className="sr-only">
+                          Your name
+                        </label>
                         <input
+                          id="estimate-name"
+                          name="name"
                           type="text"
                           required
                           value={name}
@@ -309,7 +311,12 @@ export function ProjectEstimator() {
                           autoComplete="name"
                           className="h-11 flex-1 rounded-xl border border-white/10 bg-black/40 px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#FF5E4D] focus:ring-1 focus:ring-[#FF5E4D]"
                         />
+                        <label htmlFor="estimate-email" className="sr-only">
+                          Work email
+                        </label>
                         <input
+                          id="estimate-email"
+                          name="email"
                           type="email"
                           required
                           value={email}

@@ -21,8 +21,12 @@ const SOURCE_WIDTH = 1280
 const CROPPED_SOURCE_HEIGHT = 1813
 
 // Performance budget: retina beyond 2x is imperceptible for a photo sequence,
-// and 1600px-tall bitmaps stay crisp up to ~1440p native displays.
+// and 1600px-tall bitmaps stay crisp up to ~1440p native displays. Phones get
+// a tighter cap — their smaller screens make 1.5x indistinguishable from 2x,
+// but it cuts the per-frame canvas fill (the VR-boy turn) by ~44% on 3x-DPR
+// handsets, which is the difference between a fluid turn and a stutter.
 const MAX_DPR = 2
+const MAX_DPR_PHONE = 1.5
 const MAX_BITMAP_HEIGHT = 1600
 
 // How many frames the horizontal mouse position can steer the subject by.
@@ -136,8 +140,12 @@ export function ScrollHeroSection() {
   // WebGL layer entirely so the image sequence remains responsive.
   const [lowPowerFire, setLowPowerFire] = useState(false)
   const [skipFire, setSkipFire] = useState(false)
+  // Resolved once on mount; the canvas size and the decoded bitmap size must
+  // agree, so the DPR cap is a stable ref rather than a per-frame read.
+  const dprCapRef = useRef(MAX_DPR)
   useEffect(() => {
     const phone = isPhoneDevice()
+    dprCapRef.current = phone ? MAX_DPR_PHONE : MAX_DPR
     setLowPowerFire(phone)
     setSkipFire(phone)
   }, [])
@@ -205,7 +213,7 @@ export function ScrollHeroSection() {
    * scroll-time draws are a same-size blit with zero resampling cost.
    */
   const getBitmapSize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCapRef.current)
     const upperBoundCssHeight = Math.max(
       window.innerHeight,
       window.screen?.height ?? 0
@@ -280,7 +288,7 @@ export function ScrollHeroSection() {
     if (!canvas) return
     const ctx = ensureContext()
     if (!ctx) return
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCapRef.current)
     // Force a fresh CSS-box read here (resize path) and cache it for the
     // per-frame draw path.
     viewSizeRef.current = {
@@ -309,7 +317,7 @@ export function ScrollHeroSection() {
     const bitmap = bitmapsRef.current[frameIndex - 1]
     if (!bitmap) return
 
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCapRef.current)
     const { width, height } = getViewSize()
 
     // Ensure physical canvas resolution matches the CSS box — never stretch.
@@ -621,7 +629,11 @@ export function ScrollHeroSection() {
    * as scroll lag. `scrollbar-gutter: stable` on <html> keeps the lock from
    * shifting layout.
    */
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the lock is applied synchronously with
+  // the DOM commit — before the browser ever paints the intro. With a deferred
+  // effect the page is briefly scrollable on a cold load, and the overlay's
+  // first frame can be scrolled away under the visitor.
+  useLayoutEffect(() => {
     if (!isLoading) return
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'

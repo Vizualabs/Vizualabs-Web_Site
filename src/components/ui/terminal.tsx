@@ -102,6 +102,12 @@ export function Terminal({
   const [counter, setCounter] = useState(0)
   const outputRef = useRef<HTMLDivElement>(null)
 
+  // Every completed line's tokenized output is cached by content — only the
+  // single line still being typed needs re-highlighting on a given tick.
+  // Without this, the 16ms interval re-ran the regex tokenizer over the
+  // entire revealed document on every tick (O(n^2) over the reveal).
+  const highlightCache = useRef(new Map<number, { text: string; nodes: ReturnType<typeof highlightLine> }>())
+
   useEffect(() => {
     if (!playing) return
 
@@ -125,9 +131,25 @@ export function Terminal({
     node.scrollTop = node.scrollHeight
   }, [counter])
 
+  useEffect(() => {
+    highlightCache.current.clear()
+  }, [trimmedCode])
+
   const shownChars = Math.min(trimmedCode.length, counter * CHARS_PER_TICK)
   const visibleCode = trimmedCode.slice(0, shownChars)
   const lines = visibleCode.split('\n')
+
+  const getHighlightedLine = (line: string, index: number) => {
+    const cached = highlightCache.current.get(index)
+    if (cached && cached.text === line) return cached.nodes
+    const nodes = highlightLine(line, `l${index}`)
+    // Only cache lines that are done growing — the last line is still being
+    // typed and its text changes on the very next tick.
+    if (index < lines.length - 1) {
+      highlightCache.current.set(index, { text: line, nodes })
+    }
+    return nodes
+  }
 
   const revealComplete = counter >= finalCount
 
@@ -186,7 +208,7 @@ export function Terminal({
             <div className="whitespace-pre font-mono text-[12px] leading-relaxed text-[#D4D4D4] sm:text-sm">
               {lines.map((line, i) => (
                 <div key={`code-${i}`}>
-                  {highlightLine(line, `l${i}`)}
+                  {getHighlightedLine(line, i)}
                   {i === lines.length - 1 ? <Cursor /> : null}
                 </div>
               ))}

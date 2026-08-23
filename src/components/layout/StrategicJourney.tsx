@@ -84,15 +84,20 @@ export function StrategicJourney() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [stepOffset, setStepOffset] = useState(0) // 0 = resting at slot 0, -1 = sliding forward, +1 = sliding backward
   const [isTransitioning, setIsTransitioning] = useState(true)
-  const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const wheelRef = useRef<HTMLDivElement>(null)
   const isLocked = useRef(false)
   const touchStartY = useRef(0)
   const touchStartTime = useRef(0)
   const wheelLockTimer = useRef<number | null>(null)
   const wheelDeltaAccumulator = useRef(0)
+  // Drag offset is applied straight to the DOM on every pointermove (see
+  // handlePointerMove) instead of through React state — at touch-drag
+  // frequency, re-rendering the whole wheel (icons, OrbitingCircles, text)
+  // per pixel of movement was the biggest source of mobile scroll/touch jank.
+  const dragOffsetRef = useRef(0)
 
   // Continuous forward wheel roll (1 -> 2 -> ... -> 9 -> 1 seamlessly)
   const rollNext = useCallback(() => {
@@ -106,7 +111,7 @@ export function StrategicJourney() {
       setIsTransitioning(false)
       setActiveIndex((prev) => (prev + 1) % steps.length)
       setStepOffset(0)
-      setDragOffset(0)
+      dragOffsetRef.current = 0
 
       // Re-enable smooth transition on next tick
       requestAnimationFrame(() => {
@@ -129,7 +134,7 @@ export function StrategicJourney() {
       setIsTransitioning(false)
       setActiveIndex((prev) => (prev - 1 + steps.length) % steps.length)
       setStepOffset(0)
-      setDragOffset(0)
+      dragOffsetRef.current = 0
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -187,7 +192,7 @@ export function StrategicJourney() {
     setIsDragging(true)
     touchStartY.current = e.clientY
     touchStartTime.current = performance.now()
-    setDragOffset(0)
+    dragOffsetRef.current = 0
     if (containerRef.current) {
       containerRef.current.setPointerCapture(e.pointerId)
     }
@@ -196,7 +201,13 @@ export function StrategicJourney() {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return
     const deltaY = e.clientY - touchStartY.current
-    setDragOffset(deltaY * 0.75)
+    dragOffsetRef.current = deltaY * 0.75
+    // Written straight to the DOM, bypassing React state/re-render — this
+    // handler can fire dozens of times per second while dragging.
+    const node = wheelRef.current
+    if (node) {
+      node.style.transform = `translateY(${(-1 + stepOffset) * ITEM_HEIGHT + dragOffsetRef.current}px)`
+    }
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -212,7 +223,7 @@ export function StrategicJourney() {
     } else if (deltaY > 35 || (deltaY > 15 && velocity > 0.35)) {
       rollPrev()
     } else {
-      setDragOffset(0)
+      dragOffsetRef.current = 0
     }
 
     if (containerRef.current && containerRef.current.hasPointerCapture(e.pointerId)) {
@@ -293,6 +304,7 @@ export function StrategicJourney() {
           >
             {/* Magnetically Translating Continuous Rotary Wheel */}
             <div
+              ref={wheelRef}
               className={`flex flex-col pt-6 sm:pt-8 pl-4 sm:pl-8 pr-2 sm:pr-4 will-change-transform ${
                 isDragging || !isTransitioning
                   ? 'transition-none'
@@ -300,7 +312,7 @@ export function StrategicJourney() {
               }`}
               style={{
                 transform: `translateY(${
-                  (-1 + stepOffset) * ITEM_HEIGHT + dragOffset
+                  (-1 + stepOffset) * ITEM_HEIGHT + dragOffsetRef.current
                 }px)`,
               }}
             >

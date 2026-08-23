@@ -23,6 +23,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [introLoading, setIntroLoading] = useState(true)
   const lastScrollY = useRef(0)
+  const scrollRafRef = useRef<number | null>(null)
 
   const routerState = useRouterState()
   const currentPath = routerState?.location?.pathname ?? ''
@@ -54,7 +55,8 @@ export function Navbar() {
   }, [currentPath])
 
   useEffect(() => {
-    const handleScroll = () => {
+    const updateFromScroll = () => {
+      scrollRafRef.current = null
       const currentScrollY = window.scrollY
       setScrolled(currentScrollY > 20)
 
@@ -80,11 +82,25 @@ export function Navbar() {
       }
     }
 
+    // Coalesce to one state update per animation frame — native 'scroll'
+    // events can fire faster than the browser paints, and every prior tick
+    // paid for a full read + potential re-render.
+    const handleScroll = () => {
+      if (scrollRafRef.current !== null) return
+      scrollRafRef.current = requestAnimationFrame(updateFromScroll)
+    }
+
     // Run on initial mount
-    handleScroll()
+    updateFromScroll()
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (scrollRafRef.current !== null) {
+        cancelAnimationFrame(scrollRafRef.current)
+        scrollRafRef.current = null
+      }
+    }
   }, [open])
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { animate, useInView, useReducedMotion } from 'motion/react'
 
 export interface NumberTickerProps {
@@ -35,13 +35,19 @@ export function NumberTicker({
   const ref = useRef<HTMLSpanElement>(null)
   const isInView = useInView(ref, { once: true, amount: 0.5 })
   const prefersReducedMotion = useReducedMotion()
-  const [display, setDisplay] = useState(prefersReducedMotion ? value : 0)
 
+  // Count-up writes straight to the text node on every tick instead of going
+  // through React state — at 60 updates/sec this used to trigger a component
+  // re-render for every frame of every ticker (3 run concurrently in the
+  // hero, right as the scroll-driven canvas is also painting).
   useEffect(() => {
+    const node = ref.current
+    if (!node) return
+
     if (!isInView) return
 
     if (prefersReducedMotion) {
-      setDisplay(value)
+      node.textContent = `${prefix}${value.toFixed(decimals)}${suffix}`
       return
     }
 
@@ -49,16 +55,22 @@ export function NumberTicker({
       duration,
       delay,
       ease: 'easeOut',
-      onUpdate: (latest) => setDisplay(latest),
+      onUpdate: (latest) => {
+        node.textContent = `${prefix}${latest.toFixed(decimals)}${suffix}`
+      },
     })
 
     return () => controls.stop()
-  }, [isInView, prefersReducedMotion, value, duration, delay])
+  }, [isInView, prefersReducedMotion, value, duration, delay, prefix, suffix, decimals])
 
   return (
-    <span ref={ref} className={className} style={{ fontVariantNumeric: 'tabular-nums' }}>
+    <span
+      ref={ref}
+      className={className}
+      style={{ fontVariantNumeric: 'tabular-nums' }}
+    >
       {prefix}
-      {display.toFixed(decimals)}
+      {(prefersReducedMotion ? value : 0).toFixed(decimals)}
       {suffix}
     </span>
   )

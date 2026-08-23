@@ -159,9 +159,23 @@ const extendedServices = [
 export function ServicesShowcase() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const isProgrammaticScroll = useRef(false)
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Pause the auto-scroll loop while the carousel is off-screen so the interval
+  // never competes with the user scrolling elsewhere on the page.
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.05 }
+    )
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
 
   // Initialize scroll position to the middle set (index 3 = Service 01)
   useEffect(() => {
@@ -286,16 +300,18 @@ export function ServicesShowcase() {
     }
   }, [])
 
-  // Automatic slide transition every 8 seconds in forward cycling
+  // Automatic slide transition every 8 seconds in forward cycling.
+  // Only runs while the section is visible (and not hovered) so the interval
+  // never fights the user's own scrolling / swiping off-screen.
   useEffect(() => {
-    if (isPaused) return
+    if (isPaused || !isVisible) return
 
     const interval = setInterval(() => {
       scrollToNext()
     }, 8000)
 
     return () => clearInterval(interval)
-  }, [isPaused, scrollToNext])
+  }, [isPaused, isVisible, scrollToNext])
 
   return (
     <section
@@ -340,7 +356,7 @@ export function ServicesShowcase() {
           // so child.offsetLeft picks up the section's px-3/6/8 padding and
           // every scrollTo() below lands short by that padding, leaving
           // slides permanently un-snapped with neighboring slides bleeding in.
-          className="relative flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 sm:gap-6 md:gap-8 pb-3 sm:pb-4 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-2xl touch-pan-x"
+          className="relative flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 sm:gap-6 md:gap-8 pb-3 sm:pb-4 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-2xl [touch-action:pan-x_pan-y]"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',

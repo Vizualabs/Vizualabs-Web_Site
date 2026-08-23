@@ -247,7 +247,7 @@ export function CapabilitiesSection() {
           ref={scrollContainerRef}
           className={cn(
             'lg:hidden flex gap-0 overflow-x-auto overscroll-x-contain scroll-smooth',
-            'snap-x snap-mandatory touch-pan-x',
+            'snap-x snap-mandatory [touch-action:pan-x_pan-y]',
             'pb-2 pt-1',
             '[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
           )}

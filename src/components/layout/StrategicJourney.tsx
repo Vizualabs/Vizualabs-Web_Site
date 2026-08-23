@@ -85,6 +85,7 @@ export function StrategicJourney() {
   const [stepOffset, setStepOffset] = useState(0) // 0 = resting at slot 0, -1 = sliding forward, +1 = sliding backward
   const [isTransitioning, setIsTransitioning] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const wheelRef = useRef<HTMLDivElement>(null)
@@ -188,6 +189,10 @@ export function StrategicJourney() {
 
   // Touch / Pointer Drag Gestures for Mobile & PC
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Touch scrolling the page is a more important gesture than the wheel
+    // drag — if the finger is a touch, let the browser scroll the page
+    // (the container is touch-action: pan-y) and keep the drag for mouse.
+    if (e.pointerType === 'touch') return
     if (isLocked.current) return
     setIsDragging(true)
     touchStartY.current = e.clientY
@@ -231,16 +236,30 @@ export function StrategicJourney() {
     }
   }
 
-  // Auto-cycle gently every 4.5s when stationary
+  // Track visibility so the auto-cycle can pause while the section is
+  // off-screen — the interval otherwise keeps firing during the user's scroll.
   useEffect(() => {
     if (isDragging) return
+    const container = containerRef.current
+    if (!container || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    )
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  // Auto-cycle gently every 4.5s when stationary (and on-screen)
+  useEffect(() => {
+    if (isDragging || !isVisible) return
 
     const interval = setInterval(() => {
       rollNext()
     }, 4500)
 
     return () => clearInterval(interval)
-  }, [isDragging, rollNext])
+  }, [isDragging, isVisible, rollNext])
 
   // Infinite Rotary Wheel Slots:
   // - slotOffset -1: Item above view
@@ -293,13 +312,13 @@ export function StrategicJourney() {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none ${
+            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-pan-y ${
               isDragging ? 'cursor-grabbing' : ''
             }`}
             style={{
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
-              touchAction: 'none',
+              touchAction: 'pan-y',
             }}
           >
             {/* Magnetically Translating Continuous Rotary Wheel */}

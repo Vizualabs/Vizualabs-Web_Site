@@ -192,6 +192,10 @@ export function ScrollHeroSection() {
   // Cached container geometry so scroll handler never forces layout.
   const geometryRef = useRef({ top: 0, height: 0 })
 
+  // Cached CSS view size of the canvas. clientWidth/clientHeight force layout,
+  // so we read them once per resize — never in the per-frame draw path.
+  const viewSizeRef = useRef({ width: 0, height: 0 })
+
   // RAF id for coalescing scroll updates to one calculation + draw per frame.
   const scrollRafRef = useRef<number | null>(null)
 
@@ -233,11 +237,18 @@ export function ScrollHeroSection() {
    * CSS box of the canvas — not window.innerHeight. On mobile, 100vh / h-screen
    * and the visual viewport disagree, and stretching a smaller bitmap into a
    * taller CSS box is what sliced the face with the silhouette mask.
+   *
+   * Reads from the cache populated by syncCanvasSize()/handleResize(); the
+   * raw read is only forced on resize, never inside the scroll-driven draw.
    */
   const getViewSize = () => {
+    if (viewSizeRef.current.width > 0 && viewSizeRef.current.height > 0) {
+      return viewSizeRef.current
+    }
     const canvas = canvasRef.current
     const width = canvas?.clientWidth || window.innerWidth
     const height = canvas?.clientHeight || window.innerHeight
+    viewSizeRef.current = { width, height }
     return { width, height }
   }
 
@@ -270,7 +281,13 @@ export function ScrollHeroSection() {
     const ctx = ensureContext()
     if (!ctx) return
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
-    const { width, height } = getViewSize()
+    // Force a fresh CSS-box read here (resize path) and cache it for the
+    // per-frame draw path.
+    viewSizeRef.current = {
+      width: canvas.clientWidth || window.innerWidth,
+      height: canvas.clientHeight || window.innerHeight,
+    }
+    const { width, height } = viewSizeRef.current
     const targetW = Math.round(width * dpr)
     const targetH = Math.round(height * dpr)
     if (canvas.width !== targetW || canvas.height !== targetH) {

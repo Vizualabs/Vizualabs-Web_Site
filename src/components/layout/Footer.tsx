@@ -73,10 +73,10 @@ export function Footer() {
 
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 pb-14 border-b border-white/10">
+        <div className="grid grid-cols-1 gap-12 pb-14 border-b border-white/10 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           
           {/* Column 1: Brand & Tagline */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 md:col-span-2 lg:col-span-2">
             <div>
               <a href="/" className="inline-block">
                 <h2 className="text-3xl sm:text-4xl font-bold font-hanken tracking-tight text-[#E5E2E1]">
@@ -151,8 +151,27 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                  <a href="/contact#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                <a href="/contact#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: LEGAL */}
+          <div className="space-y-4">
+            <h3 className="text-xs sm:text-sm font-normal font-geist tracking-wider text-[#FF5540] uppercase">
+              LEGAL
+            </h3>
+            <ul className="space-y-3 text-sm sm:text-base font-normal font-nimbus">
+              <li>
+                <a href="/privacy" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="/terms" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                  Terms of Service
                 </a>
               </li>
             </ul>
@@ -162,7 +181,7 @@ export function Footer() {
 
         {/* Bottom Sub-footer */}
         <div className="pt-8 text-center text-xs sm:text-sm text-[#EBBBB4]/60 font-medium font-nimbus tracking-wide">
-          <p>© {new Date().getFullYear()} Vizualabs. All rights reserved. Precision in Engineering, Strategic in Vision.</p>
+          <p>© {new Date().getFullYear()} Vizualabs (Pvt.) Ltd. All rights reserved. Precision in Engineering, Strategic in Vision.</p>
         </div>
       </div>
 

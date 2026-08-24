@@ -152,6 +152,8 @@ export function ContactSection() {
                 <div className="pt-0.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFB4A8]">Global Headquarters</p>
                   <address className="mt-1.5 not-italic text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
+                    <span className="font-medium text-[#E5E2E1]">Vizualabs (Pvt.) Ltd.</span>
+                    <br />
                     101 Silicon Valley Way, Suite 500
                     <br />
                     San Jose, CA 95110
@@ -166,11 +168,8 @@ export function ContactSection() {
                 <div className="pt-0.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFB4A8]">Communications</p>
                   <div className="mt-1.5 flex flex-col text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
-                    <a className="inline-block break-all py-2 -my-2 transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] sm:break-normal" href="mailto:strategy@vizualabs.tech">
-                      strategy@vizualabs.tech
-                    </a>
-                    <a className="inline-block break-all py-2 -my-2 transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] sm:break-normal" href="mailto:press@vizualabs.tech">
-                      press@vizualabs.tech
+                    <a className="inline-block break-all py-2 -my-2 transition-colors hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] sm:break-normal" href="mailto:info@vizualabs.com">
+                      info@vizualabs.com
                     </a>
                   </div>
                 </div>

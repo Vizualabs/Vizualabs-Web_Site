@@ -52,12 +52,12 @@ test.describe('branded loading screen', () => {
 
     await waitForIntroComplete(page)
 
-    // The recorded phase sequence proves it went through the reveal rather
-    // than simply disappearing.
+    // The loader stays opaque for warmup, then disappears directly. A third
+    // reveal phase would reintroduce the unwanted black transition layer.
     const phases = await page.evaluate(() => window.__introPhases ?? [])
     expect(phases[0]).toBe('intro')
-    expect(phases).toContain('revealing')
-    expect(phases.indexOf('revealing')).toBeGreaterThan(phases.indexOf('intro'))
+    expect(phases).toContain('warmup')
+    expect(phases).not.toContain('revealing')
 
     // ...and it handed off to a live hero.
     await expect(page.getByTestId('hero-canvas')).toBeVisible()
@@ -106,6 +106,23 @@ test.describe('branded loading screen', () => {
 
     await scrollBurst(page, 4, 200)
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  })
+
+  test('hands off directly to a clean hero without a black reveal layer', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+
+    await waitForIntroComplete(page)
+
+    const phases = await page.evaluate(() => window.__introPhases ?? [])
+    expect(phases).toContain('warmup')
+    expect(phases).not.toContain('revealing')
+    await expect(page.locator('.brand-intro-wipe')).toHaveCount(0)
+    await expect(page.getByTestId('hero-canvas')).toBeVisible()
+
+    const fire = page.getByTestId('blaze-effect-canvas')
+    await expect(fire).toHaveCSS('opacity', '1')
   })
 })
 

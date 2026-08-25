@@ -723,65 +723,6 @@
   }
 }
 
-/* --- Exit ----------------------------------------------------------------- */
-.brand-intro-revealing .brand-intro-base,
-.brand-intro-revealing .brand-intro-universe,
-.brand-intro-revealing .brand-intro-grain {
-  opacity: 0;
-  transition: none;
-}
-
-.brand-intro-stage-exit {
-  animation: brand-intro-stage-exit 420ms cubic-bezier(0.66, 0, 0.24, 1) forwards;
-}
-
-@keyframes brand-intro-stage-exit {
-  to {
-    opacity: 0;
-    transform: scale(1.08);
-    filter: blur(8px);
-  }
-}
-
-.brand-intro-wipe {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 52%;
-  background: #050505;
-  z-index: 5;
-}
-
-.brand-intro-wipe-top {
-  top: 0;
-  animation: brand-intro-wipe-up 880ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
-}
-
-.brand-intro-wipe-bottom {
-  bottom: 0;
-  animation: brand-intro-wipe-down 880ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
-}
-
-@keyframes brand-intro-wipe-up {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(-105%);
-  }
-}
-
-@keyframes brand-intro-wipe-down {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(105%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
 
   /* The canvas paints one static frame (universeCanvas.ts); the DOM scene
@@ -815,20 +756,6 @@
     filter: none !important;
   }
 
-  .brand-intro-stage-exit {
-    animation: brand-intro-fade-out 280ms ease forwards;
-  }
-
-  .brand-intro-wipe-top,
-  .brand-intro-wipe-bottom {
-    animation: brand-intro-fade-out 280ms ease forwards;
-  }
-}
-
-@keyframes brand-intro-fade-out {
-  to {
-    opacity: 0;
-  }
 }
 
 /* Returning visitor — the canvas paints one static frame; the DOM scene
@@ -860,11 +787,6 @@
 .brand-intro-fast .brand-intro-bar-fill {
   animation-duration: 0.01ms;
   animation-iteration-count: 1;
-}
-
-.brand-intro-fast.brand-intro-revealing .brand-intro-wipe-top,
-.brand-intro-fast.brand-intro-revealing .brand-intro-wipe-bottom {
-  animation-duration: 360ms;
 }
 
 /* ==========================================================================

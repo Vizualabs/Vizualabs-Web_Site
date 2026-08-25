@@ -1,14 +1,14 @@
 /**
  * Premium agency loader — deep-space universe.
  * A twinkling starfield and coral nebula drift behind a rim-lit planet with
- * an orbiting satellite; the wordmark ignites, then panels peel open to the
+ * an orbiting satellite; the wordmark ignites, then hands directly to the
  * hero. All space motion lives on one budget-capped 2D canvas (see
  * universeCanvas.ts); the DOM carries only the planet, orbits, and copy.
  */
 import { useEffect, useRef } from 'react'
-import { startUniverse, type UniverseHandle } from './universeCanvas'
+import { startUniverse } from './universeCanvas'
 
-export type IntroPhase = 'intro' | 'warmup' | 'revealing'
+export type IntroPhase = 'intro' | 'warmup'
 
 /** First-visit beat: stars settle in, wordmark ignites, hold for decode. */
 export const BRAND_INTRO_CHOREOGRAPHY_MS = 2000
@@ -21,9 +21,7 @@ export function BrandIntro({
   /** Returning session visitor — short branded fade, no full choreography. */
   fast?: boolean
 }) {
-  const revealing = phase === 'revealing'
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const universeRef = useRef<UniverseHandle | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -31,29 +29,20 @@ export function BrandIntro({
     const reducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     ).matches
-    universeRef.current = startUniverse(canvas, {
+    const universe = startUniverse(canvas, {
       staticFrame: fast || reducedMotion,
     })
-    return () => {
-      universeRef.current?.stop()
-      universeRef.current = null
-    }
+    return () => universe.stop()
   }, [fast])
-
-  // The wipe panels are opaque the moment the reveal begins — freezing the
-  // loop keeps the hidden canvas from burning frames behind them.
-  useEffect(() => {
-    if (revealing) universeRef.current?.freeze()
-  }, [revealing])
 
   return (
     <div
-      className={`fixed inset-0 z-[100] overflow-hidden${fast ? ' brand-intro-fast' : ''}${revealing ? ' brand-intro-revealing' : ''}`}
+      className={`fixed inset-0 z-[100] overflow-hidden${fast ? ' brand-intro-fast' : ''}`}
       data-testid="brand-intro"
       data-phase={phase}
       role="status"
       aria-live="polite"
-      aria-label={revealing ? 'Loading complete' : 'Loading Vizualabs'}
+      aria-label="Loading Vizualabs"
     >
       {/* Base plane — pure black void */}
       <div className="brand-intro-base absolute inset-0 bg-[#050505]" />
@@ -79,11 +68,7 @@ export function BrandIntro({
       <div className="brand-intro-grain pointer-events-none absolute inset-0 opacity-25" aria-hidden="true" />
 
       {/* ─── Planet Stage ─── */}
-      <div
-        className={`absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 ${
-          revealing ? 'brand-intro-stage-exit' : ''
-        }`}
-      >
+      <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center px-6">
         {/* Planet container — .brand-intro-core kept for test compat */}
         <div className="brand-intro-core brand-intro-planet relative flex h-36 w-36 items-center justify-center sm:h-44 sm:w-44">
           {/* Coral atmosphere — backlit halo from behind the planet */}
@@ -124,13 +109,6 @@ export function BrandIntro({
         </div>
       </div>
 
-      {/* Exit wipe — panels peel open */}
-      {revealing ? (
-        <>
-          <div className="brand-intro-wipe brand-intro-wipe-top" aria-hidden="true" />
-          <div className="brand-intro-wipe brand-intro-wipe-bottom" aria-hidden="true" />
-        </>
-      ) : null}
     </div>
   )
 }

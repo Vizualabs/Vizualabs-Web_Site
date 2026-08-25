@@ -104,14 +104,12 @@ const RETURN_INTRO_MS = 480
 
 const INTRO_SEEN_KEY = 'vlabs_intro_seen'
 
-// Beat between mounting the WebGL fire and starting the reveal. Shader compile
+// Beat between mounting the WebGL fire and showing the hero. Shader compile
 // and texture allocation are synchronous main-thread work; paying that cost
 // here — while the plane is still fully opaque — keeps it off the first scroll.
-const WARMUP_MS = 240
+const WARMUP_MS = 900
 
 // Must match the wipe animation duration in styles.css.
-const REVEAL_MS = 900
-
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -123,8 +121,7 @@ export function ScrollHeroSection() {
 
   // 'intro'     — opaque plane, core + wordmark, fire not yet mounted, scroll locked
   // 'warmup'    — still opaque, fire mounting behind it, scroll locked
-  // 'revealing' — panel wipe opening, scroll unlocked
-  // 'done'      — overlay unmounted
+  // 'done'      — overlay unmounted; the prepared hero appears immediately
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
 
   // Starts false to match SSR; flipped in an effect (client-only) so a
@@ -586,17 +583,11 @@ export function ScrollHeroSection() {
     return () => window.clearTimeout(timer)
   }, [phase, fastIntro])
 
-  // warmup -> revealing, giving the fire a beat to compile behind the plane.
+  // Warm up the prepared hero behind the fully opaque loader, then unmount the
+  // loader in one commit. There is no intermediate blur or black reveal layer.
   useEffect(() => {
     if (phase !== 'warmup') return
-    const timer = window.setTimeout(() => setPhase('revealing'), WARMUP_MS)
-    return () => window.clearTimeout(timer)
-  }, [phase])
-
-  // revealing -> done, unmounting the overlay after the wipe finishes.
-  useEffect(() => {
-    if (phase !== 'revealing') return
-    const timer = window.setTimeout(() => setPhase('done'), REVEAL_MS)
+    const timer = window.setTimeout(() => setPhase('done'), WARMUP_MS)
     return () => window.clearTimeout(timer)
   }, [phase])
 
@@ -651,7 +642,7 @@ export function ScrollHeroSection() {
 
   // The hero canvas only exists once Blaze mounts, so paint the current frame
   // as soon as it does — during 'warmup', while the plane is still opaque —
-  // guaranteeing a fully drawn hero the instant the wipe opens.
+  // guaranteeing a fully drawn hero the instant the loader unmounts.
   useEffect(() => {
     if (!fireMounted) return
     const raf = requestAnimationFrame(() => {
@@ -786,7 +777,7 @@ export function ScrollHeroSection() {
             overlaps it the way the reference composition does. It stays pinned
             for the whole sequence — no scroll fade — while its line-two
             marquee loops purely in CSS, decoupled from the frame draws. */}
-              <HeroTitle start={phase === 'revealing' || phase === 'done'} />
+              <HeroTitle start={phase !== 'intro'} />
 
               {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
               <canvas
@@ -912,6 +903,7 @@ export function ScrollHeroSection() {
           <Suspense fallback={null}>
           <Blaze
             paused={phase !== 'done'}
+            effectVisible={phase === 'done'}
             height={0.5}
             distortion={0.6}
             distortionScale={0.5}

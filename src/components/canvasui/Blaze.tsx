@@ -711,11 +711,19 @@ export interface BlazeProps extends BlazeOptions {
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  /** Hide only the rendered fire layer while keeping children mounted. */
+  effectVisible?: boolean;
 }
 
 const emptySubscribe = () => () => {};
 
-export function Blaze({ children, className, style, ...options }: BlazeProps) {
+export function Blaze({
+  children,
+  className,
+  style,
+  effectVisible = true,
+  ...options
+}: BlazeProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -792,12 +800,16 @@ export function Blaze({ children, className, style, ...options }: BlazeProps) {
       ) : null}
       <canvas
         ref={outputRef}
+        data-testid="blaze-effect-canvas"
         aria-hidden
         style={{
           position: "absolute",
           inset: 0,
           width: "100%",
           height: "100%",
+          opacity: effectVisible ? 1 : 0,
+          transition: "opacity 240ms ease-out",
+          transitionDelay: effectVisible ? "120ms" : "0ms",
           pointerEvents: "none",
         }}
       />

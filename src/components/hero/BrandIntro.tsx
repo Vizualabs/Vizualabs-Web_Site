@@ -1,11 +1,16 @@
 /**
- * Premium agency loader — red singularity / black hole vortex.
- * A swirling accretion disk of coral light spirals into a pulsing core,
- * then the wordmark ignites and panels peel open to the hero.
+ * Premium agency loader — deep-space universe.
+ * A twinkling starfield and coral nebula drift behind a rim-lit planet with
+ * an orbiting satellite; the wordmark ignites, then panels peel open to the
+ * hero. All space motion lives on one budget-capped 2D canvas (see
+ * universeCanvas.ts); the DOM carries only the planet, orbits, and copy.
  */
+import { useEffect, useRef } from 'react'
+import { startUniverse, type UniverseHandle } from './universeCanvas'
+
 export type IntroPhase = 'intro' | 'warmup' | 'revealing'
 
-/** First-visit beat: vortex spins up, wordmark ignites, hold for decode. */
+/** First-visit beat: stars settle in, wordmark ignites, hold for decode. */
 export const BRAND_INTRO_CHOREOGRAPHY_MS = 2000
 
 export function BrandIntro({
@@ -17,6 +22,29 @@ export function BrandIntro({
   fast?: boolean
 }) {
   const revealing = phase === 'revealing'
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const universeRef = useRef<UniverseHandle | null>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    universeRef.current = startUniverse(canvas, {
+      staticFrame: fast || reducedMotion,
+    })
+    return () => {
+      universeRef.current?.stop()
+      universeRef.current = null
+    }
+  }, [fast])
+
+  // The wipe panels are opaque the moment the reveal begins — freezing the
+  // loop keeps the hidden canvas from burning frames behind them.
+  useEffect(() => {
+    if (revealing) universeRef.current?.freeze()
+  }, [revealing])
 
   return (
     <div
@@ -30,6 +58,13 @@ export function BrandIntro({
       {/* Base plane — pure black void */}
       <div className="brand-intro-base absolute inset-0 bg-[#050505]" />
 
+      {/* Universe — starfield, coral nebula, shooting stars */}
+      <canvas
+        ref={canvasRef}
+        className="brand-intro-universe absolute inset-0 block h-full w-full"
+        aria-hidden="true"
+      />
+
       {/* Vignette — edges fall to absolute black */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -40,38 +75,37 @@ export function BrandIntro({
         aria-hidden="true"
       />
 
-      {/* Atmosphere layers */}
-      <div className="brand-intro-wash pointer-events-none absolute inset-0" aria-hidden="true" />
-      <div className="brand-intro-grid pointer-events-none absolute inset-0" aria-hidden="true" />
+      {/* Film grain — keeps the gradients from banding */}
       <div className="brand-intro-grain pointer-events-none absolute inset-0 opacity-25" aria-hidden="true" />
 
-      {/* ─── Singularity Stage ─── */}
+      {/* ─── Planet Stage ─── */}
       <div
         className={`absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 ${
           revealing ? 'brand-intro-stage-exit' : ''
         }`}
       >
-        {/* Vortex container — .brand-intro-core kept for test compat */}
-        <div className="brand-intro-core brand-intro-vortex relative flex h-36 w-36 items-center justify-center sm:h-44 sm:w-44">
-          {/* Accretion rings — spiral inward */}
-          <span className="brand-intro-ring brand-intro-ring-1" aria-hidden="true" />
-          <span className="brand-intro-ring brand-intro-ring-2" aria-hidden="true" />
-          <span className="brand-intro-ring brand-intro-ring-3" aria-hidden="true" />
-          <span className="brand-intro-ring brand-intro-ring-4" aria-hidden="true" />
+        {/* Planet container — .brand-intro-core kept for test compat */}
+        <div className="brand-intro-core brand-intro-planet relative flex h-36 w-36 items-center justify-center sm:h-44 sm:w-44">
+          {/* Coral atmosphere — backlit halo from behind the planet */}
+          <span className="brand-intro-atmosphere" aria-hidden="true" />
 
-          {/* Spiral arms — light streaks */}
-          <span className="brand-intro-arm brand-intro-arm-1" aria-hidden="true" />
-          <span className="brand-intro-arm brand-intro-arm-2" aria-hidden="true" />
-          <span className="brand-intro-arm brand-intro-arm-3" aria-hidden="true" />
-          <span className="brand-intro-arm brand-intro-arm-4" aria-hidden="true" />
+          {/* Outer orbit path — faint, reverse drift */}
+          <span className="brand-intro-orbit brand-intro-orbit-b" aria-hidden="true">
+            <span className="brand-intro-ring brand-intro-ring-2" />
+          </span>
 
-          {/* Singularity glow layers */}
-          <span className="brand-intro-singularity-glow-outer" aria-hidden="true" />
-          <span className="brand-intro-singularity-glow-mid" aria-hidden="true" />
-          <span className="brand-intro-singularity-glow-inner" aria-hidden="true" />
+          {/* The planet — dark sphere, starlight sheen */}
+          <span className="brand-intro-planet-sphere" aria-hidden="true" />
 
-          {/* The core — bright white-hot center */}
-          <span className="brand-intro-singularity-core" aria-hidden="true" />
+          {/* Hot crescent on the lit limb */}
+          <span className="brand-intro-crescent" aria-hidden="true" />
+
+          {/* Inner orbit path — glowing satellite circling the planet */}
+          <span className="brand-intro-orbit brand-intro-orbit-a" aria-hidden="true">
+            <span className="brand-intro-ring brand-intro-ring-1">
+              <i className="brand-intro-satellite" />
+            </span>
+          </span>
         </div>
 
         {/* Wordmark + tagline */}

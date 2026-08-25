@@ -87,6 +87,11 @@ export function startUniverse(
   let meteor: Meteor | null = null
   let nextMeteorAt = 0
   let lastT = 0
+  let lastPaintAt = 0
+
+  // The background moves slowly, so 30fps remains visually continuous while
+  // leaving every other browser frame free for hydration and hero decoding.
+  const minFrameInterval = 1000 / 30
 
   function buildNebula() {
     // Low-res offscreen: the nebula is pure soft gradient, so a 0.32x buffer
@@ -305,7 +310,10 @@ export function startUniverse(
   }
 
   function tick(t: number) {
-    draw(t)
+    if (!lastPaintAt || t - lastPaintAt >= minFrameInterval) {
+      lastPaintAt = t
+      draw(t)
+    }
     if (running) raf = requestAnimationFrame(tick)
   }
 
@@ -326,6 +334,7 @@ export function startUniverse(
       haltLoop()
     } else {
       lastT = 0
+      lastPaintAt = 0
       startLoop()
     }
   }

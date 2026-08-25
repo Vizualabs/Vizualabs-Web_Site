@@ -159,9 +159,33 @@ test.describe('initial-load scroll performance', () => {
 
     await bootLanding(page)
 
-    // Only the six <link rel=preload as=image> hints may use the image path;
+    // Only the four opening-frame preload hints may use the image path;
     // every other frame must arrive as a fetch.
-    expect(imageElementRequests.length).toBeLessThanOrEqual(6)
+    expect(imageElementRequests.length).toBeLessThanOrEqual(4)
+  })
+
+  test('moves hero pixel cleanup into a dedicated worker', async ({ page }) => {
+    const workerUrls: string[] = []
+    page.on('worker', (worker) => workerUrls.push(worker.url()))
+
+    await page.addInitScript(() => {
+      window.__mainThreadCanvasReadbacks = 0
+      const original = CanvasRenderingContext2D.prototype.getImageData
+      CanvasRenderingContext2D.prototype.getImageData = function (
+        this: CanvasRenderingContext2D,
+        ...args: Parameters<typeof original>
+      ) {
+        window.__mainThreadCanvasReadbacks!++
+        return original.apply(this, args)
+      }
+    })
+
+    await bootLanding(page, { withoutFire: true })
+
+    await expect
+      .poll(() => workerUrls.some((url) => url.includes('heroFrameWorker')))
+      .toBe(true)
+    expect(await page.evaluate(() => window.__mainThreadCanvasReadbacks)).toBe(0)
   })
 })
 

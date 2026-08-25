@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 're
 import { BrandIntro, BRAND_INTRO_CHOREOGRAPHY_MS, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
-import { keyHairBackdrop } from './keyHairBackdrop'
+import { createHeroFrameDecoder } from './heroFrameDecoder'
 import { NumberTicker } from '../ui/number-ticker'
 import { ErrorBoundary } from '../ErrorBoundary'
 
@@ -38,6 +38,11 @@ const MOUSE_TURN_RANGE = TOTAL_FRAMES - 1
 const MOBILE_MAX_WIDTH = 768
 const DESKTOP_SUBJECT_RATIO = 0.86
 const MOBILE_SUBJECT_RATIO = 0.64
+
+// Stable option values keep Blaze from restarting its render loop on each
+// intro phase change merely because React produced a new array reference.
+const FIRE_SPARK_COLOR: [number, number, number] = [1, 0, 0]
+const FIRE_SMOKE_COLOR: [number, number, number] = [0.6, 0, 0]
 
 // Desktop keeps the original 0.1 lerp. Mobile uses a shorter time constant so
 // the turn tracks the finger instead of swimming behind the scroll.
@@ -421,6 +426,12 @@ export function ScrollHeroSection() {
   useEffect(() => {
     let cancelled = false
     const { width: bmpW, height: bmpH } = getBitmapSize()
+    const decoder = createHeroFrameDecoder({
+      sourceWidth: SOURCE_WIDTH,
+      sourceHeight: CROPPED_SOURCE_HEIGHT,
+      targetWidth: bmpW,
+      targetHeight: bmpH,
+    })
     const bitmaps: (ImageBitmap | undefined)[] = new Array(TOTAL_FRAMES)
     bitmapsRef.current = bitmaps
     let completed = 0
@@ -444,46 +455,12 @@ export function ScrollHeroSection() {
     }
     const totalToLoad = phase1Indices.length + tailIndices.length
 
-    /**
-     * Decode a frame entirely OFF the main thread.
-     *
-     * The old pipeline went through an HTMLImageElement, whose decode is
-     * charged to the main thread and lands in the middle of the user's first
-     * scroll. Handing a Blob straight to createImageBitmap lets the browser
-     * decode, crop and downscale on a worker thread, so streaming the tail of
-     * the sequence can no longer stall scroll-driven canvas draws.
-     */
+    /** Fetch on the network thread, then decode and key pixels in our worker. */
     const decodeFrame = async (frameIndex: number): Promise<ImageBitmap> => {
       const response = await fetch(heroFrameUrl(frameIndex))
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const blob = await response.blob()
-
-      try {
-        // Crop (0,0,1280,1813) and resize to display resolution in one step.
-        // 'medium' filtering: this is only a ~0.9x downscale, so it looks
-        // identical to 'high' but costs a fraction of the CPU.
-        const bitmap = await createImageBitmap(
-          blob,
-          0,
-          0,
-          SOURCE_WIDTH,
-          CROPPED_SOURCE_HEIGHT,
-          { resizeWidth: bmpW, resizeHeight: bmpH, resizeQuality: 'medium' }
-        )
-        try {
-          return await keyHairBackdrop(bitmap)
-        } catch {
-          return bitmap
-        }
-      } catch {
-        // Engines without crop/resize options still give us a usable bitmap.
-        const bitmap = await createImageBitmap(blob)
-        try {
-          return await keyHairBackdrop(bitmap)
-        } catch {
-          return bitmap
-        }
-      }
+      return decoder.decode(blob)
     }
 
     const prepareFrame = async (frameIndex: number) => {
@@ -576,6 +553,7 @@ export function ScrollHeroSection() {
     return () => {
       cancelled = true
       if (tailTimer !== undefined) window.clearTimeout(tailTimer)
+      decoder.dispose()
       // Release GPU textures on unmount.
       for (const bitmap of bitmaps) bitmap?.close()
       bitmapsRef.current = []
@@ -933,6 +911,7 @@ export function ScrollHeroSection() {
           <ErrorBoundary fallback={null}>
           <Suspense fallback={null}>
           <Blaze
+            paused={phase !== 'done'}
             height={0.5}
             distortion={0.6}
             distortionScale={0.5}
@@ -943,9 +922,9 @@ export function ScrollHeroSection() {
             layers={lowPowerFire ? 2 : 4}
             smoke={lowPowerFire ? 0.8 : 1.3}
             glow={lowPowerFire ? 2.2 : 3.2}
-            maxDpr={lowPowerFire ? 1 : 2}
-            sparkColor={[1, 0, 0]}
-            smokeColor={[0.6, 0, 0]}
+            maxDpr={lowPowerFire ? 0.75 : 0.8}
+            sparkColor={FIRE_SPARK_COLOR}
+            smokeColor={FIRE_SMOKE_COLOR}
             style={{ position: 'absolute', inset: 0 }}
           >
             {heroOverlayContent}

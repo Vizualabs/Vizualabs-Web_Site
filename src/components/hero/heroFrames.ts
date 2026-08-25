@@ -15,4 +15,4 @@ export const heroFrameUrl = (frameIndex: number) =>
  * without crowding out the stylesheet and route bundle on a cold connection —
  * the remaining frames stream in over fetch once the route JS runs.
  */
-export const HERO_PRELOAD_FRAMES = [1, 2, 3, 4, 5, 6]
+export const HERO_PRELOAD_FRAMES = [1, 2, 3, 4]

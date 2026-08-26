@@ -1,4 +1,12 @@
-import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  Suspense,
+  lazy,
+  startTransition,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { BrandIntro, BRAND_INTRO_CHOREOGRAPHY_MS, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
@@ -93,10 +101,10 @@ const TAIL_START_DELAY_MS = 2500
 // The branded intro runs for at least this long so it reads as an intentional
 // animation rather than a flash. Frame decoding happens underneath it, so on
 // a warm cache this is the only thing gating the reveal. Floored to the
-// wordmark's own choreography length (plus a small settle beat) so the phase
+// wordmark's own choreography length so the phase
 // change can never fire before the last letter finishes fading in — that
 // mismatch used to cut the trailing letters off mid-animation.
-const MIN_INTRO_MS = BRAND_INTRO_CHOREOGRAPHY_MS + 100
+const MIN_INTRO_MS = BRAND_INTRO_CHOREOGRAPHY_MS
 
 // A visitor who has already seen the full intro once this session gets this
 // instead — just enough for a clean branded fade, not the whole choreography.
@@ -107,9 +115,27 @@ const INTRO_SEEN_KEY = 'vlabs_intro_seen'
 // Beat between mounting the WebGL fire and showing the hero. Shader compile
 // and texture allocation are synchronous main-thread work; paying that cost
 // here — while the plane is still fully opaque — keeps it off the first scroll.
-const WARMUP_MS = 900
+const WARMUP_MS = 400
 
-// Must match the wipe animation duration in styles.css.
+type IdleWindow = Window & {
+  requestIdleCallback?: (
+    callback: () => void,
+    options?: { timeout: number }
+  ) => number
+  cancelIdleCallback?: (handle: number) => void
+}
+
+/** Run startup work after the browser has delivered its first visual frames. */
+const scheduleIdle = (callback: () => void, timeout: number) => {
+  const idleWindow = window as IdleWindow
+  if (idleWindow.requestIdleCallback) {
+    const handle = idleWindow.requestIdleCallback(callback, { timeout })
+    return () => idleWindow.cancelIdleCallback?.(handle)
+  }
+  const handle = window.setTimeout(callback, 120)
+  return () => window.clearTimeout(handle)
+}
+
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -123,6 +149,7 @@ export function ScrollHeroSection() {
   // 'warmup'    — still opaque, fire mounting behind it, scroll locked
   // 'done'      — overlay unmounted; the prepared hero appears immediately
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
+  const [heroPrepared, setHeroPrepared] = useState(false)
 
   // Starts false to match SSR; flipped in an effect (client-only) so a
   // returning visitor never renders a mismatched first frame during
@@ -152,12 +179,14 @@ export function ScrollHeroSection() {
     setSkipFire(phone)
   }, [])
 
-  // Start fetching the Blaze chunk immediately, in parallel with the frame
-  // decode pipeline, so the lazy import resolves well before 'warmup' asks
-  // for it. Phones never mount Blaze, so prefetching it would waste bandwidth.
+  // Fetch the Blaze chunk after the first loader frame has painted. It still
+  // resolves well before warmup, without competing with initial hydration.
+  // Phones never mount Blaze, so prefetching it would waste bandwidth.
   useEffect(() => {
     if (isPhoneDevice()) return
-    void import('../canvasui/Blaze')
+    return scheduleIdle(() => {
+      void import('../canvasui/Blaze')
+    }, 800)
   }, [])
 
   // Communicate loading state so the navbar is completely hidden during intro.
@@ -181,7 +210,8 @@ export function ScrollHeroSection() {
       window.dispatchEvent(new CustomEvent('intro-loading-state', { detail: { loading: false } }))
     }
   }, [isLoading])
-  // The canvas lives inside Blaze, so it only exists from 'warmup' onward.
+  // The lightweight hero shell and title stay mounted behind the loader. The
+  // prepared scene and decorative fire are staged separately.
   const fireMounted = phase !== 'intro'
 
   // Track last rendered frame index to avoid unnecessary redrawing
@@ -417,18 +447,13 @@ export function ScrollHeroSection() {
    * PRELOAD PIPELINE
    * Each frame is decoded exactly ONCE, cropped to the subject area and
    * downscaled to display resolution via createImageBitmap (runs off the main
-   * thread in modern browsers). The first few frames start immediately; the
-   * remaining sequence streams in after the intro so startup stays responsive.
+   * thread in modern browsers). The first few frames start after first paint;
+   * the remaining sequence streams later so startup stays responsive.
    */
   useEffect(() => {
     let cancelled = false
     const { width: bmpW, height: bmpH } = getBitmapSize()
-    const decoder = createHeroFrameDecoder({
-      sourceWidth: SOURCE_WIDTH,
-      sourceHeight: CROPPED_SOURCE_HEIGHT,
-      targetWidth: bmpW,
-      targetHeight: bmpH,
-    })
+    let decoder: ReturnType<typeof createHeroFrameDecoder> | null = null
     const bitmaps: (ImageBitmap | undefined)[] = new Array(TOTAL_FRAMES)
     bitmapsRef.current = bitmaps
     let completed = 0
@@ -457,6 +482,7 @@ export function ScrollHeroSection() {
       const response = await fetch(heroFrameUrl(frameIndex))
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const blob = await response.blob()
+      if (!decoder) throw new Error('Hero frame decoder is not ready')
       return decoder.decode(blob)
     }
 
@@ -485,6 +511,10 @@ export function ScrollHeroSection() {
       // Defer to the next animation frame so the decode callback doesn't
       // steal main-thread time from the scroll handler.
       if (frameIndex === 1) {
+        // Mount the canvas and supporting hero UI only after its first frame is
+        // ready. A transition lets React yield to the visible loader while it
+        // builds that hidden subtree.
+        startTransition(() => setHeroPrepared(true))
         requestAnimationFrame(() => drawFrame(1))
       }
 
@@ -539,18 +569,28 @@ export function ScrollHeroSection() {
     // is off-thread now, so the remaining main-thread cost is negligible; the
     // macrotask yield stays as a cheap guarantee that scroll/rAF work always
     // gets a turn between frames.
-    void (async () => {
-      await runPhase(phase1Indices, LOAD_CONCURRENCY, false)
+    const cancelStartup = scheduleIdle(() => {
       if (cancelled) return
-      tailTimer = window.setTimeout(() => {
-        if (!cancelled) void runPhase(tailIndices, STREAM_CONCURRENCY, true)
-      }, TAIL_START_DELAY_MS)
-    })()
+      decoder = createHeroFrameDecoder({
+        sourceWidth: SOURCE_WIDTH,
+        sourceHeight: CROPPED_SOURCE_HEIGHT,
+        targetWidth: bmpW,
+        targetHeight: bmpH,
+      })
+      void (async () => {
+        await runPhase(phase1Indices, LOAD_CONCURRENCY, false)
+        if (cancelled) return
+        tailTimer = window.setTimeout(() => {
+          if (!cancelled) void runPhase(tailIndices, STREAM_CONCURRENCY, true)
+        }, TAIL_START_DELAY_MS)
+      })()
+    }, 500)
 
     return () => {
       cancelled = true
+      cancelStartup()
       if (tailTimer !== undefined) window.clearTimeout(tailTimer)
-      decoder.dispose()
+      decoder?.dispose()
       // Release GPU textures on unmount.
       for (const bitmap of bitmaps) bitmap?.close()
       bitmapsRef.current = []
@@ -578,6 +618,8 @@ export function ScrollHeroSection() {
     const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
     const timer = window.setTimeout(() => {
       sessionStorage.setItem(INTRO_SEEN_KEY, '1')
+      // Network or decoder failures must never leave the hero shell missing.
+      startTransition(() => setHeroPrepared(true))
       setPhase('warmup')
     }, minMs)
     return () => window.clearTimeout(timer)
@@ -615,36 +657,38 @@ export function ScrollHeroSection() {
   // cannot drift from the subject on mobile viewports.
   useEffect(() => {
     let cancelled = false
-    void fetch('/hero-subject-mask.png')
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.blob()
-      })
-      .then((blob) => createImageBitmap(blob))
-      .then((bitmap) => {
-        if (cancelled) {
-          bitmap.close()
-          return
-        }
-        maskBitmapRef.current = bitmap
-        drawFrame(currentFrameRef.current)
-      })
-      .catch(() => {
-        // Frames still paint; without the matte the heading stays covered.
-      })
+    const cancelStartup = scheduleIdle(() => {
+      void fetch('/hero-subject-mask.png')
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          return response.blob()
+        })
+        .then((blob) => createImageBitmap(blob))
+        .then((bitmap) => {
+          if (cancelled) {
+            bitmap.close()
+            return
+          }
+          maskBitmapRef.current = bitmap
+          drawFrame(currentFrameRef.current)
+        })
+        .catch(() => {
+          // Frames still paint; without the matte the heading stays covered.
+        })
+    }, 600)
 
     return () => {
       cancelled = true
+      cancelStartup()
       maskBitmapRef.current?.close()
       maskBitmapRef.current = null
     }
   }, [])
 
-  // The hero canvas only exists once Blaze mounts, so paint the current frame
-  // as soon as it does — during 'warmup', while the plane is still opaque —
-  // guaranteeing a fully drawn hero the instant the loader unmounts.
+  // The initial listener setup runs before the deferred canvas exists. Paint
+  // immediately when React finishes the non-urgent hero preparation commit.
   useEffect(() => {
-    if (!fireMounted) return
+    if (!heroPrepared) return
     const raf = requestAnimationFrame(() => {
       syncCanvasSize()
       const target = readScrollFrame()
@@ -656,7 +700,7 @@ export function ScrollHeroSection() {
       drawFrame(currentFrameRef.current)
     })
     return () => cancelAnimationFrame(raf)
-  }, [fireMounted])
+  }, [heroPrepared])
 
   // Attach scroll & resize listeners
   useEffect(() => {
@@ -777,8 +821,13 @@ export function ScrollHeroSection() {
             overlaps it the way the reference composition does. It stays pinned
             for the whole sequence — no scroll fade — while its line-two
             marquee loops purely in CSS, decoupled from the frame draws. */}
-              <HeroTitle start={phase !== 'intro'} />
+              {/* Run the title entrance behind the opaque loader. It is fully
+                  settled before the direct handoff, so no animation setup lands
+                  on the hero's first visible frame. */}
+              <HeroTitle start />
 
+              {heroPrepared && (
+              <>
               {/* HTML5 Canvas for ultra-smooth image sequence rendering */}
               <canvas
                 ref={canvasRef}
@@ -869,6 +918,8 @@ export function ScrollHeroSection() {
                   </div>
                 </div>
               </div>
+              </>
+              )}
 
             </div>
   )
@@ -885,6 +936,10 @@ export function ScrollHeroSection() {
         style={{ willChange: 'transform' }}
       >
 
+        {/* Mount the lightweight hero shell behind the loader immediately. The
+            rest joins in a non-urgent transition once frame 1 is ready. */}
+        {heroOverlayContent}
+
         {/* Blaze fire — only on the hero, burning from the bottom to the
             middle of the screen (height = 0.5 of the viewport). Mounts at the
             'warmup' beat: late enough that its WebGL setup never competes with
@@ -895,10 +950,7 @@ export function ScrollHeroSection() {
              Desktop gets the full fire treatment. Phones skip the shader's
              per-pixel noise work entirely — the scroll-driven hero still
              renders in full underneath. */}
-        {fireMounted && (
-          skipFire ? (
-            heroOverlayContent
-          ) : (
+        {fireMounted && !skipFire && (
           <ErrorBoundary fallback={null}>
           <Suspense fallback={null}>
           <Blaze
@@ -919,11 +971,10 @@ export function ScrollHeroSection() {
             smokeColor={FIRE_SMOKE_COLOR}
             style={{ position: 'absolute', inset: 0 }}
           >
-            {heroOverlayContent}
+            <span className="block h-full w-full" aria-hidden="true" />
           </Blaze>
           </Suspense>
           </ErrorBoundary>
-          )
         )}
 
         {/* Branded intro — rendered outside Blaze so the plane stays a clean

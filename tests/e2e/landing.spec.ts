@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { devices, expect, test } from '@playwright/test'
 import {
   bootLanding,
   instrument,
@@ -123,6 +123,55 @@ test.describe('branded loading screen', () => {
 
     const fire = page.getByTestId('blaze-effect-canvas')
     await expect(fire).toHaveCSS('opacity', '1')
+  })
+
+  test('keeps the main thread responsive while the loader prepares the hero', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const from = await nowInPage(page)
+    await waitForIntroComplete(page)
+    const to = await nowInPage(page)
+
+    const stats = await longTasksBetween(page, from, to)
+    // eslint-disable-next-line no-console
+    console.log(
+      `[loader] n=${stats.count} worst=${stats.worst.toFixed(0)}ms ` +
+        `tbt=${stats.totalBlocking.toFixed(0)}ms (${stats.blockingPerSecond.toFixed(0)}ms/s)`
+    )
+
+    expect(stats.worst).toBeLessThan(BUDGET.worstLongTaskMs)
+    expect(stats.blockingPerSecond).toBeLessThan(BUDGET.blockingPerSecondMs)
+  })
+})
+
+test.describe('mobile branded loading screen', () => {
+  const mobile = devices['Pixel 5']
+  test.use({
+    viewport: mobile.viewport,
+    deviceScaleFactor: mobile.deviceScaleFactor,
+    isMobile: mobile.isMobile,
+    hasTouch: mobile.hasTouch,
+    userAgent: mobile.userAgent,
+  })
+
+  test('keeps startup responsive and hands directly to the hero', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const from = await nowInPage(page)
+    await expect(page.getByTestId('brand-intro')).toBeVisible()
+    await waitForIntroComplete(page)
+    const to = await nowInPage(page)
+
+    const phases = await page.evaluate(() => window.__introPhases ?? [])
+    expect(phases).toContain('warmup')
+    expect(phases).not.toContain('revealing')
+    await expect(page.getByTestId('hero-canvas')).toBeVisible()
+
+    const stats = await longTasksBetween(page, from, to)
+    expect(stats.worst).toBeLessThan(BUDGET.worstLongTaskMs)
+    expect(stats.blockingPerSecond).toBeLessThan(BUDGET.blockingPerSecondMs)
   })
 })
 

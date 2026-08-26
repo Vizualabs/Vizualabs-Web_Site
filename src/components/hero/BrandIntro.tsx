@@ -5,8 +5,8 @@
  * hero. All space motion lives on one budget-capped 2D canvas (see
  * universeCanvas.ts); the DOM carries only the planet, orbits, and copy.
  */
-import { useEffect, useRef } from 'react'
-import { startUniverse } from './universeCanvas'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { startUniverse, type UniverseHandle } from './universeCanvas'
 
 export type IntroPhase = 'intro' | 'warmup'
 
@@ -22,6 +22,7 @@ export function BrandIntro({
   fast?: boolean
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const universeRef = useRef<UniverseHandle | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -32,8 +33,20 @@ export function BrandIntro({
     const universe = startUniverse(canvas, {
       staticFrame: fast || reducedMotion,
     })
-    return () => universe.stop()
+    universeRef.current = universe
+    return () => {
+      universe.stop()
+      if (universeRef.current === universe) universeRef.current = null
+    }
   }, [fast])
+
+  // WebGL shader compilation and any remaining hero preparation happen during
+  // warmup. Freeze the universe's final frame before passive effects run, so
+  // those one-time GPU costs cannot steal frames from the visible loader.
+  // The planet, orbit, wordmark and progress sweep keep animating in CSS.
+  useLayoutEffect(() => {
+    if (phase === 'warmup') universeRef.current?.freeze()
+  }, [phase])
 
   return (
     <div

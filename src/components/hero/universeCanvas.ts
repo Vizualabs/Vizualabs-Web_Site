@@ -197,7 +197,9 @@ export function startUniverse(
     const rect = canvas.getBoundingClientRect()
     width = Math.max(1, rect.width)
     height = Math.max(1, rect.height)
-    const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 2)
+    // Tiny stars do not benefit from a full retina backing store. This removes
+    // millions of invisible pixels while preserving the same CSS-size scene.
+    const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.25 : 1.5)
     canvas.width = Math.round(width * dpr)
     canvas.height = Math.round(height * dpr)
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)

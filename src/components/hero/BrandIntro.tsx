@@ -32,6 +32,8 @@ export function BrandIntro({
     ).matches
     const universe = startUniverse(canvas, {
       staticFrame: fast || reducedMotion,
+      // Fast/reduced sessions skip the starfield fade — instant static frame.
+      fadeIn: !fast && !reducedMotion,
     })
     universeRef.current = universe
     return () => {

@@ -460,10 +460,11 @@
    Brand intro — deep-space universe, rim-lit planet + panel wipe
    ========================================================================== */
 
-/* Starfield canvas — fades in over the void, motion lives in universeCanvas.ts */
+/* Starfield canvas — starts transparent; universeCanvas.ts fades it in from
+   JS only after its first painted frame, so the nebula/stars never pop in
+   mid-fade over the black base (which is what a paint-time CSS fade did). */
 .brand-intro-universe {
   opacity: 0;
-  animation: brand-intro-fade-in 1.2s ease 0.05s forwards;
   contain: strict;
 }
 

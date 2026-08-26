@@ -64,7 +64,7 @@ const isPhoneDevice = () =>
 
 export function startUniverse(
   canvas: HTMLCanvasElement,
-  { staticFrame = false }: { staticFrame?: boolean } = {},
+  { staticFrame = false, fadeIn = true }: { staticFrame?: boolean; fadeIn?: boolean } = {},
 ): UniverseHandle {
   const maybeCtx = canvas.getContext('2d')
   const noop: UniverseHandle = { freeze: () => {}, stop: () => {} }
@@ -311,10 +311,27 @@ export function startUniverse(
     ctx.globalAlpha = 1
   }
 
+  /**
+   * Fade the canvas in ONLY after its first real frame has been painted.
+   * A CSS-driven fade starts ticking at page paint while the canvas is still
+   * blank (pre-hydration), so the stars and nebula pop in mid-fade like a
+   * switch. Driving the fade from here keeps content and fade in lockstep.
+   */
+  let revealed = false
+  function revealCanvas() {
+    if (revealed) return
+    revealed = true
+    if (fadeIn) {
+      canvas.style.transition = 'opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1)'
+    }
+    canvas.style.opacity = '1'
+  }
+
   function tick(t: number) {
     if (!lastPaintAt || t - lastPaintAt >= minFrameInterval) {
       lastPaintAt = t
       draw(t)
+      revealCanvas()
     }
     if (running) raf = requestAnimationFrame(tick)
   }
@@ -355,6 +372,7 @@ export function startUniverse(
   if (staticFrame) {
     // Reduced motion / returning visitor: one painted frame, zero loop.
     draw(937)
+    revealCanvas()
   } else {
     startLoop()
     document.addEventListener('visibilitychange', onVisibility)
@@ -363,6 +381,8 @@ export function startUniverse(
 
   return {
     freeze() {
+      // Halt the loop only — the last painted frame stays up until the loader
+      // unmounts, so the stars never vanish in a hard cut before the handoff.
       haltLoop()
     },
     stop() {

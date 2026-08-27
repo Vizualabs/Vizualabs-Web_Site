@@ -9,7 +9,11 @@ import {
 } from 'react'
 import { BrandIntro, BRAND_INTRO_CHOREOGRAPHY_MS, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
-import { TOTAL_FRAMES, heroFrameUrl } from './heroFrames'
+import {
+  HERO_PRELOAD_FRAMES,
+  TOTAL_FRAMES,
+  heroFrameUrl,
+} from './heroFrames'
 import { createHeroFrameDecoder } from './heroFrameDecoder'
 import { NumberTicker } from '../ui/number-ticker'
 import { ErrorBoundary } from '../ErrorBoundary'
@@ -91,12 +95,24 @@ const LOAD_CONCURRENCY = 4
 // user's first scroll and can run wider than the old serialized pipeline.
 const STREAM_CONCURRENCY = 2
 
-// Only gate the intro on the first few frames. The rest can stream while the
-// visitor is already on the page; findReadyFrame() supplies a nearby fallback.
-const REVEAL_THRESHOLD = 4
+// Prepare a sparse turn across the full sequence before filling its gaps. This
+// makes the VR subject respond across its complete range immediately after the
+// intro instead of clamping to frame 4 until the sequential tail catches up.
+const INTERACTION_FRAME_STEP = 15
+const INTERACTION_READY_FRAMES = Array.from(
+  new Set([
+    ...HERO_PRELOAD_FRAMES,
+    ...Array.from(
+      { length: Math.ceil((TOTAL_FRAMES - 1) / INTERACTION_FRAME_STEP) + 1 },
+      (_, index) =>
+        Math.min(1 + index * INTERACTION_FRAME_STEP, TOTAL_FRAMES)
+    ),
+  ])
+)
 
-// Let the first-paint path settle before decoding the rest of the sequence.
-const TAIL_START_DELAY_MS = 2500
+// Let the interaction-ready pass settle, then fill exact in-between poses.
+// Tail work also yields to requestIdleCallback between frames below.
+const TAIL_START_DELAY_MS = 600
 
 // The branded intro runs for at least this long so it reads as an intentional
 // animation rather than a flash. Frame decoding happens underneath it, so on
@@ -240,18 +256,23 @@ export function ScrollHeroSection() {
   const scrollRafRef = useRef<number | null>(null)
 
   /**
-   * Target bitmap resolution: match the physical pixels the sequence can ever
-   * be rendered at (screen height is the upper bound for window height), so
-   * scroll-time draws are a same-size blit with zero resampling cost.
+   * Target bitmap resolution: match the physical size of the rendered subject,
+   * not the full viewport. The subject uses only 86% of the view on desktop and
+   * 64% on mobile; decoding every frame at 100% was allocating millions of
+   * pixels that drawFrame immediately scaled away. Across 121 frames that extra
+   * memory pressure was the source of the cold-load hitch.
    */
   const getBitmapSize = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, dprCapRef.current)
+    const subjectRatio = isMobileView(window.innerWidth)
+      ? MOBILE_SUBJECT_RATIO
+      : DESKTOP_SUBJECT_RATIO
     const upperBoundCssHeight = Math.max(
       window.innerHeight,
       window.screen?.height ?? 0
     )
     const height = Math.min(
-      Math.ceil(upperBoundCssHeight * dpr * 1.05),
+      Math.ceil(upperBoundCssHeight * subjectRatio * dpr * 1.05),
       MAX_BITMAP_HEIGHT
     )
     const width = Math.round((SOURCE_WIDTH / CROPPED_SOURCE_HEIGHT) * height)
@@ -467,13 +488,12 @@ export function ScrollHeroSection() {
     // simply never filled rather than treated as failures.
     const reduceData = prefersReducedData() || isPhoneDevice()
 
-    const phase1Indices = Array.from(
-      { length: REVEAL_THRESHOLD },
-      (_, i) => i + 1
-    )
+    const phase1Indices = INTERACTION_READY_FRAMES
+    const phase1Set = new Set(phase1Indices)
     const tailIndices: number[] = []
-    for (let i = REVEAL_THRESHOLD + 1; i <= TOTAL_FRAMES; i++) {
-      if (!reduceData || (i - REVEAL_THRESHOLD) % 2 === 1) tailIndices.push(i)
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      if (phase1Set.has(i)) continue
+      if (!reduceData || i % 2 === 1) tailIndices.push(i)
     }
     const totalToLoad = phase1Indices.length + tailIndices.length
 
@@ -554,16 +574,19 @@ export function ScrollHeroSection() {
           const next = queue.shift()
           if (next === undefined) return
           await prepareFrame(next)
-          // Yield a macrotask so scroll/rAF work always wins the main thread.
+          // Tail frames are non-urgent. Wait for browser idle time so input,
+          // animation, and canvas draws always win during the first interaction.
           if (yieldBetweenFrames) {
-            await new Promise((resolve) => setTimeout(resolve, 0))
+            await new Promise<void>((resolve) => {
+              scheduleIdle(resolve, 250)
+            })
           }
         }
       })
       await Promise.all(workers)
     }
 
-    // Phase 1: the frames gating the reveal load at full speed behind the
+    // Phase 1: a sparse, interaction-ready turn loads at full speed behind the
     // opaque intro plane.
     // Phase 2: the rest stream in while the user watches the hero. Decoding
     // is off-thread now, so the remaining main-thread cost is negligible; the

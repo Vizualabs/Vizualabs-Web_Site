@@ -18,19 +18,20 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 export function Navbar() {
+  const routerState = useRouterState()
+  const currentPath = routerState?.location?.pathname ?? ''
+  const isHome = currentPath === '/' || currentPath === ''
+
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(true)
   const [scrolled, setScrolled] = useState(false)
-  const [introLoading, setIntroLoading] = useState(true)
+  const [introLoading, setIntroLoading] = useState(() => isHome)
   const lastScrollY = useRef(0)
   const scrollRafRef = useRef<number | null>(null)
 
-  const routerState = useRouterState()
-  const currentPath = routerState?.location?.pathname ?? ''
-
   // Listen to branded intro loading state
   useEffect(() => {
-    if (currentPath !== '/' && currentPath !== '') {
+    if (!isHome) {
       setIntroLoading(false)
       return
     }

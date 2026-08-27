@@ -59,14 +59,14 @@ export function ComingSoonHero() {
         <h1 className="mb-0 space-y-1 sm:space-y-2 flex flex-col items-center">
           <TextReveal
             as="span"
-            className="font-hanken text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-extrabold tracking-tight leading-[1.08] text-[#E5E2E1]"
+            className="font-hanken text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-extrabold tracking-tight leading-[1.08] text-[#E5E2E1] justify-center"
             delay={0.05}
           >
             Engineering Breakdowns.
           </TextReveal>
           <TextReveal
             as="span"
-            className="font-hanken text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-extrabold tracking-tight leading-[1.08] bg-gradient-to-r from-[#FF5540] via-[#FF7E6B] to-[#FFA085] bg-clip-text text-transparent"
+            className="font-hanken text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-extrabold tracking-tight leading-[1.08] text-[#FF5540] justify-center"
             delay={0.22}
           >
             Arriving Very Soon.

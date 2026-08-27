@@ -35,7 +35,14 @@ const config = defineConfig({
   plugins: [
     devtools(),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        autoStaticPathsDiscovery: true,
+        crawlLinks: true,
+        autoSubfolderIndex: true,
+      },
+    }),
     netlify(),
     viteReact(),
   ],

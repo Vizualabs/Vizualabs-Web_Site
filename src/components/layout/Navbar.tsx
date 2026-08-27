@@ -14,7 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
   { label: 'Process', href: '/process', isRoute: true },
-  { label: 'Case Studies', href: '/case-study', isRoute: true },
+  { label: 'Case Studies', href: '/coming-soon', isRoute: true },
 ]
 
 export function Navbar() {
@@ -141,7 +141,8 @@ export function Navbar() {
               (item.href === '/products' && currentPath.startsWith('/product')) ||
               (item.href === '/services' && currentPath.startsWith('/service')) ||
               (item.href === '/about' && currentPath.startsWith('/about')) ||
-              (item.href === '/process' && currentPath.startsWith('/process'))
+              (item.href === '/process' && currentPath.startsWith('/process')) ||
+              (item.href === '/coming-soon' && (currentPath.startsWith('/coming-soon') || currentPath.startsWith('/case-study')))
               : false
 
             if (item.isRoute) {
@@ -213,7 +214,8 @@ export function Navbar() {
                 (item.href === '/products' && currentPath.startsWith('/product')) ||
                 (item.href === '/services' && currentPath.startsWith('/service')) ||
                 (item.href === '/about' && currentPath.startsWith('/about')) ||
-                (item.href === '/process' && currentPath.startsWith('/process'))
+                (item.href === '/process' && currentPath.startsWith('/process')) ||
+                (item.href === '/coming-soon' && (currentPath.startsWith('/coming-soon') || currentPath.startsWith('/case-study')))
                 : false
 
               if (item.isRoute) {

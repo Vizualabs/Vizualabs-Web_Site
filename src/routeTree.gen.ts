@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as CaseStudyRouteImport } from './routes/case-study'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProcessRouteImport } from './routes/process'
@@ -39,6 +40,11 @@ const BookRoute = BookRouteImport.update({
 const CaseStudyRoute = CaseStudyRouteImport.update({
   id: '/case-study',
   path: '/case-study',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/case-study': typeof CaseStudyRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/case-study': typeof CaseStudyRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/case-study': typeof CaseStudyRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/case-study'
+    | '/coming-soon'
     | '/contact'
     | '/privacy'
     | '/process'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/case-study'
+    | '/coming-soon'
     | '/contact'
     | '/privacy'
     | '/process'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/case-study'
+    | '/coming-soon'
     | '/contact'
     | '/privacy'
     | '/process'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BookRoute: typeof BookRoute
   CaseStudyRoute: typeof CaseStudyRoute
+  ComingSoonRoute: typeof ComingSoonRoute
   ContactRoute: typeof ContactRoute
   PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/case-study'
       fullPath: '/case-study'
       preLoaderRoute: typeof CaseStudyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BookRoute: BookRoute,
   CaseStudyRoute: CaseStudyRoute,
+  ComingSoonRoute: ComingSoonRoute,
   ContactRoute: ContactRoute,
   PrivacyRoute: PrivacyRoute,
   ProcessRoute: ProcessRoute,

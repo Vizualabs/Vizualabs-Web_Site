@@ -154,9 +154,9 @@ export function ContactSection() {
                   <address className="mt-1.5 not-italic text-sm sm:text-base leading-relaxed text-[#E5E2E1]">
                     <span className="font-medium text-[#E5E2E1]">Vizualabs (Pvt.) Ltd.</span>
                     <br />
-                    101 Silicon Valley Way, Suite 500
+                    6/A/9, Golden Park
                     <br />
-                    San Jose, CA 95110
+                    Malamulla West, Panadura
                   </address>
                 </div>
               </div>

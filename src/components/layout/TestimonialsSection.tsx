@@ -2,75 +2,60 @@ import { Marquee } from '#/components/ui/marquee'
 import { MagicCard } from '#/components/ui/magic-card'
 import { BlurFade } from '#/components/ui/blur-fade'
 
-// Illustrative placeholder testimonials — swap for real client quotes
-// (with permission to use their name/company) before this section ships live.
 interface Testimonial {
   quote: string
   name: string
   role: string
-  company: string
-  metric: string
+  company?: string
   initials: string
 }
 
 const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "Vizualabs didn't just ship the redesign — they cut our release cycle from six weeks to four days.",
-    name: 'Priya Anand',
-    role: 'VP Engineering',
-    company: 'Meridian Health',
-    metric: '6wk → 4d release cycle',
-    initials: 'PA',
+      'Vizualabs has been a reliable and efficient partner for our IT solutions. Their responsiveness, attention to detail, and ability to deliver high-quality work within deadlines were impressive. The team’s commitment to excellence and customer satisfaction made the entire collaboration smooth and productive.',
+    name: 'HaborLine Imports PVT LTD',
+    role: 'Client',
+    initials: 'HI',
   },
   {
     quote:
-      'We handed them a decade of technical debt. They handed back a system we can actually reason about.',
-    name: 'Tomas Herrera',
-    role: 'CTO',
-    company: 'Northline Logistics',
-    metric: '40% fewer prod incidents',
-    initials: 'TH',
+      'We had an excellent experience working with Vizualabs for our IT requirements. Their team demonstrated strong technical expertise, creativity, and a clear understanding of our expectations. The support provided throughout the project was highly professional, timely, and solution-oriented. We truly appreciate their dedication and outstanding service.',
+    name: 'Veritas International PVT LTD',
+    role: 'Client',
+    initials: 'VI',
   },
   {
     quote:
-      'The pipeline they built processes claims in under two seconds. Our old system took eleven.',
-    name: 'Wren Okafor',
-    role: 'Head of Data',
-    company: 'Arclight Robotics',
-    metric: '11s → 1.8s per claim',
-    initials: 'WO',
+      'Top-notch IT expertise! They handled our issues smoothly and efficiently. The team was professional, knowledgeable, and delivered a seamless transition. A fantastic IT partner.',
+    name: 'Manoj Rathnayake',
+    role: 'Partner',
+    company: 'Reliance',
+    initials: 'MR',
   },
   {
     quote:
-      "Every engineer I've worked with elsewhere talks about scale. This team actually built for it.",
-    name: 'Daniel Cho',
-    role: 'Founder',
-    company: 'Solace Systems',
-    metric: '3x traffic, zero downtime',
-    initials: 'DC',
+      'I sincerely appreciate the dedicated efforts of the Vizualabs team in bringing this masterpiece to life. Their exceptional work on the website, with its stunning graphics and thoughtfully designed layout, perfectly aligns with my architectural vision while captivating clients. I highly recommend them for their outstanding creativity and professionalism.',
+    name: 'Chamara Liyanage',
+    role: 'Chartered Architect, Principal Architect',
+    company: 'CLCA Associates',
+    initials: 'CL',
   },
   {
     quote:
-      "Security audit came back clean on the first pass — first time that's happened in five vendors.",
-    name: 'Lena Marchetti',
-    role: 'CISO',
-    company: 'Fenwick & Cole Capital',
-    metric: '0 critical findings',
-    initials: 'LM',
-  },
-  {
-    quote:
-      'They embedded with our team for two weeks before writing a line of code. That discipline shows in everything they shipped.',
-    name: 'Aiden Fletcher',
-    role: 'Product Lead',
-    company: 'Ridgeline Analytics',
-    metric: '18-day discovery-to-deploy',
-    initials: 'AF',
+      'We are extremely grateful to have worked with Vizualabs as our official tech partner for our concert. Their team handled our entire ticket management system and technical operations with outstanding professionalism and precision. From start to finish, Vizualabs delivered a seamless, error-free experience ensuring smooth ticketing, fast customer support, reliable scanning systems, and perfect technical coordination throughout the event. Their attention to detail, quick problem-solving, and dedication to delivering the best possible outcome truly stood out. Thanks to Vizualabs, our event ran flawlessly, and our audience enjoyed a smooth entry and a great overall experience. We highly recommend Vizualabs to anyone looking for a trusted, professional, and top-tier technical partner for events of any scale. 100% recommended. Exceptional service. Reliable team.',
+    name: 'Shanuka Marasinghe',
+    role: 'Founder and CEO',
+    company: 'Wenas Entertainments',
+    initials: 'SM',
   },
 ]
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+  const attribution = testimonial.company
+    ? `${testimonial.role}, ${testimonial.company}`
+    : testimonial.role
+
   return (
     <MagicCard
       className="w-[min(85vw,340px)] sm:w-[380px] md:w-[400px] shrink-0 rounded-2xl bg-[#121212]"
@@ -78,27 +63,19 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
       gradientTo="#FF8A6B"
       gradientColor="#2a1512"
     >
-      <div className="flex h-full min-h-[240px] sm:min-h-[260px] flex-col justify-between p-6 sm:p-7 md:p-8">
-        <p className="text-[0.95rem] sm:text-base md:text-lg font-normal leading-relaxed text-[#E5E2E1]">
+      <div className="flex h-full min-h-[280px] sm:min-h-[300px] flex-col justify-between p-6 sm:p-7 md:p-8">
+        <p className="text-[0.95rem] sm:text-base md:text-lg font-normal leading-relaxed text-[#E5E2E1] line-clamp-8 sm:line-clamp-9">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
 
-        <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 pt-5 sm:pt-6 border-t border-white/10">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-[#1c1c1c] text-[#FF5E4D] font-hanken font-bold text-sm">
-              {testimonial.initials}
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-medium text-[#E5E2E1] truncate">{testimonial.name}</div>
-              <div className="text-xs text-[#E5E2E1]/50 truncate">
-                {testimonial.role}, {testimonial.company}
-              </div>
-            </div>
+        <div className="mt-6 sm:mt-8 flex items-center gap-3 pt-5 sm:pt-6 border-t border-white/10 min-w-0">
+          <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-[#1c1c1c] text-[#FF5E4D] font-hanken font-bold text-sm">
+            {testimonial.initials}
           </div>
-
-          <span className="shrink-0 self-start sm:self-auto rounded-full border border-[#FF5E4D]/25 bg-[#FF5E4D]/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-normal tracking-wide text-[#FF5E4D] whitespace-nowrap">
-            {testimonial.metric}
-          </span>
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-[#E5E2E1] truncate">{testimonial.name}</div>
+            <div className="text-xs text-[#E5E2E1]/50 truncate">{attribution}</div>
+          </div>
         </div>
       </div>
     </MagicCard>
@@ -119,7 +96,7 @@ export function TestimonialsSection() {
             Proof, Not Promises
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.6rem] font-normal tracking-tight text-[#E5E2E1] leading-tight max-w-3xl">
-            What changed after we shipped
+            What clients say after we ship
           </h2>
         </BlurFade>
       </div>

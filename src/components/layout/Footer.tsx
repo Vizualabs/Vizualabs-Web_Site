@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { VizualabsLogo } from './VizualabsLogo'
 const LazyAssistantWidget = lazy(() =>
   import('#/components/chat/AssistantWidget').then((module) => ({
     default: module.AssistantWidget,
@@ -78,10 +79,8 @@ export function Footer() {
           {/* Column 1: Brand & Tagline */}
           <div className="space-y-6 md:col-span-2 lg:col-span-2">
             <div>
-              <a href="/" className="inline-block">
-                <h2 className="text-3xl sm:text-4xl font-bold font-hanken tracking-tight text-[#E5E2E1]">
-                  Vizualabs
-                </h2>
+              <a href="/" className="inline-block" aria-label="Vizualabs home">
+                <VizualabsLogo className="text-3xl sm:text-4xl" />
               </a>
               <p className="mt-4 text-base sm:text-lg text-[#EBBBB4] font-normal font-nimbus max-w-md leading-relaxed">
                 Precision in Engineering, Strategic in<br />

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
+import { VizualabsLogo } from './VizualabsLogo'
 
 interface NavItem {
   label: string
@@ -117,9 +118,7 @@ export function Navbar() {
           className="flex items-center gap-2 border-0 border-none outline-none ring-0 shadow-none select-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none active:border-none no-underline"
           aria-label="Vizualabs home"
         >
-          <span className="font-hanken text-[1.65rem] font-extrabold tracking-tight text-white border-0 border-none outline-none ring-0 select-none">
-            Vizualabs
-          </span>
+          <VizualabsLogo className="text-[1.65rem]" showRegistered={false} />
         </Link>
 
         {/* Desktop navigation */}

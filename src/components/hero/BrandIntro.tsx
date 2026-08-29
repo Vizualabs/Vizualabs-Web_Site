@@ -1,3 +1,5 @@
+import { BlackHoleLoader } from './BlackHoleLoader'
+
 /**
  * Premium agency loader — deep-space universe.
  * A twinkling starfield and coral nebula drift behind a rim-lit planet with
@@ -16,10 +18,16 @@ export const BRAND_INTRO_CHOREOGRAPHY_MS = 2000
 export function BrandIntro({
   phase,
   fast = false,
+  progress = 100,
+  simplifiedVisual = false,
 }: {
   phase: IntroPhase
   /** Returning session visitor — short branded fade, no full choreography. */
   fast?: boolean
+  /** 0..100 — real load progress, drives the disk ignition + readout. */
+  progress?: number
+  /** Phone/low-power device — skip the WebGL raymarch, keep the CSS fallback. */
+  simplifiedVisual?: boolean
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const universeRef = useRef<UniverseHandle | null>(null)

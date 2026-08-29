@@ -58,7 +58,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 
   return (
     <MagicCard
-      className="w-[min(85vw,340px)] sm:w-[380px] md:w-[400px] shrink-0 rounded-2xl bg-[#121212]"
+      className="w-[min(85vw,340px)] sm:w-[380px] md:w-[400px] shrink-0 overflow-hidden rounded-[2rem] bg-[#121212]"
       gradientFrom="#FF5E4D"
       gradientTo="#FF8A6B"
       gradientColor="#2a1512"

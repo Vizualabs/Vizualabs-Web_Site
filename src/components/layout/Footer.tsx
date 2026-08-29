@@ -145,7 +145,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/coming-soon" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                <a href="/case-study" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Case Studies
                 </a>
               </li>

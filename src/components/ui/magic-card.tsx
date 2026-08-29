@@ -62,7 +62,7 @@ export function MagicCard({
   return (
     <motion.div
       className={cn(
-        'group/magic relative isolate h-full overflow-hidden rounded-[inherit]',
+        'group/magic relative isolate h-full overflow-hidden rounded-2xl',
         'border border-white/10 md:border-[1.5px] md:border-transparent',
         'max-md:shadow-[inset_0_0_0_1px_rgba(255,94,77,0.16)]',
         className,

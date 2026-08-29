@@ -199,7 +199,7 @@ export function ComingSoonPreview() {
               Our Products
             </Link>
             <a
-              href="/contact#contact"
+              href="/contact"
               className="nav-contact-btn text-xs sm:text-sm font-semibold"
             >
               Book Consultation

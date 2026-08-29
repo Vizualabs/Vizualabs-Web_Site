@@ -26,7 +26,7 @@ export function ProductsCta() {
               <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
                 <LiveButton
                   type="button"
-                  onClick={() => navigate({ to: '/contact', hash: 'contact' })}
+                  onClick={() => navigate({ to: '/contact' })}
                 >
                   Book a product demo
                 </LiveButton>

@@ -169,7 +169,7 @@ export function CaseStudies() {
             </div>
 
             <a
-              href="/contact#contact"
+              href="/contact"
               className="mt-8 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[#FF5E4D] transition-colors hover:text-[#ff7a6b]"
             >
               Discuss a similar project

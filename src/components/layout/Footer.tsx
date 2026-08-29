@@ -150,7 +150,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/contact#contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
+                <a href="/contact" className="hover:text-white transition-colors duration-200 text-[#EBBBB4]">
                   Contact
                 </a>
               </li>

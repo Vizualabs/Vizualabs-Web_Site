@@ -503,7 +503,31 @@
   }
 }
 
-/* --- Core orb ------------------------------------------------------------- */
+/* --- Black hole visual ------------------------------------------------------ */
+.brand-intro-visual {
+  opacity: 0;
+  animation: brand-intro-visual-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+}
+
+@keyframes brand-intro-visual-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Darkens the lower third so the wordmark/progress readout stay legible over
+   a visually busy raymarch, without flattening the rest of the frame. */
+.brand-intro-scrim {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 55%,
+    rgba(10, 10, 10, 0.55) 82%,
+    rgba(10, 10, 10, 0.8) 100%
+  );
+}
+
+/* --- Core orb (static fallback: phones, reduced motion, no WebGL2) -------- */
 .brand-intro-core {
   opacity: 0;
   transform: scale(0.72);
@@ -624,29 +648,11 @@
 }
 
 .brand-intro-bar-fill {
-  transform: scaleX(0);
-  animation: brand-intro-bar 1.35s cubic-bezier(0.65, 0, 0.35, 1) 1s infinite;
+  transition: transform 0.15s linear;
 }
 
-@keyframes brand-intro-bar {
-  0% {
-    transform: scaleX(0);
-    transform-origin: left center;
-  }
-
-  45% {
-    transform: scaleX(1);
-    transform-origin: left center;
-  }
-
-  46% {
-    transform-origin: right center;
-  }
-
-  100% {
-    transform: scaleX(0);
-    transform-origin: right center;
-  }
+.brand-intro-progress-value {
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- Exit ----------------------------------------------------------------- */
@@ -712,17 +718,21 @@
 @media (prefers-reduced-motion: reduce) {
   .brand-intro-wash,
   .brand-intro-grid,
+  .brand-intro-visual,
   .brand-intro-core,
   .brand-intro-core-glow,
   .brand-intro-orbit,
   .brand-intro-wordmark,
   .brand-intro-tagline,
-  .brand-intro-bar,
-  .brand-intro-bar-fill {
+  .brand-intro-bar {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+  }
+
+  .brand-intro-bar-fill {
+    transition: none !important;
   }
 
   .brand-intro-stage-exit {
@@ -743,10 +753,12 @@
 
 .brand-intro-fast .brand-intro-wash,
 .brand-intro-fast .brand-intro-grid,
+.brand-intro-fast .brand-intro-visual,
 .brand-intro-fast .brand-intro-core,
 .brand-intro-fast .brand-intro-wordmark,
 .brand-intro-fast .brand-intro-tagline,
-.brand-intro-fast .brand-intro-bar {
+.brand-intro-fast .brand-intro-bar,
+.brand-intro-fast .brand-intro-progress-value {
   animation: none;
   opacity: 1;
   transform: none;
@@ -754,10 +766,13 @@
 }
 
 .brand-intro-fast .brand-intro-orbit,
-.brand-intro-fast .brand-intro-core-glow,
-.brand-intro-fast .brand-intro-bar-fill {
+.brand-intro-fast .brand-intro-core-glow {
   animation-duration: 0.01ms;
   animation-iteration-count: 1;
+}
+
+.brand-intro-fast .brand-intro-bar-fill {
+  transition-duration: 0.01ms;
 }
 
 .brand-intro-fast.brand-intro-revealing .brand-intro-wipe-top,

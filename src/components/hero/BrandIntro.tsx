@@ -1,6 +1,9 @@
+import { BlackHoleLoader } from './BlackHoleLoader'
+
 /**
- * Premium agency loader — abstract coral core + wordmark, then a panel wipe
- * into the hero. No letter-mark / V-stroke choreography.
+ * Premium agency loader — full-bleed relativistic black hole raymarch behind
+ * the wordmark, then a panel wipe into the hero. No letter-mark / V-stroke
+ * choreography.
  */
 export type IntroPhase = 'intro' | 'warmup' | 'revealing'
 
@@ -10,12 +13,19 @@ export const BRAND_INTRO_CHOREOGRAPHY_MS = 1680
 export function BrandIntro({
   phase,
   fast = false,
+  progress = 100,
+  simplifiedVisual = false,
 }: {
   phase: IntroPhase
   /** Returning session visitor — short branded fade, no full choreography. */
   fast?: boolean
+  /** 0..100 — real load progress, drives the disk ignition + readout. */
+  progress?: number
+  /** Phone/low-power device — skip the WebGL raymarch, keep the CSS fallback. */
+  simplifiedVisual?: boolean
 }) {
   const revealing = phase === 'revealing'
+  const clampedProgress = Math.max(0, Math.min(100, progress))
 
   return (
     <div
@@ -24,15 +34,25 @@ export function BrandIntro({
       data-phase={phase}
       role="status"
       aria-live="polite"
-      aria-label={revealing ? 'Loading complete' : 'Loading Vizualabs'}
+      aria-label={revealing ? 'Loading complete' : `Loading Vizualabs, ${Math.round(clampedProgress)}%`}
     >
       {/* Base plane — hides the instant wipe panels take over */}
       <div className="brand-intro-base absolute inset-0 bg-[#0a0a0a]" />
+
+      {/* Relativistic black hole raymarch — full-bleed, behind the copy */}
+      <div className="brand-intro-visual absolute inset-0" aria-hidden="true">
+        <BlackHoleLoader
+          progress={clampedProgress}
+          simplified={fast || simplifiedVisual}
+          className="h-full w-full"
+        />
+      </div>
 
       {/* Atmosphere */}
       <div className="brand-intro-wash pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="brand-intro-grid pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="brand-intro-grain pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
+      <div className="brand-intro-scrim pointer-events-none absolute inset-0" aria-hidden="true" />
 
       {/* Center stage */}
       <div
@@ -40,14 +60,7 @@ export function BrandIntro({
           revealing ? 'brand-intro-stage-exit' : ''
         }`}
       >
-        <div className="brand-intro-core relative flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32">
-          <span className="brand-intro-orbit brand-intro-orbit-a" aria-hidden="true" />
-          <span className="brand-intro-orbit brand-intro-orbit-b" aria-hidden="true" />
-          <span className="brand-intro-core-glow" aria-hidden="true" />
-          <span className="brand-intro-core-orb" aria-hidden="true" />
-        </div>
-
-        <div className="brand-intro-copy mt-10 text-center sm:mt-12">
+        <div className="brand-intro-copy text-center">
           <p className="brand-intro-wordmark font-hanken text-3xl font-black tracking-[0.2em] text-white sm:text-4xl">
             VIZUALABS
           </p>
@@ -56,8 +69,16 @@ export function BrandIntro({
           </p>
         </div>
 
-        <div className="brand-intro-bar mt-10 h-[2px] w-24 overflow-hidden rounded-full bg-white/10 sm:w-32">
-          <span className="brand-intro-bar-fill block h-full w-full origin-left rounded-full bg-gradient-to-r from-[#FF5E4D] via-[#FF8A6B] to-[#FF5E4D]" />
+        <div className="brand-intro-bar mt-10 flex w-24 flex-col items-center gap-2.5 sm:w-32">
+          <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/10">
+            <span
+              className="brand-intro-bar-fill block h-full w-full origin-left rounded-full bg-gradient-to-r from-[#FF5E4D] via-[#FF8A6B] to-[#FF5E4D]"
+              style={{ transform: `scaleX(${clampedProgress / 100})` }}
+            />
+          </div>
+          <span className="brand-intro-progress-value font-mono text-[10px] tabular-nums tracking-[0.28em] text-white/45">
+            {Math.round(clampedProgress)}%
+          </span>
         </div>
       </div>
 

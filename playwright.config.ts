@@ -13,7 +13,9 @@ export default defineConfig({
   workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: [['list']],
+  reporter: process.env.CI
+    ? [['list'], ['github'], ['html', { open: 'never' }]]
+    : [['list']],
   timeout: 60_000,
   expect: { timeout: 15_000 },
 
@@ -42,7 +44,7 @@ export default defineConfig({
     // Build first, then serve: `vite preview` runs the SSR handler via the
     // TanStack Start plugin, but it does NOT rebuild — without the build step
     // the suite silently tests whatever dist/ happens to be lying around.
-    command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
+    command: `bun run build && bunx --bun vite preview --port ${PORT} --strictPort`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

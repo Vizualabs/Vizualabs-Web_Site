@@ -12,10 +12,10 @@ export function WorkCtaSection() {
           <Meteors number={10} className="opacity-80" />
           <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-white/[0.03] blur-[80px]" />
           <div className="relative mx-auto max-w-2xl">
-            <h2 className="font-hanken text-3xl font-bold tracking-tight text-[#E5E2E1] sm:text-4xl">
+            <h2 className="type-cta text-[#E5E2E1]">
               Have a project like this?
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-[#EBBBB4] sm:text-base">
+            <p className="type-lead mt-4 text-[#EBBBB4]">
               Book a session and leave with a clear, engineered plan for what&apos;s next.
             </p>
             <div className="mt-8 flex justify-center">

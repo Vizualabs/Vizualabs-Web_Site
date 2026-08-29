@@ -55,16 +55,16 @@ export function ProcessTerminalSection() {
     >
       <div className="mx-auto grid w-full max-w-7xl items-center gap-8 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
         <div className="min-w-0">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#E7978B]">
+          <p className="type-eyebrow mb-3 text-[#E7978B]">
             Execution view
           </p>
           <h2
             id="process-terminal-heading"
-            className="font-hanken text-3xl font-extrabold tracking-tight text-[#E5E2E1] sm:text-4xl"
+            className="type-section font-extrabold text-[#E5E2E1]"
           >
             How a project boots
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-[#EBBBB4]/75 sm:text-base">
+          <p className="type-lead mt-4 max-w-md text-[#EBBBB4]/75">
             Every engagement follows the same disciplined pipeline — from first idea
             through launch and long-term maintenance. No guesswork, no black boxes.
           </p>

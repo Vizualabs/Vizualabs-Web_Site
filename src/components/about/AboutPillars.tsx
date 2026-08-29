@@ -95,12 +95,12 @@ export function AboutPillars() {
                 </div>
 
                 {/* Title */}
-                <h2 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#E5E2E1] mb-3 sm:mb-4">
+                <h2 className="type-card-title text-[#E5E2E1] mb-3 sm:mb-4">
                   The Architectural Void
                 </h2>
 
                 {/* Description */}
-                <p className="text-sm sm:text-base md:text-lg font-light leading-relaxed text-[#E5E2E1]/60 max-w-2xl">
+                <p className="type-lead text-[#E5E2E1]/60 max-w-2xl">
                   We specialize in turning "the void"—untapped technical potential—into stable, high-performance architectures. Our engineering core is built for enterprise-grade scalability.
                 </p>
               </div>
@@ -146,12 +146,12 @@ export function AboutPillars() {
               </div>
 
               {/* Title */}
-              <h3 className="font-hanken text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#5C0000] mb-2.5">
+              <h3 className="type-card-title text-[#5C0000] mb-2.5">
                 Momentum
               </h3>
 
               {/* Description */}
-              <p className="text-sm sm:text-base font-normal leading-relaxed text-[#5C0000] max-w-xs">
+              <p className="type-lead text-[#5C0000] max-w-xs">
                 Driving strategic velocity for global market leaders since 2018.
               </p>
             </motion.div>

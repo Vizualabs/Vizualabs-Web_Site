@@ -214,10 +214,10 @@ export function CapabilitiesSection() {
       <div className="relative mx-auto max-w-7xl space-y-10 sm:space-y-12 md:space-y-14">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 pb-2">
           <BlurFade inView delay={0.05} direction="up" className="space-y-3 sm:space-y-3.5 max-w-5xl">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.6rem] font-normal tracking-tight text-[#E5E2E1] leading-tight whitespace-normal md:whitespace-nowrap">
+            <h2 className="type-section font-normal text-[#E5E2E1] whitespace-normal md:whitespace-nowrap">
               Core Strategic Capabilities
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-[#E5E2E1]/60 font-normal leading-relaxed max-w-3xl">
+            <p className="type-body text-[#E5E2E1]/60 max-w-3xl">
               We engineer precise solutions for the enterprise void, transforming complex challenges
               into competitive advantages.
             </p>

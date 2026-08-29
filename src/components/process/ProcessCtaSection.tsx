@@ -13,10 +13,10 @@ export function ProcessCtaSection() {
           <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-white/[0.03] blur-[80px]" />
 
           <div className="relative mx-auto max-w-3xl">
-            <h2 className="font-hanken text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+            <h2 className="type-cta text-[#E5E2E1]">
               Ready to start your journey?
             </h2>
-            <p className="mt-4 sm:mt-5 mx-auto max-w-2xl text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4]">
+            <p className="type-lead mt-4 sm:mt-5 mx-auto max-w-2xl text-[#EBBBB4]">
               Connect with our engineering leads and map the first stretch of your roadmap —
               from idea through launch and beyond.
             </p>

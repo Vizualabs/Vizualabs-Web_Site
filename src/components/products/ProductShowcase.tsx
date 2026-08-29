@@ -324,14 +324,14 @@ export function ProductShowcase() {
         <FadeLine>
           <div className="inline-flex items-center gap-2 text-[#FF8A6B]">
             <Sparkles className="h-4 w-4" aria-hidden />
-            <span className="text-[11px] sm:text-xs font-semibold tracking-[0.16em] uppercase">
+            <span className="type-eyebrow">
               Deep dive
             </span>
           </div>
         </FadeLine>
         <TextReveal
           as="h2"
-          className="mt-3 max-w-3xl font-hanken text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#E5E2E1]"
+          className="type-section mt-3 max-w-3xl font-bold text-[#E5E2E1]"
         >
           Three products. One engineering standard.
         </TextReveal>

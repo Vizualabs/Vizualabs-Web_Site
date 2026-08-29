@@ -19,10 +19,10 @@ export function BookingSection() {
             <Calendar className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <h1 className="font-hanken text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h1 className="type-section font-bold text-white">
               Book a Strategy Session
             </h1>
-            <p className="mt-1.5 text-sm leading-relaxed text-white/55 sm:text-base">
+            <p className="type-lead mt-1.5 text-white/55">
               1-on-1 discovery with Vizualabs engineering leads — pick a time that works for you.
             </p>
           </div>

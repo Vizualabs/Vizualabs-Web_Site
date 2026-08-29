@@ -108,7 +108,7 @@ export function CaseStudies() {
               </span>
             </div>
 
-            <h2 className="mt-5 font-hanken text-2xl font-bold leading-snug text-white sm:text-3xl">
+            <h2 className="type-card-title mt-5 leading-snug text-white">
               {study.title}
             </h2>
 

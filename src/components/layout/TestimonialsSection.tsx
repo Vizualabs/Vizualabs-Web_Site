@@ -92,10 +92,10 @@ export function TestimonialsSection() {
 
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8 md:px-12 mb-10 sm:mb-12 md:mb-14">
         <BlurFade inView delay={0.05} direction="up">
-          <span className="text-[11px] sm:text-xs font-normal tracking-[0.2em] text-[#FF5E4D] uppercase block mb-3.5">
+          <span className="type-eyebrow mb-3.5 block text-[#FF5E4D]">
             Proof, Not Promises
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.6rem] font-normal tracking-tight text-[#E5E2E1] leading-tight max-w-3xl">
+          <h2 className="type-section font-normal text-[#E5E2E1] max-w-3xl">
             What clients say after we ship
           </h2>
         </BlurFade>

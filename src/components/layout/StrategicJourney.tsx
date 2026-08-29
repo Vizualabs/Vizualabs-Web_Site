@@ -290,10 +290,10 @@ export function StrategicJourney() {
       <div className="relative mx-auto max-w-4xl">
         {/* Section Heading: completely solid and anchored */}
         <BlurFade inView delay={0.05} direction="up" className="space-y-2 sm:space-y-3 mb-8 sm:mb-10 md:mb-12">
-          <span className="text-[11px] sm:text-xs md:text-sm font-normal tracking-[0.2em] text-[#FF5E4D] uppercase block">
+          <span className="type-eyebrow block text-[#FF5E4D]">
             THE STRATEGIC JOURNEY
           </span>
-          <h2 className="font-hanken text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal tracking-tight text-white leading-[1.1] sm:leading-[1.08]">
+          <h2 className="type-section font-normal text-white">
             Digital Success
             <span className="text-[#FF5E4D] italic block font-normal">
               Mastered.

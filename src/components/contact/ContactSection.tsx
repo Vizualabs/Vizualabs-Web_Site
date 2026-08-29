@@ -137,10 +137,10 @@ export function ContactSection() {
             transition={{ duration: 0.55, ease: EASE }}
             className="max-w-xl"
           >
-            <h1 className="font-hanken text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-bold leading-tight tracking-tight text-[#E5E2E1] sm:whitespace-nowrap">
+            <h1 className="type-section font-bold text-[#E5E2E1]">
               Initiate Strategic Contact
             </h1>
-            <p className="mt-6 max-w-lg text-sm sm:text-base font-light font-[300] leading-relaxed text-[#E5E2E1]/70">
+            <p className="type-lead mt-6 max-w-lg text-[#E5E2E1]/70">
               Tell us what you're building — a founder reads every message personally.
             </p>
 

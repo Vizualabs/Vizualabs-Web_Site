@@ -15,13 +15,13 @@ export function CtaSection() {
 
           <div className="relative mx-auto max-w-3xl space-y-5 sm:space-y-6">
             <BlurFade inView delay={0.05} direction="up">
-              <h2 className="font-hanken text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+              <h2 className="type-cta text-[#E5E2E1]">
                 Ready to Accelerate Your Journey?
               </h2>
             </BlurFade>
 
             <BlurFade inView delay={0.12} direction="up">
-              <p className="mx-auto max-w-2xl text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4]">
+              <p className="type-lead mx-auto max-w-2xl text-[#EBBBB4]">
                 Book a session and leave with a clear, engineered plan for what&apos;s next — no
                 guesswork, no fluff.
               </p>

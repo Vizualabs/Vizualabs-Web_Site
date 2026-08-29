@@ -12,13 +12,13 @@ export function ServicesHero() {
       <div className="relative mx-auto w-full max-w-7xl">
         <FadeLine>
           <div className="inline-flex items-center rounded-full border border-[#42221E]/80 bg-[#1A1211]/80 px-4 py-1.5 backdrop-blur-sm mb-6 sm:mb-8">
-            <span className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] uppercase text-[#E7978B]">
+            <span className="type-eyebrow text-[#E7978B]">
               OUR CAPABILITIES
             </span>
           </div>
         </FadeLine>
 
-        <h1 className="font-hanken text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] xl:text-[5.75rem] font-extrabold tracking-tight leading-[1.05] flex flex-wrap gap-x-[0.28em] gap-y-1">
+        <h1 className="type-display flex flex-wrap gap-x-[0.28em] gap-y-1">
           <TextReveal as="span" className="text-[#E5E2E1]" delay={0.05}>
             Engineering
           </TextReveal>
@@ -28,7 +28,7 @@ export function ServicesHero() {
         </h1>
 
         <FadeLine delay={0.28}>
-          <p className="mt-6 sm:mt-7 max-w-2xl sm:max-w-3xl text-base sm:text-lg md:text-[1.125rem] font-normal leading-relaxed text-[#EBBBB4]">
+          <p className="type-lead mt-6 sm:mt-7 max-w-2xl sm:max-w-3xl text-[#EBBBB4]">
             We bridge the void between raw technological potential and strategic market leadership.
             From high-integrity codebases to intelligent AI ecosystems, our services are architected
             for enterprise precision.

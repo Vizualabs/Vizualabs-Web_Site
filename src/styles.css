@@ -249,6 +249,151 @@
   font-family: var(--font-hanken);
 }
 
+/*
+  Site type scale — keep page/section copy on these sizes so every route
+  matches the homepage / Products hero system.
+  - type-eyebrow: small uppercase labels
+  - type-display: page heroes (H1)
+  - type-section: major section titles (H2)
+  - type-cta: CTA block titles
+  - type-lead: hero supporting copy
+  - type-body: section supporting copy
+  - type-card-title: in-card headings
+*/
+.type-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+@media (min-width: 640px) {
+  .type-eyebrow {
+    font-size: 0.75rem; /* text-xs */
+  }
+}
+
+.type-display {
+  font-family: var(--font-hanken);
+  font-size: 3rem; /* text-5xl */
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+@media (min-width: 640px) {
+  .type-display {
+    font-size: 3.75rem; /* text-6xl */
+  }
+}
+@media (min-width: 768px) {
+  .type-display {
+    font-size: 4.5rem; /* text-7xl */
+  }
+}
+@media (min-width: 1024px) {
+  .type-display {
+    font-size: 5.25rem;
+  }
+}
+@media (min-width: 1280px) {
+  .type-display {
+    font-size: 5.75rem;
+  }
+}
+
+.type-section {
+  font-family: var(--font-hanken);
+  font-size: 1.875rem; /* text-3xl */
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+@media (min-width: 640px) {
+  .type-section {
+    font-size: 2.25rem; /* text-4xl */
+  }
+}
+@media (min-width: 768px) {
+  .type-section {
+    font-size: 3rem; /* text-5xl */
+  }
+}
+@media (min-width: 1024px) {
+  .type-section {
+    font-size: 3.6rem;
+  }
+}
+
+.type-cta {
+  font-family: var(--font-hanken);
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+@media (min-width: 640px) {
+  .type-cta {
+    font-size: 2.25rem;
+  }
+}
+@media (min-width: 768px) {
+  .type-cta {
+    font-size: 3rem;
+  }
+}
+@media (min-width: 1024px) {
+  .type-cta {
+    font-size: 3.25rem;
+  }
+}
+
+.type-lead {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.625;
+}
+@media (min-width: 640px) {
+  .type-lead {
+    font-size: 1.125rem;
+  }
+}
+@media (min-width: 768px) {
+  .type-lead {
+    font-size: 1.125rem;
+  }
+}
+
+.type-body {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.625;
+}
+@media (min-width: 640px) {
+  .type-body {
+    font-size: 1.125rem;
+  }
+}
+@media (min-width: 768px) {
+  .type-body {
+    font-size: 1.25rem;
+  }
+}
+
+.type-card-title {
+  font-family: var(--font-hanken);
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+@media (min-width: 640px) {
+  .type-card-title {
+    font-size: 1.5rem; /* text-2xl */
+  }
+}
+@media (min-width: 768px) {
+  .type-card-title {
+    font-size: 1.875rem; /* text-3xl */
+  }
+}
+
 .hero-title-type {
   font-family: var(--font-hanken);
   font-size: clamp(1.4rem, 12vw, 7.6rem);

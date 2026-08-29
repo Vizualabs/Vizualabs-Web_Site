@@ -15,10 +15,10 @@ export function ProductsCta() {
             <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[36rem] rounded-full bg-[#FF5E4D]/10 blur-[90px]" />
 
             <div className="relative mx-auto max-w-3xl">
-              <h2 className="font-hanken text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+              <h2 className="type-cta text-[#E5E2E1]">
                 Ready to put a Vizualabs product to work?
               </h2>
-              <p className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4] max-w-2xl mx-auto">
+              <p className="type-lead mt-4 sm:mt-5 text-[#EBBBB4] max-w-2xl mx-auto">
                 Whether you need Odeasy, Dine Mate, or Doc Channeling — we&apos;ll walk you through
                 a live demo and a rollout plan that fits your operation.
               </p>

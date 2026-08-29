@@ -13,11 +13,11 @@ export function ServicesCtaSection() {
           <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[36rem] rounded-full bg-white/[0.03] blur-[80px]" />
 
           <div className="relative mx-auto max-w-3xl">
-            <h2 className="font-hanken text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+            <h2 className="type-cta text-[#E5E2E1]">
               Ready to Architect Your Future?
             </h2>
 
-            <p className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg font-normal leading-relaxed text-[#EBBBB4] max-w-2xl mx-auto">
+            <p className="type-lead mt-4 sm:mt-5 text-[#EBBBB4] max-w-2xl mx-auto">
               From custom software to AI-driven products, every build gets the same engineering
               rigor — start to launch.
             </p>

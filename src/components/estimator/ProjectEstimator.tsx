@@ -172,11 +172,11 @@ export function ProjectEstimator() {
     <section className="relative w-full border-t border-white/10 bg-[#0d0d0d] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
       <div className="mx-auto max-w-3xl">
         <BlurFade inView delay={0.05} direction="up" className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#FF5E4D]">Live AI read</p>
-          <h2 className="mt-3 font-hanken text-3xl font-bold text-white sm:text-4xl">
+          <p className="type-eyebrow text-[#FF5E4D]">Live AI read</p>
+          <h2 className="type-section mt-3 font-bold text-white">
             What would your project take?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-white/60 sm:text-base">
+          <p className="type-lead mx-auto mt-3 max-w-xl text-white/60">
             Describe what you&apos;re building. Get an honest, instant read on complexity and
             timeline — no form, no wait.
           </p>

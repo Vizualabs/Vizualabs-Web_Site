@@ -376,13 +376,13 @@ export function ServicesShowcase() {
               >
                 {/* Section Header */}
                 <div className="text-center max-w-2xl mx-auto mb-3.5 sm:mb-6 px-1">
-                  <span className="inline-block text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] uppercase text-[#E7978B] mb-1 sm:mb-2">
+                  <span className="type-eyebrow mb-1 inline-block text-[#E7978B] sm:mb-2">
                     {service.serviceNumber}
                   </span>
-                  <h2 className="font-hanken text-xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-bold tracking-tight leading-tight text-[#E5E2E1]">
+                  <h2 className="type-section font-bold text-[#E5E2E1]">
                     {service.title}
                   </h2>
-                  <p className="mt-1 sm:mt-2 text-xs sm:text-sm md:text-[0.935rem] font-normal leading-relaxed text-[#EBBBB4] max-w-xl mx-auto">
+                  <p className="type-lead mt-1 text-[#EBBBB4] max-w-xl mx-auto sm:mt-2">
                     {service.subtitle}
                   </p>
                 </div>

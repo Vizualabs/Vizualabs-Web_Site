@@ -84,15 +84,21 @@ export function StrategicJourney() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [stepOffset, setStepOffset] = useState(0) // 0 = resting at slot 0, -1 = sliding forward, +1 = sliding backward
   const [isTransitioning, setIsTransitioning] = useState(true)
-  const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const wheelRef = useRef<HTMLDivElement>(null)
   const isLocked = useRef(false)
   const touchStartY = useRef(0)
   const touchStartTime = useRef(0)
   const wheelLockTimer = useRef<number | null>(null)
   const wheelDeltaAccumulator = useRef(0)
+  // Drag offset is applied straight to the DOM on every pointermove (see
+  // handlePointerMove) instead of through React state — at touch-drag
+  // frequency, re-rendering the whole wheel (icons, OrbitingCircles, text)
+  // per pixel of movement was the biggest source of mobile scroll/touch jank.
+  const dragOffsetRef = useRef(0)
 
   // Continuous forward wheel roll (1 -> 2 -> ... -> 9 -> 1 seamlessly)
   const rollNext = useCallback(() => {
@@ -106,7 +112,7 @@ export function StrategicJourney() {
       setIsTransitioning(false)
       setActiveIndex((prev) => (prev + 1) % steps.length)
       setStepOffset(0)
-      setDragOffset(0)
+      dragOffsetRef.current = 0
 
       // Re-enable smooth transition on next tick
       requestAnimationFrame(() => {
@@ -129,7 +135,7 @@ export function StrategicJourney() {
       setIsTransitioning(false)
       setActiveIndex((prev) => (prev - 1 + steps.length) % steps.length)
       setStepOffset(0)
-      setDragOffset(0)
+      dragOffsetRef.current = 0
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -183,11 +189,15 @@ export function StrategicJourney() {
 
   // Touch / Pointer Drag Gestures for Mobile & PC
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Touch scrolling the page is a more important gesture than the wheel
+    // drag — if the finger is a touch, let the browser scroll the page
+    // (the container is touch-action: pan-y) and keep the drag for mouse.
+    if (e.pointerType === 'touch') return
     if (isLocked.current) return
     setIsDragging(true)
     touchStartY.current = e.clientY
     touchStartTime.current = performance.now()
-    setDragOffset(0)
+    dragOffsetRef.current = 0
     if (containerRef.current) {
       containerRef.current.setPointerCapture(e.pointerId)
     }
@@ -196,7 +206,13 @@ export function StrategicJourney() {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return
     const deltaY = e.clientY - touchStartY.current
-    setDragOffset(deltaY * 0.75)
+    dragOffsetRef.current = deltaY * 0.75
+    // Written straight to the DOM, bypassing React state/re-render — this
+    // handler can fire dozens of times per second while dragging.
+    const node = wheelRef.current
+    if (node) {
+      node.style.transform = `translateY(${(-1 + stepOffset) * ITEM_HEIGHT + dragOffsetRef.current}px)`
+    }
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -212,7 +228,7 @@ export function StrategicJourney() {
     } else if (deltaY > 35 || (deltaY > 15 && velocity > 0.35)) {
       rollPrev()
     } else {
-      setDragOffset(0)
+      dragOffsetRef.current = 0
     }
 
     if (containerRef.current && containerRef.current.hasPointerCapture(e.pointerId)) {
@@ -220,16 +236,30 @@ export function StrategicJourney() {
     }
   }
 
-  // Auto-cycle gently every 4.5s when stationary
+  // Track visibility so the auto-cycle can pause while the section is
+  // off-screen — the interval otherwise keeps firing during the user's scroll.
   useEffect(() => {
     if (isDragging) return
+    const container = containerRef.current
+    if (!container || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    )
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  // Auto-cycle gently every 4.5s when stationary (and on-screen)
+  useEffect(() => {
+    if (isDragging || !isVisible) return
 
     const interval = setInterval(() => {
       rollNext()
     }, 4500)
 
     return () => clearInterval(interval)
-  }, [isDragging, rollNext])
+  }, [isDragging, isVisible, rollNext])
 
   // Infinite Rotary Wheel Slots:
   // - slotOffset -1: Item above view
@@ -282,17 +312,18 @@ export function StrategicJourney() {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none ${
+            className={`relative h-[290px] sm:h-[320px] md:h-[330px] overflow-hidden select-none cursor-grab active:cursor-grabbing touch-pan-y ${
               isDragging ? 'cursor-grabbing' : ''
             }`}
             style={{
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 28px), transparent 100%)',
-              touchAction: 'none',
+              touchAction: 'pan-y',
             }}
           >
             {/* Magnetically Translating Continuous Rotary Wheel */}
             <div
+              ref={wheelRef}
               className={`flex flex-col pt-6 sm:pt-8 pl-4 sm:pl-8 pr-2 sm:pr-4 will-change-transform ${
                 isDragging || !isTransitioning
                   ? 'transition-none'
@@ -300,7 +331,7 @@ export function StrategicJourney() {
               }`}
               style={{
                 transform: `translateY(${
-                  (-1 + stepOffset) * ITEM_HEIGHT + dragOffset
+                  (-1 + stepOffset) * ITEM_HEIGHT + dragOffsetRef.current
                 }px)`,
               }}
             >
@@ -430,10 +461,6 @@ export function StrategicJourney() {
                 )
               })}
             </div>
-
-            <span className="text-[11px] sm:text-xs text-gray-500 font-medium">
-              Rotary wheel • Swipe or scroll
-            </span>
           </div>
 
         </div>

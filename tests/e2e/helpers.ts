@@ -6,6 +6,7 @@ declare global {
     __lcp?: number
     __introPhases?: string[]
     __introTexts?: string[]
+    __mainThreadCanvasReadbacks?: number
   }
 }
 

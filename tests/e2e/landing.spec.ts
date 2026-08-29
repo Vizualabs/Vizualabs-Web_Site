@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { devices, expect, test } from '@playwright/test'
 import {
   bootLanding,
   instrument,
@@ -36,28 +36,28 @@ test.describe('branded loading screen', () => {
     const intro = page.getByTestId('brand-intro')
     await expect(intro).toBeVisible()
 
-    // Branded: the drawn V mark and the wordmark are both on screen.
-    await expect(intro.locator('.brand-intro-v')).toBeAttached()
-    await expect(intro.locator('.brand-intro-letter')).toHaveCount(9)
+    // Branded: the coral core orb and the wordmark are both on screen.
+    await expect(intro.locator('.brand-intro-core')).toBeAttached()
+    await expect(intro.locator('.brand-intro-wordmark')).toHaveText('VIZUALABS')
 
-    // It animates rather than sitting static — the mark draws itself in.
-    const dashEarly = await intro
-      .locator('.brand-intro-v')
-      .evaluate((el) => getComputedStyle(el).strokeDashoffset)
+    // It animates rather than sitting static — the accretion rings spin continuously.
+    const rotateEarly = await intro
+      .locator('.brand-intro-ring-1')
+      .evaluate((el) => getComputedStyle(el).transform)
     await page.waitForTimeout(400)
-    const dashLater = await intro
-      .locator('.brand-intro-v')
-      .evaluate((el) => getComputedStyle(el).strokeDashoffset)
-    expect(dashEarly).not.toBe(dashLater)
+    const rotateLater = await intro
+      .locator('.brand-intro-ring-1')
+      .evaluate((el) => getComputedStyle(el).transform)
+    expect(rotateEarly).not.toBe(rotateLater)
 
     await waitForIntroComplete(page)
 
-    // The recorded phase sequence proves it went through the reveal rather
-    // than simply disappearing.
+    // The loader stays opaque for warmup, then disappears directly. A third
+    // reveal phase would reintroduce the unwanted black transition layer.
     const phases = await page.evaluate(() => window.__introPhases ?? [])
     expect(phases[0]).toBe('intro')
-    expect(phases).toContain('revealing')
-    expect(phases.indexOf('revealing')).toBeGreaterThan(phases.indexOf('intro'))
+    expect(phases).toContain('warmup')
+    expect(phases).not.toContain('revealing')
 
     // ...and it handed off to a live hero.
     await expect(page.getByTestId('hero-canvas')).toBeVisible()
@@ -88,18 +88,90 @@ test.describe('branded loading screen', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
     await expect(page.getByTestId('brand-intro')).toBeVisible()
 
-    expect(
-      await page.evaluate(() => getComputedStyle(document.body).overflowY)
-    ).toBe('hidden')
+    // The lock is applied synchronously on hydration (useLayoutEffect); poll
+    // until it engages since hydration can lag behind DOMContentLoaded.
+    await expect
+      .poll(() =>
+        page.evaluate(() => getComputedStyle(document.body).overflowY)
+      )
+      .toBe('hidden')
 
     await waitForIntroComplete(page)
 
-    expect(
-      await page.evaluate(() => getComputedStyle(document.body).overflowY)
-    ).not.toBe('hidden')
+    await expect
+      .poll(() =>
+        page.evaluate(() => getComputedStyle(document.body).overflowY)
+      )
+      .not.toBe('hidden')
 
     await scrollBurst(page, 4, 200)
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  })
+
+  test('hands off directly to a clean hero without a black reveal layer', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+
+    await waitForIntroComplete(page)
+
+    const phases = await page.evaluate(() => window.__introPhases ?? [])
+    expect(phases).toContain('warmup')
+    expect(phases).not.toContain('revealing')
+    await expect(page.locator('.brand-intro-wipe')).toHaveCount(0)
+    await expect(page.getByTestId('hero-canvas')).toBeVisible()
+
+    const fire = page.getByTestId('blaze-effect-canvas')
+    await expect(fire).toHaveCSS('opacity', '1')
+  })
+
+  test('keeps the main thread responsive while the loader prepares the hero', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const from = await nowInPage(page)
+    await waitForIntroComplete(page)
+    const to = await nowInPage(page)
+
+    const stats = await longTasksBetween(page, from, to)
+    // eslint-disable-next-line no-console
+    console.log(
+      `[loader] n=${stats.count} worst=${stats.worst.toFixed(0)}ms ` +
+        `tbt=${stats.totalBlocking.toFixed(0)}ms (${stats.blockingPerSecond.toFixed(0)}ms/s)`
+    )
+
+    expect(stats.worst).toBeLessThan(BUDGET.worstLongTaskMs)
+    expect(stats.blockingPerSecond).toBeLessThan(BUDGET.blockingPerSecondMs)
+  })
+})
+
+test.describe('mobile branded loading screen', () => {
+  const mobile = devices['Pixel 5']
+  test.use({
+    viewport: mobile.viewport,
+    deviceScaleFactor: mobile.deviceScaleFactor,
+    isMobile: mobile.isMobile,
+    hasTouch: mobile.hasTouch,
+    userAgent: mobile.userAgent,
+  })
+
+  test('keeps startup responsive and hands directly to the hero', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const from = await nowInPage(page)
+    await expect(page.getByTestId('brand-intro')).toBeVisible()
+    await waitForIntroComplete(page)
+    const to = await nowInPage(page)
+
+    const phases = await page.evaluate(() => window.__introPhases ?? [])
+    expect(phases).toContain('warmup')
+    expect(phases).not.toContain('revealing')
+    await expect(page.getByTestId('hero-canvas')).toBeVisible()
+
+    const stats = await longTasksBetween(page, from, to)
+    expect(stats.worst).toBeLessThan(BUDGET.worstLongTaskMs)
+    expect(stats.blockingPerSecond).toBeLessThan(BUDGET.blockingPerSecondMs)
   })
 })
 
@@ -153,14 +225,38 @@ test.describe('initial-load scroll performance', () => {
 
     await bootLanding(page)
 
-    // Only the six <link rel=preload as=image> hints may use the image path;
+    // Only the four opening-frame preload hints may use the image path;
     // every other frame must arrive as a fetch.
-    expect(imageElementRequests.length).toBeLessThanOrEqual(6)
+    expect(imageElementRequests.length).toBeLessThanOrEqual(4)
+  })
+
+  test('moves hero pixel cleanup into a dedicated worker', async ({ page }) => {
+    const workerUrls: string[] = []
+    page.on('worker', (worker) => workerUrls.push(worker.url()))
+
+    await page.addInitScript(() => {
+      window.__mainThreadCanvasReadbacks = 0
+      const original = CanvasRenderingContext2D.prototype.getImageData
+      CanvasRenderingContext2D.prototype.getImageData = function (
+        this: CanvasRenderingContext2D,
+        ...args: Parameters<typeof original>
+      ) {
+        window.__mainThreadCanvasReadbacks!++
+        return original.apply(this, args)
+      }
+    })
+
+    await bootLanding(page, { withoutFire: true })
+
+    await expect
+      .poll(() => workerUrls.some((url) => url.includes('heroFrameWorker')))
+      .toBe(true)
+    expect(await page.evaluate(() => window.__mainThreadCanvasReadbacks)).toBe(0)
   })
 })
 
 test.describe('hero scroll effect (regression)', () => {
-  test('keeps its 350vh scroll track and sticky pinning', async ({ page }) => {
+  test('keeps its scroll track and sticky pinning', async ({ page }) => {
     await bootLanding(page, { withoutFire: true })
 
     const container = page.getByTestId('hero-scroll-container')
@@ -172,7 +268,9 @@ test.describe('hero scroll effect (regression)', () => {
           .position,
       }))
 
-    expect(containerHeight).toBeCloseTo(viewportHeight * 3.5, -1)
+    // Desktop track is 105dvh (a touch past one viewport for the turn) and
+    // mobile is 220dvh; this suite runs at 1280x800, so the desktop value wins.
+    expect(containerHeight).toBeCloseTo(viewportHeight * 1.05, -1)
     expect(stickyPosition).toBe('sticky')
   })
 
@@ -268,43 +366,29 @@ test.describe('hero heading', () => {
     expect(layering.canvasZ).toBe('auto')
   })
 
-  test('masks the canvas to the subject, aligned to the drawn frame', async ({
+  test('cuts the subject out in canvas space, not via a CSS mask', async ({
     page,
   }) => {
+    // The silhouette used to be a CSS mask-image layer; it is now composited
+    // in-canvas with destination-in so the matte cannot drift on mobile. The
+    // canvas must carry no CSS mask, and the mask asset must still be fetched.
+    const maskRequests: string[] = []
+    page.on('request', (req) => {
+      if (req.url().includes('hero-subject-mask')) maskRequests.push(req.url())
+    })
+
     await bootLanding(page, { withoutFire: true })
 
-    const mask = await page.evaluate(() => {
+    const cssMask = await page.evaluate(() => {
       const canvas = document.querySelector(
         '[data-testid="hero-canvas"]'
       ) as HTMLCanvasElement
       const cs = getComputedStyle(canvas)
-
-      // Recompute the expected rect the same way the component does.
-      const SOURCE_WIDTH = 1280
-      const CROPPED_SOURCE_HEIGHT = 1813
-      const width = window.innerWidth
-      const height = window.innerHeight
-      const isMobile = width < 768
-      let scale = (isMobile ? height * 0.7 : height * 0.86) / CROPPED_SOURCE_HEIGHT
-      if (isMobile) scale = Math.max(scale, (width * 0.84) / SOURCE_WIDTH)
-
-      return {
-        image: cs.maskImage || cs.webkitMaskImage,
-        size: cs.maskSize || cs.webkitMaskSize,
-        expectedW: SOURCE_WIDTH * scale,
-        expectedH: CROPPED_SOURCE_HEIGHT * scale,
-      }
+      return cs.maskImage || cs.webkitMaskImage
     })
+    expect(cssMask).toBe('none')
 
-    expect(mask.image).toContain('hero-subject-mask')
-
-    const [maskW, maskH] = mask.size
-      .split(' ')
-      .map((v: string) => parseFloat(v))
-    // Mask must track the exact rect the frame is painted into, or the
-    // silhouette drifts off the subject as the viewport changes.
-    expect(maskW).toBeCloseTo(mask.expectedW, 0)
-    expect(maskH).toBeCloseTo(mask.expectedH, 0)
+    await expect.poll(() => maskRequests.length).toBeGreaterThan(0)
   })
 
   test('does not paint a black smudge over the hair', async ({ page }) => {
@@ -517,20 +601,33 @@ test.describe('load performance', () => {
     expect(jpgRequests).toEqual([])
   })
 
-  test('requests only the font families the page actually paints', async ({
-    page,
-  }) => {
-    const fontCss: string[] = []
+  test('self-hosts fonts instead of loading Google Fonts', async ({ page }) => {
+    const googleFonts: string[] = []
     page.on('request', (req) => {
-      if (req.url().includes('fonts.googleapis.com/css')) fontCss.push(req.url())
+      if (req.url().includes('fonts.googleapis.com')) googleFonts.push(req.url())
     })
 
     await bootLanding(page)
 
-    const joined = fontCss.join(' ')
-    expect(joined).not.toContain('Plus+Jakarta+Sans')
-    expect(joined).not.toContain('Space+Grotesk')
+    // Fonts are self-hosted (@font-face in styles.css) — no render-blocking
+    // third-party stylesheet round trip.
+    expect(googleFonts).toEqual([])
+
+    // The families actually painted are declared as local @font-face rules.
+    const fontFaces = await page.evaluate(() =>
+      [...document.styleSheets].flatMap((sheet) => {
+        try {
+          return [...sheet.cssRules].filter((r) => r.type === 5).map((r) =>
+            (r as CSSFontFaceRule).cssText
+          )
+        } catch {
+          return []
+        }
+      })
+    )
+    const joined = fontFaces.join(' ')
     expect(joined).toContain('Poppins')
+    expect(joined).toContain('Hanken Grotesk')
   })
 
   test('preloads the opening hero frames from the document head', async ({
@@ -538,10 +635,13 @@ test.describe('load performance', () => {
   }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
 
+    // Frames are preloaded as fetch (Blob -> createImageBitmap, off the main
+    // thread) rather than as image elements, so they warm the HTTP cache
+    // without re-decoding into an <img>.
     const preloads = await page.evaluate(() =>
-      [...document.querySelectorAll('link[rel="preload"][as="image"]')].map(
-        (l) => l.getAttribute('href')
-      )
+      [...document.querySelectorAll('link[rel="preload"]')]
+        .filter((l) => l.getAttribute('href')?.includes('/Frist-opt/'))
+        .map((l) => l.getAttribute('href'))
     )
 
     expect(preloads.length).toBeGreaterThanOrEqual(4)

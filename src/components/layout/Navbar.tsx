@@ -14,22 +14,24 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Services', href: '/services', isRoute: true },
   { label: 'About Us', href: '/about', isRoute: true },
   { label: 'Process', href: '/process', isRoute: true },
-  { label: 'Case Studies', href: '/case-study', isRoute: true },
+  { label: 'Case Studies', href: '/coming-soon', isRoute: true },
 ]
 
 export function Navbar() {
+  const routerState = useRouterState()
+  const currentPath = routerState?.location?.pathname ?? ''
+  const isHome = currentPath === '/' || currentPath === ''
+
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(true)
   const [scrolled, setScrolled] = useState(false)
-  const [introLoading, setIntroLoading] = useState(true)
+  const [introLoading, setIntroLoading] = useState(() => isHome)
   const lastScrollY = useRef(0)
-
-  const routerState = useRouterState()
-  const currentPath = routerState?.location?.pathname ?? ''
+  const scrollRafRef = useRef<number | null>(null)
 
   // Listen to branded intro loading state
   useEffect(() => {
-    if (currentPath !== '/' && currentPath !== '') {
+    if (!isHome) {
       setIntroLoading(false)
       return
     }
@@ -54,7 +56,8 @@ export function Navbar() {
   }, [currentPath])
 
   useEffect(() => {
-    const handleScroll = () => {
+    const updateFromScroll = () => {
+      scrollRafRef.current = null
       const currentScrollY = window.scrollY
       setScrolled(currentScrollY > 20)
 
@@ -80,11 +83,25 @@ export function Navbar() {
       }
     }
 
+    // Coalesce to one state update per animation frame — native 'scroll'
+    // events can fire faster than the browser paints, and every prior tick
+    // paid for a full read + potential re-render.
+    const handleScroll = () => {
+      if (scrollRafRef.current !== null) return
+      scrollRafRef.current = requestAnimationFrame(updateFromScroll)
+    }
+
     // Run on initial mount
-    handleScroll()
+    updateFromScroll()
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (scrollRafRef.current !== null) {
+        cancelAnimationFrame(scrollRafRef.current)
+        scrollRafRef.current = null
+      }
+    }
   }, [open])
 
   return (
@@ -125,7 +142,8 @@ export function Navbar() {
               (item.href === '/products' && currentPath.startsWith('/product')) ||
               (item.href === '/services' && currentPath.startsWith('/service')) ||
               (item.href === '/about' && currentPath.startsWith('/about')) ||
-              (item.href === '/process' && currentPath.startsWith('/process'))
+              (item.href === '/process' && currentPath.startsWith('/process')) ||
+              (item.href === '/coming-soon' && (currentPath.startsWith('/coming-soon') || currentPath.startsWith('/case-study')))
               : false
 
             if (item.isRoute) {
@@ -197,7 +215,8 @@ export function Navbar() {
                 (item.href === '/products' && currentPath.startsWith('/product')) ||
                 (item.href === '/services' && currentPath.startsWith('/service')) ||
                 (item.href === '/about' && currentPath.startsWith('/about')) ||
-                (item.href === '/process' && currentPath.startsWith('/process'))
+                (item.href === '/process' && currentPath.startsWith('/process')) ||
+                (item.href === '/coming-soon' && (currentPath.startsWith('/coming-soon') || currentPath.startsWith('/case-study')))
                 : false
 
               if (item.isRoute) {

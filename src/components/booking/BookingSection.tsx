@@ -43,10 +43,10 @@ export function BookingSection() {
                 Scheduling isn&apos;t configured yet. In the meantime, reach us directly:
               </p>
               <a
-                href="mailto:strategy@vizualabs.tech"
+                href="mailto:info@vizualabs.com"
                 className="inline-block py-2 -my-2 font-semibold text-[#FF5540] underline-offset-4 hover:underline"
               >
-                strategy@vizualabs.tech
+                info@vizualabs.com
               </a>
             </div>
           )}

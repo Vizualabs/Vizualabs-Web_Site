@@ -13,11 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as CaseStudyRouteImport } from './routes/case-study'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProcessRouteImport } from './routes/process'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TermsRouteImport } from './routes/terms'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,9 +42,19 @@ const CaseStudyRoute = CaseStudyRouteImport.update({
   path: '/case-study',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProcessRoute = ProcessRouteImport.update({
@@ -64,28 +77,39 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/case-study': typeof CaseStudyRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/products': typeof ProductsRoute
   '/service': typeof ServiceRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/case-study': typeof CaseStudyRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/products': typeof ProductsRoute
   '/service': typeof ServiceRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -93,11 +117,14 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/case-study': typeof CaseStudyRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/products': typeof ProductsRoute
   '/service': typeof ServiceRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,33 +133,42 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/case-study'
+    | '/coming-soon'
     | '/contact'
+    | '/privacy'
     | '/process'
     | '/products'
     | '/service'
     | '/services'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/book'
     | '/case-study'
+    | '/coming-soon'
     | '/contact'
+    | '/privacy'
     | '/process'
     | '/products'
     | '/service'
     | '/services'
+    | '/terms'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/book'
     | '/case-study'
+    | '/coming-soon'
     | '/contact'
+    | '/privacy'
     | '/process'
     | '/products'
     | '/service'
     | '/services'
+    | '/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,11 +176,14 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BookRoute: typeof BookRoute
   CaseStudyRoute: typeof CaseStudyRoute
+  ComingSoonRoute: typeof ComingSoonRoute
   ContactRoute: typeof ContactRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
   ProductsRoute: typeof ProductsRoute
   ServiceRoute: typeof ServiceRoute
   ServicesRoute: typeof ServicesRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -177,11 +216,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaseStudyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/process': {
@@ -212,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -220,11 +280,14 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BookRoute: BookRoute,
   CaseStudyRoute: CaseStudyRoute,
+  ComingSoonRoute: ComingSoonRoute,
   ContactRoute: ContactRoute,
+  PrivacyRoute: PrivacyRoute,
   ProcessRoute: ProcessRoute,
   ProductsRoute: ProductsRoute,
   ServiceRoute: ServiceRoute,
   ServicesRoute: ServicesRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

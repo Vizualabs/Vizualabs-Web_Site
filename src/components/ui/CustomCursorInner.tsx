@@ -13,7 +13,7 @@ export function CustomCursorInner() {
       cursorX.set(e.clientX)
       cursorY.set(e.clientY)
     }
-    window.addEventListener('mousemove', move)
+    window.addEventListener('mousemove', move, { passive: true })
     return () => window.removeEventListener('mousemove', move)
   }, [cursorX, cursorY])
 

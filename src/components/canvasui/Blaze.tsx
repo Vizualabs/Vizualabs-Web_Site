@@ -9,6 +9,8 @@ import {
 } from "react";
 
 export interface BlazeOptions {
+  /** Render one prepared frame without running the continuous animation. */
+  paused?: boolean;
   /** Height of the blaze zone as a fraction of the screen (0 to 1). */
   height?: number;
   /** Strength of the heat distortion bending the content. */
@@ -58,6 +60,7 @@ export interface BlazeInstance {
 }
 
 const DEFAULTS: Required<BlazeOptions> = {
+  paused: false,
   height: 0.97,
   distortion: 0.6,
   distortionScale: 0.5,
@@ -604,7 +607,9 @@ export function createBlaze(
 
   let raf = 0;
   let lastTime = performance.now();
-  const MIN_FRAME_INTERVAL_MS = 1000 / 30;
+  // Fire and smoke are deliberately slow-moving; 24fps preserves their look
+  // while reserving CPU/GPU time for the 60fps scroll-driven subject canvas.
+  const MIN_FRAME_INTERVAL_MS = 1000 / 24;
   let destroyed = false;
   let running = false;
   let visible = true;
@@ -622,11 +627,11 @@ export function createBlaze(
       raf = requestAnimationFrame(frame);
       return;
     }
-    const delta = Math.min((now - lastTime) / 1000, 1 / 30);
+    const delta = Math.min((now - lastTime) / 1000, 1 / 24);
     lastTime = now;
-    if (!reducedMotion) time += delta * config.speed;
+    if (!reducedMotion && !config.paused) time += delta * config.speed;
     render();
-    if (reducedMotion && !contentDirty) {
+    if ((reducedMotion || config.paused) && !contentDirty) {
       running = false;
       return;
     }
@@ -664,12 +669,17 @@ export function createBlaze(
 
   return {
     setOptions(next) {
-      if (
-        !Object.entries(next).some(
-          ([key, value]) => config[key as keyof BlazeOptions] !== value,
-        )
-      )
-        return;
+      const changed = Object.entries(next).some(([key, value]) => {
+        const previous = config[key as keyof BlazeOptions];
+        if (Array.isArray(value) && Array.isArray(previous)) {
+          return (
+            value.length !== previous.length ||
+            value.some((item, index) => item !== previous[index])
+          );
+        }
+        return previous !== value;
+      });
+      if (!changed) return;
       Object.assign(config, next);
       start();
     },
@@ -701,11 +711,19 @@ export interface BlazeProps extends BlazeOptions {
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  /** Hide only the rendered fire layer while keeping children mounted. */
+  effectVisible?: boolean;
 }
 
 const emptySubscribe = () => () => {};
 
-export function Blaze({ children, className, style, ...options }: BlazeProps) {
+export function Blaze({
+  children,
+  className,
+  style,
+  effectVisible = true,
+  ...options
+}: BlazeProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -782,12 +800,16 @@ export function Blaze({ children, className, style, ...options }: BlazeProps) {
       ) : null}
       <canvas
         ref={outputRef}
+        data-testid="blaze-effect-canvas"
         aria-hidden
         style={{
           position: "absolute",
           inset: 0,
           width: "100%",
           height: "100%",
+          opacity: effectVisible ? 1 : 0,
+          transition: "opacity 240ms ease-out",
+          transitionDelay: effectVisible ? "120ms" : "0ms",
           pointerEvents: "none",
         }}
       />

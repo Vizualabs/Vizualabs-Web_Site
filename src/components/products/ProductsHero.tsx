@@ -23,13 +23,14 @@ export function ProductsHero() {
           </div>
         </FadeLine>
 
-        <TextReveal
-          as="h1"
-          className="font-hanken text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] xl:text-[5.75rem] font-extrabold tracking-tight leading-[1.05] text-[#E5E2E1]"
-          delay={0.05}
-        >
-          Software that runs the business.
-        </TextReveal>
+        <h1 className="font-hanken text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] xl:text-[5.75rem] font-extrabold tracking-tight leading-[1.05] flex flex-wrap gap-x-[0.28em] gap-y-1">
+          <TextReveal as="span" className="text-[#E5E2E1]" delay={0.05}>
+            Software that runs
+          </TextReveal>
+          <TextReveal as="span" className="text-[#FF553E]" delay={0.12}>
+            the business.
+          </TextReveal>
+        </h1>
 
         <FadeLine delay={0.28}>
           <p className="mt-6 sm:mt-7 max-w-2xl sm:max-w-3xl text-base sm:text-lg md:text-[1.125rem] font-normal leading-relaxed text-[#EBBBB4]">

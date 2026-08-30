@@ -1,4 +1,4 @@
-import { ShieldCheck, Zap, Code, Award } from 'lucide-react'
+import { Zap, Code, Award } from 'lucide-react'
 
 // Static stats array hoisted to module scope (vercel-react-best-practices: rendering-hoist-jsx)
 const STATS_DATA = [

@@ -167,11 +167,6 @@ export function ScrollHeroSection() {
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
   const [heroPrepared, setHeroPrepared] = useState(false)
 
-  // Live 0..100 readout for the black hole loader's disk ignition + percentage
-  // label. Tracks the same choreography timer that gates 'intro' -> 'warmup'
-  // (see below), so it reaches 100 exactly when the reveal fires.
-  const [introProgress, setIntroProgress] = useState(0)
-
   // Starts false to match SSR; flipped in an effect (client-only) so a
   // returning visitor never renders a mismatched first frame during
   // hydration.
@@ -1009,12 +1004,7 @@ export function ScrollHeroSection() {
             flat black with no heat distortion, and sits above it so the fire
             can warm up hidden underneath. */}
         {phase !== 'done' && (
-          <BrandIntro
-            phase={phase}
-            fast={fastIntro}
-            progress={introProgress}
-            simplifiedVisual={skipFire}
-          />
+          <BrandIntro phase={phase} fast={fastIntro} />
         )}
 
       </div>

@@ -126,10 +126,14 @@ jobs:
         env:
           HOSTINGER_FTP_REMOTE_DIR: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR }}
         run: |
-          dir="${HOSTINGER_FTP_REMOTE_DIR:-/public_html/}"
+          # Strip accidental whitespace/newlines from pasted secrets.
+          dir="$(printf '%s' "${HOSTINGER_FTP_REMOTE_DIR:-/public_html/}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          if [ -z "$dir" ]; then
+            dir="/public_html/"
+          fi
           dir="${dir%/}/"
-          echo "Using server-dir: ${dir}"
-          echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+          echo "Using normalized FTP server-dir"
+          printf 'dir=%s\n' "$dir" >> "$GITHUB_OUTPUT"
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6

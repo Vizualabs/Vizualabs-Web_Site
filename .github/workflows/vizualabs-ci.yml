@@ -128,6 +128,8 @@ jobs:
         run: |
           # Strip accidental whitespace/newlines from pasted secrets.
           dir="$(printf '%s' "${HOSTINGER_FTP_REMOTE_DIR:-/public_html/}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          # hPanel shows absolute paths like /home/u123/... — FTP expects relative.
+          dir="$(printf '%s' "$dir" | sed -E 's|^/home/u[0-9]+||')"
           if [ -z "$dir" ]; then
             dir="/public_html/"
           fi
@@ -143,9 +145,12 @@ jobs:
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./dist/client/
-          # REQUIRED for addon domains — set GitHub secret HOSTINGER_FTP_REMOTE_DIR
-          # to the vizualabs.com web root, e.g. /domains/vizualabs.com/public_html/
-          # Trailing slash optional; normalized in the step above.
+          # Hostinger FTP paths are RELATIVE to the FTP account root — not the
+          # full server path. hPanel may show:
+          #   /home/u962037160/domains/vizualabs.com/public_html
+          # but the secret must be:
+          #   /domains/vizualabs.com/public_html/
+          # Domain-specific FTP accounts rooted at public_html may use: /
           server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: false
 

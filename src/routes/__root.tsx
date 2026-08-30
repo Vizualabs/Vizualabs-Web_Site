@@ -4,17 +4,11 @@ import type { QueryClient } from '@tanstack/react-query'
 import appCss from '../styles.css?url'
 import { CustomCursor } from '../components/ui/CustomCursor'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
+import { SITE_NAME, SITE_URL } from '../lib/site'
 
 interface RouterContext {
   queryClient: QueryClient
 }
-
-// NOTE: the codebase uses both vizualabs.tech (ContactSection)
-// and vizualabs.com (chat system prompt, AssistantWidget) inconsistently.
-// This picks .tech since that's what's shown to visitors on the live
-// contact page — flag if that's wrong and every OG/canonical URL below
-// moves with it.
-const SITE_URL = 'https://vizualabs.com'
 const DEFAULT_DESCRIPTION =
   'Vizualabs engineers custom software, product development, and AI solutions with the same precision from first idea to launch.'
 
@@ -41,7 +35,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
       {
         property: 'og:site_name',
-        content: 'Vizualabs',
+        content: SITE_NAME,
       },
       {
         property: 'og:title',
@@ -61,6 +55,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
     ],
     links: [
+      {
+        rel: 'sitemap',
+        type: 'application/xml',
+        href: '/sitemap.xml',
+      },
       {
         rel: 'icon',
         type: 'image/svg+xml',

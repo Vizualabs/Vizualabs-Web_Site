@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check, AlertCircle } from 'lucide-react'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
-import { submitLead } from '#/lib/submitLead'
+import { submitLeadClient } from '#/lib/submitLeadClient'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -108,7 +108,7 @@ export function ContactSection() {
     setError(null)
 
     try {
-      const result = await submitLead({ data: formData })
+      const result = await submitLeadClient(formData)
       if (result.ok) {
         setSubmitted(true)
         setFormData(initialFormData)

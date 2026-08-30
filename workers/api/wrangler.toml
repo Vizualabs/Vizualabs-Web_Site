@@ -14,5 +14,4 @@ ALLOWED_ORIGINS = "https://vizualabs.com,https://www.vizualabs.com,http://localh
 
 # Secrets (set via CLI — never commit):
 #   bunx wrangler secret put RESEND_API_KEY
-# Optional later:
 #   bunx wrangler secret put GEMINI_API_KEY

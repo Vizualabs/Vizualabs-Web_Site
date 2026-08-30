@@ -1,0 +1,11 @@
+# Hostinger Apache — SPA fallback for client-side navigation.
+# Prerendered HTML exists for known routes; unknown paths fall back to /.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

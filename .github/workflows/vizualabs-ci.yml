@@ -129,7 +129,19 @@ jobs:
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./dist/client/
-          # Hostinger web root. Override with secret only if your path differs
-          # (e.g. /domains/vizualabs.com/public_html/).
+          # REQUIRED for addon domains — set GitHub secret HOSTINGER_FTP_REMOTE_DIR
+          # to the vizualabs.com web root, e.g. /domains/vizualabs.com/public_html/
+          # Default /public_html/ only works when vizualabs.com IS the primary domain.
           server-dir: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR || '/public_html/' }}
           dangerous-clean-slate: false
+
+      - name: Verify live site
+        run: |
+          for path in / /sitemap.xml /robots.txt; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" "https://vizualabs.com${path}")
+            echo "${path} → HTTP ${code}"
+            if [ "$code" != "200" ]; then
+              echo "::error::Deploy path may be wrong. Set HOSTINGER_FTP_REMOTE_DIR to vizualabs.com public_html in GitHub Secrets."
+              exit 1
+            fi
+          done

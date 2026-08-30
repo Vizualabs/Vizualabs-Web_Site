@@ -121,6 +121,16 @@ jobs:
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
 
+      - name: Prepare FTP remote directory
+        id: ftp
+        env:
+          HOSTINGER_FTP_REMOTE_DIR: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR }}
+        run: |
+          dir="${HOSTINGER_FTP_REMOTE_DIR:-/public_html/}"
+          dir="${dir%/}/"
+          echo "Using server-dir: ${dir}"
+          echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -131,8 +141,8 @@ jobs:
           local-dir: ./dist/client/
           # REQUIRED for addon domains — set GitHub secret HOSTINGER_FTP_REMOTE_DIR
           # to the vizualabs.com web root, e.g. /domains/vizualabs.com/public_html/
-          # Default /public_html/ only works when vizualabs.com IS the primary domain.
-          server-dir: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR || '/public_html/' }}
+          # Trailing slash optional; normalized in the step above.
+          server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: false
 
       - name: Verify live site

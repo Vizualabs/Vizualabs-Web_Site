@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
-import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check, AlertCircle } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { SendHorizontal, AtSign, ChevronDown, MapPin, Mail, Check, AlertCircle, ArrowUpRight } from 'lucide-react'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
 import { submitLeadClient } from '#/lib/submitLeadClient'
+import { ContactAiReadPanel } from '#/components/contact/ContactAiReadPanel'
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -52,17 +54,27 @@ const socialLinks = [
     ),
   },
   {
-    label: 'GitHub',
-    href: 'https://github.com/vizualabs',
+    label: 'Instagram',
+    href: 'https://www.instagram.com/vizualabs/',
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881.001 1.44 1.44 0 012.881-.001z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/Vizualabs',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
       </svg>
     ),
   },
 ]
 
-export function ContactSection() {
+export function ContactSection({ variant = 'page' }: { variant?: 'page' | 'home' }) {
+  const isHome = variant === 'home'
   const [formData, setFormData] = useState(initialFormData)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -122,10 +134,23 @@ export function ContactSection() {
     }
   }
 
+  const handleAiReadComplete = (summary: string) => {
+    setFormData((current) => {
+      const marker = '\n\n--- AI scope read ---\n'
+      if (current.message.includes('--- AI scope read ---')) return current
+      const nextMessage = current.message.trim()
+        ? `${current.message.trim()}${marker}${summary}`
+        : summary
+      return { ...current, message: nextMessage.slice(0, 4000) }
+    })
+  }
+
   return (
     <section
       id="contact"
-      className="relative isolate overflow-hidden bg-[#0a0a0a] px-4 py-20 text-[#E5E2E1] selection:bg-[#FF5540] selection:text-[#0a0a0a] sm:px-8 sm:py-28 lg:px-16 lg:py-36"
+      className={`relative isolate overflow-hidden bg-[#0a0a0a] px-4 text-[#E5E2E1] selection:bg-[#FF5540] selection:text-[#0a0a0a] sm:px-8 lg:px-16 ${
+        isHome ? 'py-16 sm:py-20 lg:py-24' : 'py-20 sm:py-28 lg:py-36'
+      }`}
     >
       <div className="pointer-events-none absolute -left-40 top-1/3 h-96 w-96 rounded-full bg-[#FF5540]/[0.035] blur-[140px]" />
       <div className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-[#FF5540]/[0.035] blur-[130px]" />
@@ -138,13 +163,36 @@ export function ContactSection() {
             className="max-w-xl"
           >
             <h1 className="type-section font-bold text-[#E5E2E1]">
-              Initiate Strategic Contact
+              {isHome ? 'Tell us what you\u2019re building' : 'Initiate Strategic Contact'}
             </h1>
             <p className="type-lead mt-6 max-w-lg text-[#E5E2E1]/70">
-              Tell us what you're building — a founder reads every message personally.
+              {isHome
+                ? 'Reach out first — a founder reads every message personally. Prefer to explore our work before you write? Browse the projects below.'
+                : 'Tell us what you\u2019re building — a founder reads every message personally.'}
             </p>
 
-            <div className="mt-10 sm:mt-12 space-y-6 sm:space-y-7">
+            {isHome ? (
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+                <Link
+                  to="/case-study"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#3A3735] bg-[#171615] px-5 text-sm font-semibold text-[#E5E2E1] transition-colors hover:border-[#FF5540] hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                >
+                  View our case studies
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+                <a
+                  href="mailto:info@vizualabs.com"
+                  className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[#FFB4A8] transition-colors hover:text-[#FF5540]"
+                >
+                  <AtSign className="h-4 w-4" aria-hidden="true" />
+                  info@vizualabs.com
+                </a>
+              </div>
+            ) : null}
+
+            <div className={`space-y-6 sm:space-y-7 ${isHome ? 'mt-10 sm:mt-12' : 'mt-10 sm:mt-12'}`}>
+              {!isHome ? (
+              <>
               <div className="flex gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#3A3735] bg-[#171615] text-[#FFB4A8]">
                   <MapPin className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
@@ -174,9 +222,11 @@ export function ContactSection() {
                   </div>
                 </div>
               </div>
+              </>
+              ) : null}
             </div>
 
-            <div className="mt-10 sm:mt-12 border-t border-white/10 pt-6 sm:pt-7">
+            <div className={`border-t border-white/10 pt-6 sm:pt-7 ${isHome ? 'mt-8' : 'mt-10 sm:mt-12'}`}>
               <p className="mb-4 font-geist text-xs font-medium uppercase tracking-[0.16em] text-[#E5E2E1]/40">Connect with us</p>
               <div className="flex gap-3">
                 {socialLinks.map((social) => (
@@ -339,6 +389,8 @@ export function ContactSection() {
                     className="min-h-32 w-full resize-y rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-sm leading-relaxed text-[#E5E2E1] outline-none transition-colors placeholder:text-[#E5E2E1]/30 focus:border-[#FF5540] focus:ring-1 focus:ring-[#FF5540]"
                   />
                 </div>
+
+                <ContactAiReadPanel onReadComplete={handleAiReadComplete} />
 
                 {error ? (
                   <div

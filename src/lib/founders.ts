@@ -12,7 +12,7 @@ export const FOUNDERS: FounderProfile[] = [
     id: 'soorya',
     name: 'Soorya Suraweera',
     title: 'Co-Founder',
-    imageSrc: '/images/founders/soorya-suraweera.jpg',
+    imageSrc: '/images/founders/soorya-suraweera.jpeg',
     imageAlt: 'Portrait of Soorya Suraweera, Co-Founder of Vizualabs',
     quote:
       'Software only matters when it ships reliably and scales without drama. We build with that standard from day one — clean architecture, honest timelines, and systems our clients can trust for years.',

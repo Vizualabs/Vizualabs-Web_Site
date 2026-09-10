@@ -1,62 +1,49 @@
 import { useEffect } from 'react'
 
-const PROJECT_ID = import.meta.env.VITE_CLARITY_PROJECT_ID as string | undefined
+const PROJECT_ID = (import.meta.env.VITE_CLARITY_PROJECT_ID as string | undefined)?.trim()
 
 declare global {
   interface Window {
-    clarity?: (...args: unknown[]) => void
+    clarity?: ((...args: unknown[]) => void) & { q?: unknown[] }
   }
+}
+
+/** Official Clarity bootstrap — safe to call once; no-ops if already present. */
+export function injectClarity(projectId: string) {
+  if (typeof window === 'undefined' || !projectId) return
+  if (document.getElementById('microsoft-clarity')) return
+
+  window.clarity =
+    window.clarity ||
+    function (...args: unknown[]) {
+      ;(window.clarity!.q = window.clarity!.q || []).push(args)
+    }
+
+  const script = document.createElement('script')
+  script.id = 'microsoft-clarity'
+  script.async = true
+  script.src = `https://www.clarity.ms/tag/${projectId}`
+  // Always append to <head> — the stock snippet can no-op when no <script>
+  // tags exist yet (common right after a SPA shell mounts).
+  document.head.appendChild(script)
 }
 
 /**
  * Loads Microsoft Clarity after first paint so heatmaps / session recordings
- * never compete with hero decode or hydration. No-op when the project ID
- * env var is unset (local/CI without analytics).
+ * never compete with hero decode. No-op when VITE_CLARITY_PROJECT_ID is unset.
  */
 export function ClarityInit() {
   useEffect(() => {
-    const id = PROJECT_ID?.trim()
-    if (!id || typeof window === 'undefined') return
-    if (document.getElementById('microsoft-clarity')) return
+    if (!PROJECT_ID) return
 
-    const load = () => {
-      ;(function (
-        c: Window,
-        l: Document,
-        a: string,
-        r: string,
-        i: string,
-        t?: HTMLScriptElement,
-        y?: Element
-      ) {
-        const w = c as Window & Record<string, { q?: unknown[] } & ((...args: unknown[]) => void)>
-        w[a] =
-          w[a] ||
-          function (...args: unknown[]) {
-            ;(w[a].q = w[a].q || []).push(args)
-          }
-        t = l.createElement(r) as HTMLScriptElement
-        t.async = true
-        t.src = 'https://www.clarity.ms/tag/' + i
-        t.id = 'microsoft-clarity'
-        y = l.getElementsByTagName(r)[0]
-        y?.parentNode?.insertBefore(t, y)
-      })(window, document, 'clarity', 'script', id)
-    }
-
-    const idleWindow = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
-      cancelIdleCallback?: (handle: number) => void
-    }
-
-    if (idleWindow.requestIdleCallback) {
-      const handle = idleWindow.requestIdleCallback(load, { timeout: 2500 })
-      return () => idleWindow.cancelIdleCallback?.(handle)
-    }
-
-    const timeout = window.setTimeout(load, 1200)
-    return () => window.clearTimeout(timeout)
+    // Next frame: hydration finished, still early enough for Clarity to
+    // capture the visit. Avoid requestIdleCallback — Strict Mode cleanup
+    // can cancel it before the tag ever runs.
+    const handle = window.setTimeout(() => injectClarity(PROJECT_ID), 0)
+    return () => window.clearTimeout(handle)
   }, [])
 
   return null
 }
+
+export const CLARITY_PROJECT_ID = PROJECT_ID

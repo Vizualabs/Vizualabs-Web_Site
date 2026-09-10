@@ -2,7 +2,7 @@ import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/reac
 import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
-import { ClarityInit } from '../components/analytics/ClarityInit'
+import { ClarityInit, CLARITY_PROJECT_ID } from '../components/analytics/ClarityInit'
 import { CustomCursor } from '../components/ui/CustomCursor'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
 import { SITE_NAME, SITE_URL } from '../lib/site'
@@ -101,6 +101,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         fetchPriority: 'high' as const,
       })),
     ],
+    // Inline Clarity bootstrap in <head> so static Hostinger HTML records
+    // visits even before React hydrates. Guarded: only when the build has an ID.
+    scripts: CLARITY_PROJECT_ID
+      ? [
+          {
+            id: 'microsoft-clarity-bootstrap',
+            children: `(function(c,l,a,r,i,t){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;t.id="microsoft-clarity";(l.head||l.documentElement).appendChild(t);})(window,document,"clarity","script",${JSON.stringify(CLARITY_PROJECT_ID)});`,
+          },
+        ]
+      : [],
   }),
   shellComponent: RootDocument,
 })

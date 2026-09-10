@@ -40,6 +40,7 @@ jobs:
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLARITY_PROJECT_ID: ${{ vars.VITE_CLARITY_PROJECT_ID }}
 
   e2e:
     name: E2E (Playwright)
@@ -79,6 +80,7 @@ jobs:
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLARITY_PROJECT_ID: ${{ vars.VITE_CLARITY_PROJECT_ID }}
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
@@ -123,6 +125,7 @@ jobs:
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLARITY_PROJECT_ID: ${{ vars.VITE_CLARITY_PROJECT_ID }}
 
       - name: Prepare FTP remote directory
         id: ftp

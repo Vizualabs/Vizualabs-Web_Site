@@ -51,7 +51,8 @@ function PrivacyPage() {
           <LegalSection title="Sharing">
             <p>
               We do not sell personal information. We may share data with service providers who help us operate
-              the website (for example email or hosting), or when required by law.
+              the website (for example email, hosting, or analytics such as Microsoft Clarity for heatmaps and
+              session recordings), or when required by law.
             </p>
           </LegalSection>
 

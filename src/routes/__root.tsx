@@ -2,6 +2,7 @@ import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/reac
 import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
+import { ClarityInit } from '../components/analytics/ClarityInit'
 import { CustomCursor } from '../components/ui/CustomCursor'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
 import { SITE_NAME, SITE_URL } from '../lib/site'
@@ -112,6 +113,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         {children}
+        <ClarityInit />
         <CustomCursor />
         <Scripts />
       </body>

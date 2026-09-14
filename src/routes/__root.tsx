@@ -13,6 +13,8 @@ interface RouterContext {
 const DEFAULT_DESCRIPTION =
   'Vizualabs engineers custom software, product development, and AI solutions with the same precision from first idea to launch.'
 
+const OG_IMAGE_URL = `${SITE_URL}/images/og-share.jpg`
+
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
@@ -51,8 +53,32 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content: SITE_URL,
       },
       {
+        property: 'og:image',
+        content: OG_IMAGE_URL,
+      },
+      {
+        property: 'og:image:type',
+        content: 'image/jpeg',
+      },
+      {
+        property: 'og:image:width',
+        content: '1024',
+      },
+      {
+        property: 'og:image:height',
+        content: '1024',
+      },
+      {
+        property: 'og:image:alt',
+        content: 'Vizualabs logo',
+      },
+      {
         name: 'twitter:card',
         content: 'summary',
+      },
+      {
+        name: 'twitter:image',
+        content: OG_IMAGE_URL,
       },
     ],
     links: [
@@ -63,8 +89,25 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
       {
         rel: 'icon',
-        type: 'image/svg+xml',
-        href: '/favicon.svg',
+        type: 'image/png',
+        sizes: '32x32',
+        href: '/favicon-32.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '48x48',
+        href: '/favicon-48.png',
+      },
+      {
+        rel: 'apple-touch-icon',
+        sizes: '180x180',
+        href: '/apple-touch-icon.png',
+      },
+      {
+        rel: 'shortcut icon',
+        type: 'image/jpeg',
+        href: '/favicon.jpg',
       },
       // Fonts are self-hosted (src/styles.css) — no more third-party
       // fonts.googleapis.com round trip blocking first paint. Only the two

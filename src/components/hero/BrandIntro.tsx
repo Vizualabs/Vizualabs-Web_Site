@@ -4,25 +4,75 @@
  * an orbiting satellite; the wordmark ignites, then hands directly to the
  * hero. All space motion lives on one budget-capped 2D canvas (see
  * universeCanvas.ts); the DOM carries only the planet, orbits, and copy.
+ *
+ * The progress sweep is driven by the REAL hero frame-decode fraction,
+ * eased per-frame on a rAF loop, so the bar completes exactly when the site
+ * is ready — then the whole plane dissolves into the already-live hero.
  */
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { startUniverse, type UniverseHandle } from './universeCanvas'
 
-export type IntroPhase = 'intro' | 'warmup'
+export type IntroPhase = 'intro' | 'warmup' | 'leaving'
 
 /** First-visit beat: stars settle in, wordmark ignites, hold for decode. */
 export const BRAND_INTRO_CHOREOGRAPHY_MS = 2000
 
+/** Fill glide time constant — short enough to track live decode bursts. */
+const FILL_SMOOTH_SEC = 0.18
+
 export function BrandIntro({
   phase,
   fast = false,
+  progress = 0,
 }: {
   phase: IntroPhase
   /** Returning session visitor — short branded fade, no full choreography. */
   fast?: boolean
+  /** Real hero-load fraction, 0..1. Pinned to full once the intro beat ends. */
+  progress?: number
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fillRef = useRef<HTMLSpanElement>(null)
   const universeRef = useRef<UniverseHandle | null>(null)
+  const targetRef = useRef(Math.min(1, Math.max(0, progress)))
+
+  // The bar tracks the true load while the intro beat plays; the moment the
+  // hero takes over preparation (warmup) it sweeps to full — the loader and
+  // the load finish together.
+  useEffect(() => {
+    targetRef.current =
+      phase === 'intro' ? Math.min(1, Math.max(0, progress)) : 1
+  }, [phase, progress])
+
+  // Ease the fill toward its target on a rAF loop and write the transform
+  // straight to the DOM — no React re-render per decoded frame, no CSS
+  // animation stepping. Reduced-motion sessions snap instead of gliding.
+  useEffect(() => {
+    const fill = fillRef.current
+    if (!fill) return
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    let raf = 0
+    let displayed = 0
+    let last = performance.now()
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick)
+      const target = targetRef.current
+      if (displayed === target) {
+        last = now
+        return
+      }
+      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000))
+      last = now
+      const alpha = reducedMotion ? 1 : 1 - Math.exp(-dt / FILL_SMOOTH_SEC)
+      displayed += (target - displayed) * alpha
+      if (Math.abs(target - displayed) < 0.002) displayed = target
+      fill.style.transform = `scaleX(${displayed})`
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -47,12 +97,12 @@ export function BrandIntro({
   // those one-time GPU costs cannot steal frames from the visible loader.
   // The planet, orbit, wordmark and progress sweep keep animating in CSS.
   useLayoutEffect(() => {
-    if (phase === 'warmup') universeRef.current?.freeze()
+    if (phase !== 'intro') universeRef.current?.freeze()
   }, [phase])
 
   return (
     <div
-      className={`fixed inset-0 z-[100] overflow-hidden${fast ? ' brand-intro-fast' : ''}`}
+      className={`fixed inset-0 z-[100] overflow-hidden${fast ? ' brand-intro-fast' : ''}${phase === 'leaving' ? ' brand-intro-leaving' : ''}`}
       data-testid="brand-intro"
       data-phase={phase}
       role="status"
@@ -118,9 +168,16 @@ export function BrandIntro({
           </p>
         </div>
 
-        {/* Cinematic progress sweep */}
-        <div className="brand-intro-bar mt-10 h-[1.5px] w-28 overflow-hidden rounded-full bg-white/[0.08] sm:w-36">
-          <span className="brand-intro-bar-fill block h-full w-full origin-left rounded-full bg-gradient-to-r from-[#FF5E4D] via-[#FF8A6B] to-[#FF5E4D]" />
+        {/* Progress sweep — tracks the real hero-load fraction, then pops
+            bright for a beat as the handoff begins */}
+        <div
+          className="brand-intro-bar mt-10 h-[1.5px] w-28 overflow-hidden rounded-full bg-white/[0.08] sm:w-36"
+          data-complete={phase !== 'intro' || undefined}
+        >
+          <span
+            ref={fillRef}
+            className="brand-intro-bar-fill block h-full w-full origin-left rounded-full bg-gradient-to-r from-[#FF5E4D] via-[#FF8A6B] to-[#FF5E4D]"
+          />
         </div>
       </div>
 

@@ -134,6 +134,16 @@ const INTRO_SEEN_KEY = 'vlabs_intro_seen'
 // here — while the plane is still fully opaque — keeps it off the first scroll.
 const WARMUP_MS = 400
 
+// The intro also waits on the reveal-gating frames, so the loader and the
+// load finish together — but a stalled connection must never pin the loader,
+// so this hard cap forces the handoff regardless.
+const INTRO_LOAD_CAP_MS = 8000
+
+// Dissolve between the opaque warmup plane and the live hero: a short fade
+// (~60-70% of an entrance beat, per motion guidance) with the hero already
+// painted underneath — a handoff, not a black reveal layer.
+const LEAVE_MS = 480
+
 type IdleWindow = Window & {
   requestIdleCallback?: (
     callback: () => void,
@@ -162,11 +172,19 @@ export function ScrollHeroSection() {
   // Pre-cropped, pre-scaled GPU bitmaps — the ONLY thing kept in memory.
   const bitmapsRef = useRef<(ImageBitmap | undefined)[]>([])
 
-  // 'intro'     — opaque plane, core + wordmark, fire not yet mounted, scroll locked
+  // 'intro'     — opaque plane, planet + wordmark, fire not yet mounted, scroll locked
   // 'warmup'    — still opaque, fire mounting behind it, scroll locked
-  // 'done'      — overlay unmounted; the prepared hero appears immediately
+  // 'leaving'   — dissolving into the already-live hero, scroll released
+  // 'done'      — overlay unmounted
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
   const [heroPrepared, setHeroPrepared] = useState(false)
+
+  // Real fraction of the reveal-gating hero frames decoded so far — this is
+  // what the loader's progress sweep tracks, so the bar and the load finish
+  // together instead of the bar looping a fake animation.
+  const [loadProgress, setLoadProgress] = useState(0)
+  const [minElapsed, setMinElapsed] = useState(false)
+  const [loadTimedOut, setLoadTimedOut] = useState(false)
 
   // Starts false to match SSR; flipped in an effect (client-only) so a
   // returning visitor never renders a mismatched first frame during
@@ -491,6 +509,8 @@ export function ScrollHeroSection() {
 
     const phase1Indices = INTERACTION_READY_FRAMES
     const phase1Set = new Set(phase1Indices)
+    const phase1Total = phase1Indices.length
+    let phase1Done = 0
     const tailIndices: number[] = []
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       if (phase1Set.has(i)) continue
@@ -525,6 +545,14 @@ export function ScrollHeroSection() {
 
       completed++
       if (cancelled) return
+
+      // Reveal-gating fraction — the loader's progress sweep tracks this.
+      // Failures still count: they are patched with frame 1 once the load
+      // completes, so the reveal is never gated on a broken frame.
+      if (phase1Set.has(frameIndex)) {
+        phase1Done++
+        setLoadProgress(phase1Done / phase1Total)
+      }
 
       const allDone = completed === totalToLoad
 
@@ -636,24 +664,48 @@ export function ScrollHeroSection() {
    * just scheduled in the same closure.
    */
 
-  // intro -> warmup after the branded animation beat has played.
+  // intro: arm the branded-beat timer and the load hard-cap timer.
   useEffect(() => {
     if (phase !== 'intro') return
     const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
     const timer = window.setTimeout(() => {
       sessionStorage.setItem(INTRO_SEEN_KEY, '1')
-      // Network or decoder failures must never leave the hero shell missing.
-      startTransition(() => setHeroPrepared(true))
-      setPhase('warmup')
+      setMinElapsed(true)
     }, minMs)
-    return () => window.clearTimeout(timer)
+    // A stalled network must never pin the loader — force the handoff.
+    const capTimer = window.setTimeout(
+      () => setLoadTimedOut(true),
+      INTRO_LOAD_CAP_MS
+    )
+    return () => {
+      window.clearTimeout(timer)
+      window.clearTimeout(capTimer)
+    }
   }, [phase, fastIntro])
 
-  // Warm up the prepared hero behind the fully opaque loader, then unmount the
-  // loader in one commit. There is no intermediate blur or black reveal layer.
+  // intro -> warmup once the branded beat has played AND the reveal-gating
+  // frames are in (or the cap tripped) — the loader and the load finish
+  // together, so the progress sweep reads as the truth, not decoration.
+  useEffect(() => {
+    if (phase !== 'intro' || !minElapsed) return
+    if (loadProgress < 1 && !loadTimedOut) return
+    // Network or decoder failures must never leave the hero shell missing.
+    startTransition(() => setHeroPrepared(true))
+    setPhase('warmup')
+  }, [phase, minElapsed, loadProgress, loadTimedOut])
+
+  // Warm up the prepared hero behind the fully opaque loader, then dissolve.
   useEffect(() => {
     if (phase !== 'warmup') return
-    const timer = window.setTimeout(() => setPhase('done'), WARMUP_MS)
+    const timer = window.setTimeout(() => setPhase('leaving'), WARMUP_MS)
+    return () => window.clearTimeout(timer)
+  }, [phase])
+
+  // The hero is already live underneath the fading plane; unmount once the
+  // dissolve lands. There is no intermediate blur or black reveal layer.
+  useEffect(() => {
+    if (phase !== 'leaving') return
+    const timer = window.setTimeout(() => setPhase('done'), LEAVE_MS)
     return () => window.clearTimeout(timer)
   }, [phase])
 
@@ -1008,7 +1060,7 @@ export function ScrollHeroSection() {
             flat black with no heat distortion, and sits above it so the fire
             can warm up hidden underneath. */}
         {phase !== 'done' && (
-          <BrandIntro phase={phase} fast={fastIntro} />
+          <BrandIntro phase={phase} fast={fastIntro} progress={loadProgress} />
         )}
 
       </div>

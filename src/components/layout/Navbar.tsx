@@ -118,7 +118,7 @@ export function Navbar() {
           className="flex items-center gap-2 border-0 border-none outline-none ring-0 shadow-none select-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none active:border-none no-underline"
           aria-label="Vizualabs home"
         >
-          <VizualabsLogo className="text-[1.65rem]" showRegistered={false} />
+          <VizualabsLogo className="text-[1.65rem]" />
         </Link>
 
         {/* Desktop navigation */}

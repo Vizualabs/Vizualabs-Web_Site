@@ -39,6 +39,8 @@ jobs:
         run: bun run build
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLARITY_PROJECT_ID: ${{ vars.VITE_CLARITY_PROJECT_ID }}
 
   e2e:
     name: E2E (Playwright)
@@ -77,6 +79,8 @@ jobs:
         run: bun run test:e2e
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLARITY_PROJECT_ID: ${{ vars.VITE_CLARITY_PROJECT_ID }}
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
@@ -120,6 +124,24 @@ jobs:
         run: bun run build
         env:
           VITE_CAL_LINK: ${{ vars.VITE_CAL_LINK }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLARITY_PROJECT_ID: ${{ vars.VITE_CLARITY_PROJECT_ID }}
+
+      - name: Prepare FTP remote directory
+        id: ftp
+        env:
+          HOSTINGER_FTP_REMOTE_DIR: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR }}
+        run: |
+          # Strip accidental whitespace/newlines from pasted secrets.
+          dir="$(printf '%s' "${HOSTINGER_FTP_REMOTE_DIR:-/public_html/}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          # hPanel shows absolute paths like /home/u123/... — FTP expects relative.
+          dir="$(printf '%s' "$dir" | sed -E 's|^/home/u[0-9]+||')"
+          if [ -z "$dir" ]; then
+            dir="/public_html/"
+          fi
+          dir="${dir%/}/"
+          echo "Using normalized FTP server-dir"
+          printf 'dir=%s\n' "$dir" >> "$GITHUB_OUTPUT"
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
@@ -129,7 +151,22 @@ jobs:
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./dist/client/
-          # Hostinger web root. Override with secret only if your path differs
-          # (e.g. /domains/vizualabs.com/public_html/).
-          server-dir: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR || '/public_html/' }}
+          # Hostinger FTP paths are RELATIVE to the FTP account root — not the
+          # full server path. hPanel may show:
+          #   /home/u962037160/domains/vizualabs.com/public_html
+          # but the secret must be:
+          #   /domains/vizualabs.com/public_html/
+          # Domain-specific FTP accounts rooted at public_html may use: /
+          server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: false
+
+      - name: Verify live site
+        run: |
+          for path in / /sitemap.xml /robots.txt; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" "https://vizualabs.com${path}")
+            echo "${path} → HTTP ${code}"
+            if [ "$code" != "200" ]; then
+              echo "::error::Deploy path may be wrong. Set HOSTINGER_FTP_REMOTE_DIR to vizualabs.com public_html in GitHub Secrets."
+              exit 1
+            fi
+          done

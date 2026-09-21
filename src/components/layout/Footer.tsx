@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+﻿import { lazy, Suspense, useEffect, useState } from 'react'
 import { VizualabsLogo } from './VizualabsLogo'
 const LazyAssistantWidget = lazy(() =>
   import('#/components/chat/AssistantWidget').then((module) => ({
@@ -39,6 +39,7 @@ function DeferredAssistantWidget({
   )
 }
 
+/*
 function GithubIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -62,6 +63,7 @@ function TwitterIcon({ className = "h-5 w-5" }: { className?: string }) {
     </svg>
   )
 }
+*/
 
 export function Footer() {
   const [chatOpen, setChatOpen] = useState(false)

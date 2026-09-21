@@ -3,6 +3,7 @@ import { Navbar } from '#/components/layout/Navbar'
 import { Footer } from '#/components/layout/Footer'
 import { AboutHero } from '#/components/about/AboutHero'
 import { AboutPillars } from '#/components/about/AboutPillars'
+import { AboutFounders } from '#/components/about/AboutFounders'
 
 // No manual code-splitting needed here: TanStack Start's Vite plugin
 // already auto-splits each route's component into its own chunk
@@ -41,6 +42,9 @@ function AboutPage() {
 
         {/* Pillars / Bento Grid Section */}
         <AboutPillars />
+
+        {/* Co-founder profiles */}
+        <AboutFounders />
       </main>
 
       {/* Footer */}

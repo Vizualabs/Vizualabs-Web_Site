@@ -1,4 +1,4 @@
-import { Terminal, CheckCircle2, Cpu, Sparkles, Layers, Activity } from 'lucide-react'
+import { Terminal, CheckCircle2, Cpu } from 'lucide-react'
 
 // Hoisted code snippet (vercel-react-best-practices: rendering-hoist-jsx)
 const CODE_SNIPPET = [

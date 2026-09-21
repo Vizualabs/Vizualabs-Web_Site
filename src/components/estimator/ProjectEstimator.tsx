@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Sparkles, Loader2, Mail, Check, AlertCircle, Clock3, ListChecks, ArrowRight } from 'lucide-react'
 import {
-  estimateProject,
-  requestWrittenBrief,
-  formatEstimateForEmail,
+  estimateProjectClient,
+  requestWrittenBriefClient,
   type EstimatePayload,
-} from '#/lib/assistant/estimate'
+} from '#/lib/assistant/estimateClient'
+import { formatEstimateForEmail } from '#/lib/assistant/estimate'
 import { BlobMascotIcon } from '#/components/chat/BlobMascotIcon'
 import { BlurFade } from '#/components/ui/blur-fade'
 
@@ -112,7 +112,7 @@ export function ProjectEstimator() {
     setBriefError(null)
 
     try {
-      const result = await estimateProject({ data: { description: trimmed } })
+      const result = await estimateProjectClient(trimmed)
       if (result.ok) {
         setEstimate(result.estimate)
       } else {
@@ -148,14 +148,12 @@ export function ProjectEstimator() {
     setBriefError(null)
 
     try {
-      const result = await requestWrittenBrief({
-        data: {
+      const result = await requestWrittenBriefClient({
           name,
           email,
           description,
           estimate: formatEstimateForEmail(estimate),
-        },
-      })
+        })
       if (result.ok) {
         setBriefState('sent')
       } else {

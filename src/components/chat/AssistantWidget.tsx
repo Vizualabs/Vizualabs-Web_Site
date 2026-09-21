@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Send, X } from 'lucide-react'
-import { sendChatMessage, type ChatMessage } from '#/lib/assistant/chat'
+import { sendChatMessageClient, type ChatMessage } from '#/lib/assistant/chatClient'
 import { BlobMascotIcon } from '#/components/chat/BlobMascotIcon'
 
 type AssistantWidgetProps = {
@@ -34,7 +34,7 @@ export function AssistantWidget({ open: chatOpen, onOpenChange }: AssistantWidge
     setSending(true)
 
     try {
-      const result = await sendChatMessage({ data: { messages: nextMessages } })
+      const result = await sendChatMessageClient(nextMessages)
       setMessages((prev) => [...prev, { role: 'assistant', content: result.reply }])
     } catch {
       setMessages((prev) => [

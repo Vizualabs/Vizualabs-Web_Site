@@ -36,11 +36,14 @@ const config = defineConfig({
     devtools(),
     tailwindcss(),
     tanstackStart({
+      // Hostinger FTP deploys dist/client/ as static files — prerender
+      // generates index.html and per-route HTML so Apache doesn't 403.
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: true,
         crawlLinks: true,
         autoSubfolderIndex: true,
+        concurrency: 8,
       },
     }),
     netlify(),

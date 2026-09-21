@@ -2,18 +2,13 @@ import { cn } from '#/lib/cn'
 
 type VizualabsLogoProps = {
   className?: string
-  /** When false, omit the ® mark (e.g. navbar). */
-  showRegistered?: boolean
 }
 
 /**
  * Typed Vizualabs wordmark — Poppins for the brand’s single-story “a”,
- * capital V + tight geometric tracking. Optional ® at top-right.
+ * capital V + tight geometric tracking.
  */
-export function VizualabsLogo({
-  className,
-  showRegistered = true,
-}: VizualabsLogoProps) {
+export function VizualabsLogo({ className }: VizualabsLogoProps) {
   return (
     <span
       className={cn(
@@ -24,11 +19,6 @@ export function VizualabsLogo({
     >
       <span className="uppercase">V</span>
       izualabs
-      {showRegistered ? (
-        <sup className="ml-[0.06em] mt-[0.02em] text-[0.72em] font-bold leading-none tracking-normal">
-          ®
-        </sup>
-      ) : null}
     </span>
   )
 }

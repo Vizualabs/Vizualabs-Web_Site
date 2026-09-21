@@ -1,4 +1,4 @@
-import { Cpu, Server, Activity, ArrowRight, Layers, Sparkles, ExternalLink } from 'lucide-react'
+import { Cpu, Server, Activity, ArrowRight, Layers } from 'lucide-react'
 import { BorderBeam } from '#/components/ui/border-beam'
 import { Link } from '@tanstack/react-router'
 

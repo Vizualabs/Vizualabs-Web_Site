@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vizualabs.tech/sitemap.xml
+Sitemap: https://vizualabs.com/sitemap.xml

@@ -2,21 +2,18 @@ import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/reac
 import type { QueryClient } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
+import { ClarityInit, CLARITY_PROJECT_ID } from '../components/analytics/ClarityInit'
 import { CustomCursor } from '../components/ui/CustomCursor'
 import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
+import { SITE_NAME, SITE_URL } from '../lib/site'
 
 interface RouterContext {
   queryClient: QueryClient
 }
-
-// NOTE: the codebase uses both vizualabs.tech (ContactSection)
-// and vizualabs.com (chat system prompt, AssistantWidget) inconsistently.
-// This picks .tech since that's what's shown to visitors on the live
-// contact page — flag if that's wrong and every OG/canonical URL below
-// moves with it.
-const SITE_URL = 'https://vizualabs.com'
 const DEFAULT_DESCRIPTION =
   'Vizualabs engineers custom software, product development, and AI solutions with the same precision from first idea to launch.'
+
+const OG_IMAGE_URL = `${SITE_URL}/images/og-share.jpg`
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
@@ -41,7 +38,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
       {
         property: 'og:site_name',
-        content: 'Vizualabs',
+        content: SITE_NAME,
       },
       {
         property: 'og:title',
@@ -56,15 +53,61 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content: SITE_URL,
       },
       {
+        property: 'og:image',
+        content: OG_IMAGE_URL,
+      },
+      {
+        property: 'og:image:type',
+        content: 'image/jpeg',
+      },
+      {
+        property: 'og:image:width',
+        content: '1024',
+      },
+      {
+        property: 'og:image:height',
+        content: '1024',
+      },
+      {
+        property: 'og:image:alt',
+        content: 'Vizualabs logo',
+      },
+      {
         name: 'twitter:card',
         content: 'summary',
+      },
+      {
+        name: 'twitter:image',
+        content: OG_IMAGE_URL,
       },
     ],
     links: [
       {
+        rel: 'sitemap',
+        type: 'application/xml',
+        href: '/sitemap.xml',
+      },
+      {
         rel: 'icon',
-        type: 'image/svg+xml',
-        href: '/favicon.svg',
+        type: 'image/png',
+        sizes: '32x32',
+        href: '/favicon-32.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '48x48',
+        href: '/favicon-48.png',
+      },
+      {
+        rel: 'apple-touch-icon',
+        sizes: '180x180',
+        href: '/apple-touch-icon.png',
+      },
+      {
+        rel: 'shortcut icon',
+        type: 'image/jpeg',
+        href: '/favicon.jpg',
       },
       // Fonts are self-hosted (src/styles.css) — no more third-party
       // fonts.googleapis.com round trip blocking first paint. Only the two
@@ -101,6 +144,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         fetchPriority: 'high' as const,
       })),
     ],
+    // Inline Clarity bootstrap in <head> so static Hostinger HTML records
+    // visits even before React hydrates. Guarded: only when the build has an ID.
+    scripts: CLARITY_PROJECT_ID
+      ? [
+          {
+            id: 'microsoft-clarity-bootstrap',
+            children: `(function(c,l,a,r,i,t){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;t.id="microsoft-clarity";(l.head||l.documentElement).appendChild(t);})(window,document,"clarity","script",${JSON.stringify(CLARITY_PROJECT_ID)});`,
+          },
+        ]
+      : [],
   }),
   shellComponent: RootDocument,
 })
@@ -113,6 +166,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         {children}
+        <ClarityInit />
         <CustomCursor />
         <Scripts />
       </body>

@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import {
   Suspense,
   lazy,
@@ -166,11 +167,6 @@ export function ScrollHeroSection() {
   // 'done'      — overlay unmounted; the prepared hero appears immediately
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
   const [heroPrepared, setHeroPrepared] = useState(false)
-
-  // Live 0..100 readout for the black hole loader's disk ignition + percentage
-  // label. Tracks the same choreography timer that gates 'intro' -> 'warmup'
-  // (see below), so it reaches 100 exactly when the reveal fires.
-  const [introProgress, setIntroProgress] = useState(0)
 
   // Starts false to match SSR; flipped in an effect (client-only) so a
   // returning visitor never renders a mismatched first frame during
@@ -886,11 +882,14 @@ export function ScrollHeroSection() {
               </div>
 
 
-              {/* Bottom Left Navigation Title — hidden on mobile to free the bottom bar */}
-              <div className="hidden sm:block absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 pointer-events-none">
-                <span className="text-sm sm:text-base font-semibold text-gray-200 tracking-wider">
+              {/* Bottom left — plain text link to Process */}
+              <div className="hidden sm:block absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20">
+                <Link
+                  to="/process"
+                  className="text-sm sm:text-base font-semibold text-gray-200 tracking-wider cursor-pointer transition-colors duration-200 hover:text-[#FFB4A8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5540] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                >
                   Our Approach
-                </span>
+                </Link>
               </div>
 
               {/* Bottom Right Premium Glassmorphic Stats Card — true full-width row
@@ -1009,12 +1008,7 @@ export function ScrollHeroSection() {
             flat black with no heat distortion, and sits above it so the fire
             can warm up hidden underneath. */}
         {phase !== 'done' && (
-          <BrandIntro
-            phase={phase}
-            fast={fastIntro}
-            progress={introProgress}
-            simplifiedVisual={skipFire}
-          />
+          <BrandIntro phase={phase} fast={fastIntro} />
         )}
 
       </div>

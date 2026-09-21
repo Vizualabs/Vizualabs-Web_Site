@@ -4,18 +4,18 @@
  * in the browser and contact/chat/estimator crash with "process is not defined".
  * Seed a safe default before any createServerFn client stub evaluates.
  */
-const g = globalThis as typeof globalThis & {
-  process?: { env?: Record<string, string | undefined> }
-}
+type ProcessEnvShim = { env: Record<string, string | undefined> }
 
-if (typeof g.process === 'undefined') {
-  g.process = { env: {} }
+const runtime = globalThis as unknown as { process?: ProcessEnvShim }
+
+if (typeof runtime.process === 'undefined') {
+  runtime.process = { env: {} }
 }
-if (!g.process.env) {
-  g.process.env = {}
+if (!runtime.process.env) {
+  runtime.process.env = {}
 }
-if (!g.process.env.TSS_SERVER_FN_BASE) {
-  g.process.env.TSS_SERVER_FN_BASE = '/_serverFn/'
+if (!runtime.process.env.TSS_SERVER_FN_BASE) {
+  runtime.process.env.TSS_SERVER_FN_BASE = '/_serverFn/'
 }
 
 export {}

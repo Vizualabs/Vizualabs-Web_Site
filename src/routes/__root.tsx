@@ -4,7 +4,11 @@ import type { QueryClient } from '@tanstack/react-query'
 import appCss from '../styles.css?url'
 import { ClarityInit, CLARITY_PROJECT_ID } from '../components/analytics/ClarityInit'
 import { CustomCursor } from '../components/ui/CustomCursor'
-import { HERO_PRELOAD_FRAMES, heroFrameUrl } from '../components/hero/heroFrames'
+import {
+  HERO_POSTER_URL,
+  HERO_PRELOAD_FRAMES,
+  heroFrameUrl,
+} from '../components/hero/heroFrames'
 import { SITE_NAME, SITE_URL } from '../lib/site'
 
 interface RouterContext {
@@ -131,6 +135,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'preload',
+        as: 'image',
+        type: 'image/png',
+        href: HERO_POSTER_URL,
+        fetchPriority: 'high',
       },
       // The hero cannot paint until these decode, and they are only discovered
       // once the route JS runs. Preloading lets the fetch overlap script

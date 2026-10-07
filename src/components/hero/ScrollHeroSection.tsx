@@ -11,6 +11,7 @@ import {
 import { BrandIntro, BRAND_INTRO_CHOREOGRAPHY_MS, type IntroPhase } from './BrandIntro'
 import { HeroTitle } from './HeroTitle'
 import {
+  HERO_POSTER_URL,
   HERO_PRELOAD_FRAMES,
   TOTAL_FRAMES,
   heroFrameUrl,
@@ -88,12 +89,12 @@ const prefersReducedData = () => {
   )
 }
 
-// Keep the reveal work below the main-thread budget on slower devices.
-const LOAD_CONCURRENCY = 4
+// Sparse full-turn coverage starts only after the poster is ready, so these
+// fetches can run wider without competing with first paint.
+const INTERACTION_CONCURRENCY = 4
 
-// Frames streaming in after the reveal. Decoding is off the main thread now
-// (fetch -> Blob -> createImageBitmap), so this no longer competes with the
-// user's first scroll and can run wider than the old serialized pipeline.
+// Frames streaming in after the sparse interaction pass. Decoding is off the
+// main thread and yields between frames to protect active scrolling.
 const STREAM_CONCURRENCY = 2
 
 // Prepare a sparse turn across the full sequence before filling its gaps. This
@@ -134,9 +135,8 @@ const INTRO_SEEN_KEY = 'vlabs_intro_seen'
 // here — while the plane is still fully opaque — keeps it off the first scroll.
 const WARMUP_MS = 400
 
-// The intro also waits on the reveal-gating frames, so the loader and the
-// load finish together — but a stalled connection must never pin the loader,
-// so this hard cap forces the handoff regardless.
+// The intro also waits for the lightweight hero poster. A stalled connection
+// must never pin the loader, so this hard cap forces the handoff regardless.
 const INTRO_LOAD_CAP_MS = 8000
 
 // Dissolve between the opaque warmup plane and the live hero: a short fade
@@ -163,9 +163,16 @@ const scheduleIdle = (callback: () => void, timeout: number) => {
   return () => window.clearTimeout(handle)
 }
 
+/** Start required hero work on the first frame after the loader has painted. */
+const scheduleAfterPaint = (callback: () => void) => {
+  const handle = window.requestAnimationFrame(callback)
+  return () => window.cancelAnimationFrame(handle)
+}
+
 export function ScrollHeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const posterRef = useRef<HTMLImageElement>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
   const maskBitmapRef = useRef<ImageBitmap | null>(null)
 
@@ -178,10 +185,11 @@ export function ScrollHeroSection() {
   // 'done'      — overlay unmounted
   const [phase, setPhase] = useState<IntroPhase | 'done'>('intro')
   const [heroPrepared, setHeroPrepared] = useState(false)
+  const [canvasReady, setCanvasReady] = useState(false)
+  const posterReadyRef = useRef(false)
 
-  // Real fraction of the reveal-gating hero frames decoded so far — this is
-  // what the loader's progress sweep tracks, so the bar and the load finish
-  // together instead of the bar looping a fake animation.
+  // The progress sweep completes when the lightweight hero poster is ready.
+  // Full sequence decoding continues after first paint.
   const [loadProgress, setLoadProgress] = useState(0)
   const [minElapsed, setMinElapsed] = useState(false)
   const [loadTimedOut, setLoadTimedOut] = useState(false)
@@ -194,6 +202,18 @@ export function ScrollHeroSection() {
     if (sessionStorage.getItem(INTRO_SEEN_KEY) === '1') {
       setFastIntro(true)
     }
+  }, [])
+
+  const markPosterReady = () => {
+    if (posterReadyRef.current) return
+    posterReadyRef.current = true
+    setLoadProgress(1)
+    startTransition(() => setHeroPrepared(true))
+  }
+
+  useEffect(() => {
+    const poster = posterRef.current
+    if (poster?.complete && poster.naturalWidth > 0) markPosterReady()
   }, [])
 
   // Scroll stays locked while the plane is still opaque.
@@ -485,12 +505,13 @@ export function ScrollHeroSection() {
 
   /**
    * PRELOAD PIPELINE
-   * Each frame is decoded exactly ONCE, cropped to the subject area and
-   * downscaled to display resolution via createImageBitmap (runs off the main
-   * thread in modern browsers). The first few frames start after first paint;
-   * the remaining sequence streams later so startup stays responsive.
+   * The lightweight poster handles first paint. Full sequence frames are each
+   * decoded once, cropped, and downscaled in the worker, then the poster is
+   * removed as soon as frame 1 reaches the canvas. The worker intentionally
+   * waits for the poster so heavy decoding cannot starve first paint.
    */
   useEffect(() => {
+    if (!heroPrepared) return
     let cancelled = false
     const { width: bmpW, height: bmpH } = getBitmapSize()
     let decoder: ReturnType<typeof createHeroFrameDecoder> | null = null
@@ -499,30 +520,28 @@ export function ScrollHeroSection() {
     let completed = 0
     let tailTimer: number | undefined
 
-    // On a slow or data-saver connection, the reveal-gating frames still
-    // load in full (the sequence can't unlock without them), but the long
-    // background tail — the bulk of the payload — is fetched at half
-    // density. findReadyFrame() already falls back to the nearest decoded
-    // neighbour for any frame that isn't ready, so the skipped slots are
-    // simply never filled rather than treated as failures.
+    // On a slow or data-saver connection, the long background tail is fetched
+    // at half density. findReadyFrame() already falls back to the nearest
+    // decoded neighbour, so skipped slots are never treated as failures.
     const reduceData = prefersReducedData() || isPhoneDevice()
 
-    const phase1Indices = INTERACTION_READY_FRAMES
-    const phase1Set = new Set(phase1Indices)
-    const phase1Total = phase1Indices.length
-    let phase1Done = 0
+    const interactionIndices = INTERACTION_READY_FRAMES
+    const interactionSet = new Set(INTERACTION_READY_FRAMES)
     const tailIndices: number[] = []
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      if (phase1Set.has(i)) continue
+      if (interactionSet.has(i)) continue
       if (!reduceData || i % 2 === 1) tailIndices.push(i)
     }
-    const totalToLoad = phase1Indices.length + tailIndices.length
+    const totalToLoad = interactionIndices.length + tailIndices.length
+    const fetchFrameBlob = async (frameIndex: number) => {
+      const response = await fetch(heroFrameUrl(frameIndex))
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      return response.blob()
+    }
 
     /** Fetch on the network thread, then decode and key pixels in our worker. */
     const decodeFrame = async (frameIndex: number): Promise<ImageBitmap> => {
-      const response = await fetch(heroFrameUrl(frameIndex))
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const blob = await response.blob()
+      const blob = await fetchFrameBlob(frameIndex)
       if (!decoder) throw new Error('Hero frame decoder is not ready')
       return decoder.decode(blob)
     }
@@ -539,20 +558,11 @@ export function ScrollHeroSection() {
           maxLoadedRef.current = frameIndex
         }
       } catch {
-        // Missing/broken frame: patched to frame 1 after the load completes.
-        bitmaps[frameIndex - 1] = undefined
+        // Missing frames remain empty and are patched after loading completes.
       }
 
       completed++
       if (cancelled) return
-
-      // Reveal-gating fraction — the loader's progress sweep tracks this.
-      // Failures still count: they are patched with frame 1 once the load
-      // completes, so the reveal is never gated on a broken frame.
-      if (phase1Set.has(frameIndex)) {
-        phase1Done++
-        setLoadProgress(phase1Done / phase1Total)
-      }
 
       const allDone = completed === totalToLoad
 
@@ -560,11 +570,15 @@ export function ScrollHeroSection() {
       // Defer to the next animation frame so the decode callback doesn't
       // steal main-thread time from the scroll handler.
       if (frameIndex === 1) {
+        setLoadProgress(1)
         // Mount the canvas and supporting hero UI only after its first frame is
         // ready. A transition lets React yield to the visible loader while it
         // builds that hidden subtree.
         startTransition(() => setHeroPrepared(true))
-        requestAnimationFrame(() => drawFrame(1))
+        requestAnimationFrame(() => {
+          drawFrame(1)
+          setCanvasReady(true)
+        })
       }
 
       if (allDone) {
@@ -615,13 +629,9 @@ export function ScrollHeroSection() {
       await Promise.all(workers)
     }
 
-    // Phase 1: a sparse, interaction-ready turn loads at full speed behind the
-    // opaque intro plane.
-    // Phase 2: the rest stream in while the user watches the hero. Decoding
-    // is off-thread now, so the remaining main-thread cost is negligible; the
-    // macrotask yield stays as a cheap guarantee that scroll/rAF work always
-    // gets a turn between frames.
-    const cancelStartup = scheduleIdle(() => {
+    // Phase 1 spans a sparse full turn in the worker while the lightweight
+    // poster handles first paint. Phase 2 fills exact in-between frames at idle.
+    const cancelStartup = scheduleAfterPaint(() => {
       if (cancelled) return
       decoder = createHeroFrameDecoder({
         sourceWidth: SOURCE_WIDTH,
@@ -630,13 +640,13 @@ export function ScrollHeroSection() {
         targetHeight: bmpH,
       })
       void (async () => {
-        await runPhase(phase1Indices, LOAD_CONCURRENCY, false)
+        await runPhase(interactionIndices, INTERACTION_CONCURRENCY, false)
         if (cancelled) return
         tailTimer = window.setTimeout(() => {
           if (!cancelled) void runPhase(tailIndices, STREAM_CONCURRENCY, true)
         }, TAIL_START_DELAY_MS)
       })()
-    }, 500)
+    })
 
     return () => {
       cancelled = true
@@ -648,7 +658,7 @@ export function ScrollHeroSection() {
       bitmapsRef.current = []
       maxLoadedRef.current = 0
     }
-  }, [])
+  }, [heroPrepared])
 
   /**
    * Intro choreography.
@@ -668,14 +678,20 @@ export function ScrollHeroSection() {
   useEffect(() => {
     if (phase !== 'intro') return
     const minMs = fastIntro ? RETURN_INTRO_MS : MIN_INTRO_MS
+    const elapsedSinceNavigation = performance.now()
+    const remainingIntroMs = Math.max(0, minMs - elapsedSinceNavigation)
+    const remainingCapMs = Math.max(
+      0,
+      INTRO_LOAD_CAP_MS - elapsedSinceNavigation
+    )
     const timer = window.setTimeout(() => {
       sessionStorage.setItem(INTRO_SEEN_KEY, '1')
       setMinElapsed(true)
-    }, minMs)
+    }, remainingIntroMs)
     // A stalled network must never pin the loader — force the handoff.
     const capTimer = window.setTimeout(
       () => setLoadTimedOut(true),
-      INTRO_LOAD_CAP_MS
+      remainingCapMs
     )
     return () => {
       window.clearTimeout(timer)
@@ -683,9 +699,8 @@ export function ScrollHeroSection() {
     }
   }, [phase, fastIntro])
 
-  // intro -> warmup once the branded beat has played AND the reveal-gating
-  // frames are in (or the cap tripped) — the loader and the load finish
-  // together, so the progress sweep reads as the truth, not decoration.
+  // intro -> warmup once the branded beat has played AND the poster is ready
+  // (or the cap tripped), so the progress sweep remains truthful.
   useEffect(() => {
     if (phase !== 'intro' || !minElapsed) return
     if (loadProgress < 1 && !loadTimedOut) return
@@ -901,6 +916,19 @@ export function ScrollHeroSection() {
                   settled before the direct handoff, so no animation setup lands
                   on the hero's first visible frame. */}
               <HeroTitle start />
+
+              {!canvasReady && (
+                <img
+                  ref={posterRef}
+                  src={HERO_POSTER_URL}
+                  alt=""
+                  aria-hidden="true"
+                  decoding="async"
+                  fetchPriority="high"
+                  onLoad={markPosterReady}
+                  className="pointer-events-none absolute bottom-0 left-1/2 h-[64%] w-auto -translate-x-1/2 md:h-[86%]"
+                />
+              )}
 
               {heroPrepared && (
               <>

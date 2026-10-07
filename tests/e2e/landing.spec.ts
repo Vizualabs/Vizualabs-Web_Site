@@ -218,7 +218,10 @@ test.describe('initial-load scroll performance', () => {
     // charged to the main thread and lands mid-scroll.
     const imageElementRequests: string[] = []
     page.on('request', (req) => {
-      if (req.resourceType() === 'image' && req.url().includes('/Frist-opt/')) {
+      if (
+        req.resourceType() === 'image' &&
+        req.url().includes('/Frist-opt/ezgif-frame-')
+      ) {
         imageElementRequests.push(req.url())
       }
     })
@@ -640,7 +643,9 @@ test.describe('load performance', () => {
     // without re-decoding into an <img>.
     const preloads = await page.evaluate(() =>
       [...document.querySelectorAll('link[rel="preload"]')]
-        .filter((l) => l.getAttribute('href')?.includes('/Frist-opt/'))
+        .filter((l) =>
+          l.getAttribute('href')?.includes('/Frist-opt/ezgif-frame-')
+        )
         .map((l) => l.getAttribute('href'))
     )
 

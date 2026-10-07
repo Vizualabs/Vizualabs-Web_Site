@@ -7,6 +7,8 @@
  */
 export const TOTAL_FRAMES = 121
 
+export const HERO_POSTER_URL = '/Frist-opt/hero-poster.png'
+
 export const heroFrameUrl = (frameIndex: number) =>
   `/Frist-opt/ezgif-frame-${String(frameIndex).padStart(3, '0')}.webp`
 
